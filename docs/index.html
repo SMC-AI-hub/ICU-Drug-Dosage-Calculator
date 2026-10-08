@@ -3,450 +3,628 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="light">
-<meta name="description" content="Offline ICU emergency drug calculator for Indian practice: age- or weight-driven dosing, Indian formulations with mg/mL concentrations for IV and oral routes, system-wise and class-wise grouping, guideline references, enforced dose caps and high-alert double-check blocks.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0b5394">
+<meta name="description" content="Offline paediatric and neonatal emergency drug calculator, 24 weeks of gestation to 18 years: age- or weight-driven dosing, Indian formulations with mg/mL concentrations for IV and oral routes, system-wise and class-wise grouping, guideline references, enforced dose caps and high-alert double-check blocks.">
 <title>Paediatric &amp; Neonatal Drug Calculator — 24 weeks to 18 years</title>
-<style>/* ============================================================
-   ICU EMERGENCY DRUG CALCULATOR — clinical UI stylesheet
-   Self-contained: no webfonts, no external assets.
-   ============================================================ */
+<style>/* =====================================================================
+   PAEDIATRIC & NEONATAL DRUG CALCULATOR — interface stylesheet
+   ---------------------------------------------------------------------
+   Design rules this file follows:
+     · Answer first.      The dose and the volume to draw are the loudest
+                          thing on the card; everything else is quiet.
+     · One screen, no hunt.Search sits at the top, sections are labelled,
+                          and a card never repeats a heading the header has.
+     · Readable anywhere. Base 15 px, tabular numerals for every number,
+                          WCAG-AA contrast in both themes, 44 px tap targets.
+     · Night safe.        A real dark theme for a ward at 3 a.m. — dim
+                          surfaces, no pure-white glare, same colour logic.
+     · Prints clean.      A printed sheet is a clinical document: all
+                          sections open, no chrome, no page-broken cards.
+   Self-contained: no webfonts, no external assets, no network calls.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------- tokens */
 :root{
-  --bg:#f4f6f9; --panel:#ffffff; --ink:#0f1b2d; --ink2:#42536b; --ink3:#71829b;
-  --line:#dce3ec; --line2:#eef2f7;
-  --brand:#0b5394; --brand2:#083d6e; --brand-soft:#e8f0fa;
-  --ok:#0f7b4d; --ok-soft:#e5f5ed;
-  --warn:#8a5a00; --warn-soft:#fff4e0;
-  --crit:#a3161c; --crit-soft:#fdeaea;
-  --info:#0f5f7a; --info-soft:#e4f3f7;
-  --neu:#5b3f9e; --neu-soft:#efeafa;
-  --r1:#eef2f7;
-  --shadow:0 1px 2px rgba(16,32,56,.06),0 4px 14px rgba(16,32,56,.06);
+  /* type */
+  --fs-1:11.5px; --fs-2:12.5px; --fs-3:13.5px; --fs-4:15px; --fs-5:17px; --fs-6:21px; --fs-7:27px;
+  /* surfaces */
+  --bg:#eef1f6; --panel:#ffffff; --panel2:#f7f9fc; --raised:#ffffff;
+  --line:#dbe2ec; --line2:#e9eef5; --line3:#c9d4e2;
+  /* ink */
+  --ink:#0e1a2b; --ink2:#43536b; --ink3:#6b7b93; --ink4:#8a97ab;
+  /* brand */
+  --brand:#0b5394; --brand2:#083f71; --brand3:#0a6bb5; --brand-soft:#e9f1fa; --brand-line:#c3d7ee;
+  /* status */
+  --ok:#0d6b43; --ok-soft:#e7f6ee; --ok-line:#b9e2cb;
+  --warn:#8a5300; --warn-soft:#fff5e5; --warn-line:#f0d5a3;
+  --crit:#a8161d; --crit-soft:#fdeaea; --crit-line:#f2c4c6;
+  --info:#0d6178; --info-soft:#e6f4f8; --info-line:#b9dee8;
+  --neu:#4b3a90; --neu-soft:#efeafb; --neu-line:#d8cff2;
+  /* risk stripes */
+  --risk1:#cdd8e6; --risk2:#8fb0d6; --risk3:#d9a72a; --risk4:#e07b10; --risk5:#bf1d24;
+  /* form */
+  --r-sm:8px; --r-md:11px; --r-lg:14px; --r-pill:999px;
+  --sh-1:0 1px 2px rgba(14,26,43,.05);
+  --sh-2:0 1px 3px rgba(14,26,43,.07), 0 8px 22px rgba(14,26,43,.06);
+  --sh-3:0 2px 6px rgba(14,26,43,.09), 0 18px 44px rgba(14,26,43,.14);
   --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  --stick:56px;      /* height of the sticky header stack */
+  --h-pbar:46px;
 }
+
+/* ------------------------------------------------------------ dark theme */
+body.dark{
+  --bg:#0a1120; --panel:#101a2c; --panel2:#0d1626; --raised:#142036;
+  --line:#22304a; --line2:#1a2740; --line3:#2e405e;
+  --ink:#e9eefa; --ink2:#b3c0d6; --ink3:#8e9db6; --ink4:#77869e;
+  --brand:#69a8e8; --brand2:#8dc0f5; --brand3:#7fb6ee; --brand-soft:#152744; --brand-line:#28425f;
+  --ok:#68d69b; --ok-soft:#102b１f; --ok-soft:#102a20; --ok-line:#1f4a35;
+  --warn:#f0b861; --warn-soft:#2c2110; --warn-line:#4a3717;
+  --crit:#ff8b8b; --crit-soft:#2e1418; --crit-line:#54222a;
+  --info:#6ec8e0; --info-soft:#0f2733; --info-line:#1e4453;
+  --neu:#b7a6f0; --neu-soft:#211a3a; --neu-line:#3b2f63;
+  --risk1:#2c3a52; --risk2:#3f5d84; --risk3:#a97f14; --risk4:#b35f06; --risk5:#e0403f;
+  --sh-1:0 1px 2px rgba(0,0,0,.4);
+  --sh-2:0 2px 6px rgba(0,0,0,.45), 0 12px 30px rgba(0,0,0,.35);
+  --sh-3:0 4px 12px rgba(0,0,0,.5), 0 24px 60px rgba(0,0,0,.45);
+}
+body.big{ --fs-4:17px; --fs-3:15px; --fs-2:14px; --fs-5:19px; --fs-6:24px; --fs-7:32px; }
+
+/* ----------------------------------------------------------------- base */
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
 body{
-  background:var(--bg);color:var(--ink);
+  background:var(--bg); color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
-  font-size:14px;line-height:1.45;-webkit-text-size-adjust:100%;
+  font-size:var(--fs-4); line-height:1.5;
+  font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
 }
 button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
-a{color:var(--brand)}
-h1,h2,h3,h4{margin:0;line-height:1.25}
+button{cursor:pointer}
+a{color:var(--brand); text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4{margin:0;line-height:1.25;font-weight:700}
+ul{margin:0;padding-left:18px}
+li+li{margin-top:3px}
+:focus-visible{outline:3px solid var(--brand3); outline-offset:2px; border-radius:4px}
+.mono{font-family:var(--mono); font-size:.94em}
+.noprint,.printonly,.print-head{display:none;}
 
-/* ---------- top bar ---------- */
-.topbar{background:linear-gradient(180deg,var(--brand) 0%,var(--brand2) 100%);color:#fff;
-  padding:calc(10px + env(safe-area-inset-top,0px)) calc(16px + env(safe-area-inset-right,0px)) 10px calc(16px + env(safe-area-inset-left,0px));
-  display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:60;
-  box-shadow:0 2px 10px rgba(8,40,80,.25)}
-.topbar .logo{display:flex;align-items:center;gap:10px}
+/* --------------------------------------------------------------- topbar */
+.topbar{
+  position:sticky; top:0; z-index:70;
+  display:flex; align-items:center; gap:12px;
+  padding:calc(8px + env(safe-area-inset-top,0px)) calc(14px + env(safe-area-inset-right,0px)) 8px calc(14px + env(safe-area-inset-left,0px));
+  background:linear-gradient(180deg,var(--brand) 0%,var(--brand2) 100%);
+  color:#fff; box-shadow:0 2px 14px rgba(8,40,80,.22);
+}
+.topbar .logo{display:flex;align-items:center;gap:10px;min-width:0}
 .topbar .logo svg{flex:0 0 auto}
-.topbar h1{font-size:17px;font-weight:700;letter-spacing:.2px}
-.topbar .sub{font-size:11.5px;opacity:.85;font-weight:400}
-.topbar .spacer{flex:1 1 auto}
-.topbar .meta{font-size:11px;opacity:.9;text-align:right;line-height:1.35}
-.tbtn{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);color:#fff;
-  border-radius:7px;padding:6px 11px;font-size:12px;cursor:pointer;font-weight:600;transition:.15s}
-.tbtn:hover{background:rgba(255,255,255,.26)}
+.topbar h1{font-size:var(--fs-5);font-weight:700;letter-spacing:.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .sub{font-size:11.5px;opacity:.82;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .spacer{flex:1 1 auto;min-width:4px}
+.topbar .meta{font-size:11.5px;text-align:right;line-height:1.3;opacity:.95}
+.topbar .meta b{font-size:12.5px}
+.topbar .meta .mono{opacity:.8}
+.tbtn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.3); color:#fff;
+  padding:7px 11px; border-radius:var(--r-pill); font-size:12.5px; font-weight:600;
+  white-space:nowrap; transition:background .15s ease, transform .12s ease;
+}
+.tbtn:hover{background:rgba(255,255,255,.24)}
 .tbtn:active{transform:translateY(1px)}
+.tbtn.icon{padding:7px 9px;font-size:13.5px}
+.tbtn[aria-pressed="true"]{background:#fff;color:var(--brand2);border-color:#fff}
 
-/* ---------- safety strip ---------- */
-.safety{background:var(--crit-soft);border-bottom:1px solid #f2c9c9;color:#7c1114;
-  padding:7px 16px;font-size:11.8px;display:flex;gap:10px;align-items:flex-start}
+/* -------------------------------------------------------- safety ribbon */
+.safety{
+  background:var(--crit-soft); color:var(--crit);
+  border-bottom:1px solid var(--crit-line);
+  padding:6px 16px; font-size:var(--fs-2); line-height:1.42;
+  display:flex; gap:8px; align-items:flex-start;
+}
 .safety b{font-weight:700}
+.safety .sx{margin-left:auto;background:none;border:0;color:inherit;font-size:14px;opacity:.7;padding:0 2px}
+.safety .sx:hover{opacity:1}
+body.hero-mode .safety{display:none}
 
-/* ---------- layout ---------- */
-.wrap{max-width:1560px;margin:0 auto;padding:14px 16px 60px;display:grid;
-  grid-template-columns:330px minmax(0,1fr);gap:16px;align-items:start}
-@media(max-width:1080px){.wrap{grid-template-columns:minmax(0,1fr);padding:12px}}
-
-/* ---------- panels ---------- */
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:11px;box-shadow:var(--shadow);overflow:hidden}
-.panel>.ph{padding:9px 12px;border-bottom:1px solid var(--line);background:#fbfcfe;
-  display:flex;align-items:center;gap:8px}
-.panel>.ph h2{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--brand2)}
-.panel>.ph .rt{margin-left:auto;font-size:11px;color:var(--ink3)}
-.panel>.pb{padding:12px}
-.sticky{position:sticky;top:64px;z-index:40}
-@media(max-width:1080px){.sticky{position:static}}
-
-/* ---------- form ---------- */
-.row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
-.field{display:flex;flex-direction:column;gap:3px;min-width:0}
-.field>label{font-size:10.5px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.45px}
-.field .hint{font-size:10.5px;color:var(--ink3)}
-input[type=number],input[type=text],select,textarea{
-  border:1px solid var(--line);background:#fff;border-radius:7px;padding:7px 8px;width:100%;
-  outline:none;transition:.15s;font-variant-numeric:tabular-nums}
-input[type=number]:focus,input[type=text]:focus,select:focus,textarea:focus{
-  border-color:var(--brand);box-shadow:0 0 0 3px rgba(11,83,148,.13)}
-input:disabled{background:#f5f7fa;color:var(--ink3)}
-.num-sm{width:74px}
-.seg{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:#fff}
-.seg button{flex:1;border:0;background:#fff;padding:7px 6px;cursor:pointer;font-size:11.5px;font-weight:600;color:var(--ink2)}
-.seg button+button{border-left:1px solid var(--line)}
-.seg button[aria-pressed=true]{background:var(--brand);color:#fff}
-.btn{border:1px solid var(--line);background:#fff;border-radius:7px;padding:7px 12px;cursor:pointer;font-weight:600;font-size:12px;color:var(--ink2)}
-.btn:hover{border-color:var(--brand);color:var(--brand)}
-.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
-.btn.pri:hover{background:var(--brand2)}
-.btn.sm{padding:4px 8px;font-size:11px}
-
-/* ---------- weight result ---------- */
-.wbox{background:var(--brand-soft);border:1px solid #c6d9ef;border-radius:9px;padding:10px 11px;margin-top:2px}
-.wbox .big{font-size:30px;font-weight:800;color:var(--brand2);line-height:1;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
-.wbox .big small{font-size:14px;font-weight:700;margin-left:3px}
-.wbox .cap{font-size:10.5px;color:var(--ink2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
-.wbox .rng{font-size:11px;color:var(--ink2);margin-top:5px}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:11.5px;margin-top:9px;
-  border-top:1px dashed #c6d9ef;padding-top:8px}
-.kv dt{color:var(--ink3);font-weight:600}
-.kv dd{margin:0;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
-.flag{display:inline-block;font-size:10px;font-weight:800;padding:1.5px 6px;border-radius:20px;letter-spacing:.4px}
-.f-measured{background:var(--ok-soft);color:var(--ok);border:1px solid #b7e2c9}
-.f-est{background:var(--warn-soft);color:var(--warn);border:1px solid #f0d9a8}
-.f-crit{background:var(--crit-soft);color:var(--crit);border:1px solid #f2c9c9}
-.f-info{background:var(--info-soft);color:var(--info);border:1px solid #bfe1ea}
-
-/* ---------- toolbar ---------- */
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);background:#fbfcfe}
-.toolbar .grow{flex:1 1 190px;min-width:150px}
-.search{position:relative}
-.search input{padding-left:29px}
-.search svg{position:absolute;left:8px;top:50%;transform:translateY(-50%);opacity:.45}
-.chips{display:flex;gap:6px;flex-wrap:wrap;padding:9px 12px;border-bottom:1px solid var(--line);background:#fff}
-.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:4px 10px;font-size:11.5px;
-  font-weight:600;color:var(--ink2);cursor:pointer;transition:.12s;white-space:nowrap;display:flex;align-items:center;gap:5px}
-.chip:hover{border-color:var(--brand);color:var(--brand)}
-.chip[aria-pressed=true]{background:var(--brand2);border-color:var(--brand2);color:#fff}
-.chip .n{font-size:9.5px;background:rgba(0,0,0,.08);border-radius:20px;padding:0 5px;font-weight:700}
-.chip[aria-pressed=true] .n{background:rgba(255,255,255,.24)}
-.chip.risk[aria-pressed=true]{background:var(--crit);border-color:var(--crit)}
-
-/* ---------- tabs ---------- */
-.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);background:#fbfcfe;padding:0 8px;overflow-x:auto}
-.tabs button{border:0;background:transparent;padding:10px 13px;font-size:12.5px;font-weight:700;color:var(--ink3);
-  cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
-.tabs button:hover{color:var(--brand)}
-.tabs button[aria-selected=true]{color:var(--brand2);border-bottom-color:var(--brand)}
-
-/* ---------- drug cards ---------- */
-.sysgroup{margin:16px 0 0}
-.sysgroup>h3{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--brand2);
-  padding:6px 2px;border-bottom:2px solid var(--brand);margin-bottom:9px;display:flex;align-items:center;gap:8px}
-.sysgroup>h3 .cnt{font-size:10.5px;background:var(--brand-soft);color:var(--brand2);border-radius:20px;padding:1px 8px;font-weight:700}
-.sysgroup>h3 .desc{font-size:11px;color:var(--ink3);text-transform:none;letter-spacing:0;font-weight:600;margin-left:auto}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(430px,1fr));gap:11px}
-@media(max-width:560px){.grid{grid-template-columns:1fr}}
-.card{background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);overflow:hidden;
-  display:flex;flex-direction:column;break-inside:avoid}
-.card.risk4{border-left:4px solid #e08a00}
-.card.risk5{border-left:4px solid var(--crit)}
-.card.risk3{border-left:4px solid #c9a227}
-.card .ch{padding:9px 11px 8px;border-bottom:1px solid var(--line2);display:flex;gap:8px;align-items:flex-start}
-.card .ch .nm{font-size:14.5px;font-weight:800;color:var(--ink);letter-spacing:-.1px}
-.card .ch .ind{font-size:11.3px;color:var(--ink2);margin-top:2px;line-height:1.35}
-.badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
-.bdg{font-size:9.5px;font-weight:800;padding:1.5px 6px;border-radius:4px;letter-spacing:.35px;text-transform:uppercase;white-space:nowrap}
-.b-route{background:var(--info-soft);color:var(--info);border:1px solid #bfe1ea}
-.b-route.iv{background:#e8f0fa;color:#0b5394;border-color:#c6d9ef}
-.b-route.po{background:#eaf6ec;color:#1c6b3c;border-color:#c2e3cd}
-.b-route.im{background:#f3edfa;color:#5b3f9e;border-color:#ddcef0}
-.b-route.neb{background:#e6f5f7;color:#0f5f7a;border-color:#bfe1ea}
-.b-route.sc{background:#fdf1e3;color:#8a5a00;border-color:#f0d9a8}
-.b-route.pr{background:#f0eefa;color:#4a3a8a;border-color:#d5cff0}
-.b-cls{background:#f2f5f9;color:var(--ink2);border:1px solid var(--line)}
-.b-age{background:#fff;color:var(--ink2);border:1px dashed var(--line)}
-.b-risk{background:var(--crit-soft);color:var(--crit);border:1px solid #f2c9c9}
-.b-same{background:var(--ok-soft);color:var(--ok);border:1px solid #b7e2c9}
-
-.dose{padding:9px 11px;background:#fafbfd;border-bottom:1px solid var(--line2)}
-.dose .dl{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--ink3)}
-.dose .dv{font-size:21px;font-weight:800;color:var(--brand2);font-variant-numeric:tabular-nums;line-height:1.15;letter-spacing:-.4px}
-.dose .dv small{font-size:12px;font-weight:700;color:var(--ink2)}
-.dose .dr{font-size:11px;color:var(--ink2);margin-top:2px}
-.dose .cap{margin-top:5px;font-size:11px;background:var(--warn-soft);border:1px solid #f0d9a8;color:var(--warn);
-  border-radius:6px;padding:4px 7px;font-weight:600}
-.dose .cap.hit{background:var(--crit-soft);border-color:#f2c9c9;color:var(--crit)}
-
-table.fx{width:100%;border-collapse:collapse;font-size:11.6px}
-table.fx th{text-align:left;font-size:9.6px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);
-  font-weight:800;padding:5px 8px;border-bottom:1px solid var(--line);background:#fff}
-table.fx td{padding:6px 8px;border-bottom:1px solid var(--line2);vertical-align:top}
-table.fx tr:last-child td{border-bottom:0}
-table.fx tr.hl{background:#f3f8ff}
-table.fx tr.hl td{border-top:1px solid #c6d9ef;border-bottom:1px solid #c6d9ef}
-.vol{font-weight:800;color:var(--brand2);font-variant-numeric:tabular-nums;white-space:nowrap}
-.vol.big{font-size:14.5px}
-.str{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
-.pack{color:var(--ink3);font-size:10.5px}
-.brand{color:var(--ink2);font-size:10.6px;font-style:italic}
-.na{color:var(--ink3);font-style:italic}
-.syr{display:inline-block;font-size:10px;background:#eef2f7;border:1px solid var(--line);border-radius:4px;
-  padding:0 5px;color:var(--ink2);font-weight:700;margin-left:4px}
-
-.cbody{padding:8px 11px;font-size:11.5px;color:var(--ink2)}
-.cbody .sec{margin-bottom:7px}
-.cbody .sec:last-child{margin-bottom:0}
-.cbody .sec>b{color:var(--ink);font-size:10px;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:2px}
-.warnbox{background:var(--crit-soft);border:1px solid #f2c9c9;border-radius:7px;padding:6px 8px;margin:7px 11px 0}
-.warnbox ul{margin:0;padding-left:16px}
-.warnbox li{font-size:11.2px;color:#7c1114;margin-bottom:2px;line-height:1.4}
-.notebox{background:var(--warn-soft);border:1px solid #f0d9a8;border-radius:7px;padding:6px 8px;margin:7px 11px 0}
-.notebox li{font-size:11.2px;color:var(--warn);margin-bottom:2px}
-.proto.flash{outline:3px solid var(--acc);outline-offset:3px;animation:protoflash 1.4s ease-out 2}
-@keyframes protoflash{0%{background:#fff3cd}60%{background:#fffaf0}100%{background:transparent}}
-.notebox.warn{background:#fdecea;border-color:#f3b8b1}
-.notebox.warn li{color:#a52a1c;font-weight:600}
-.syr[title]{cursor:help}
-.infobox{background:var(--info-soft);border:1px solid #bfe1ea;border-radius:7px;padding:6px 8px;margin:7px 11px 0}
-.infobox li{font-size:11.2px;color:var(--info);margin-bottom:2px}
-.refbox{border-top:1px dashed var(--line);margin-top:auto;padding:6px 11px;background:#fcfdfe}
-.refbox b{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3)}
-.refbox span{font-size:10.4px;color:var(--ink3)}
-details.moredet{margin:0 11px 8px;border-top:1px dashed var(--line);padding-top:5px}
-details.moredet summary{cursor:pointer;font-size:11px;font-weight:700;color:var(--brand);outline:none}
-details.moredet .inner{padding-top:6px}
-
-/* infusion widget */
-.infx{margin:7px 11px 9px;background:#f7fafd;border:1px solid #d5e3f2;border-radius:8px;padding:8px}
-.infx .ih{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--brand2);margin-bottom:6px;
-  display:flex;align-items:center;gap:6px}
-.infx .irow{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
-.infx .irow .field{flex:1 1 90px}
-.infx table{width:100%;border-collapse:collapse;margin-top:7px;font-size:11.3px}
-.infx th{text-align:right;font-size:9.5px;text-transform:uppercase;color:var(--ink3);letter-spacing:.4px;padding:3px 5px;border-bottom:1px solid var(--line)}
-.infx th:first-child{text-align:left}
-.infx td{padding:4px 5px;border-bottom:1px solid var(--line2);text-align:right;font-variant-numeric:tabular-nums}
-.infx td:first-child{text-align:left;color:var(--ink2)}
-.infx td b{color:var(--brand2);font-size:12.5px}
-.infx .eq{font-family:var(--mono);font-size:10.6px;color:var(--ink3);margin-top:6px;word-break:break-word}
-
-/* utility tabs */
-.utilgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}
-.utile{background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);overflow:hidden}
-.utile h3{font-size:12.5px;font-weight:800;padding:9px 11px;border-bottom:1px solid var(--line);background:#fbfcfe;color:var(--brand2);
-  text-transform:uppercase;letter-spacing:.5px}
-.utile .ub{padding:11px}
-.big-out{font-size:26px;font-weight:800;color:var(--brand2);font-variant-numeric:tabular-nums;letter-spacing:-.5px}
-.big-out small{font-size:13px;font-weight:700;color:var(--ink2)}
-.tbl{width:100%;border-collapse:collapse;font-size:11.8px;margin-top:8px}
-.tbl th{background:#f4f7fb;text-align:left;padding:5px 7px;font-size:9.8px;text-transform:uppercase;letter-spacing:.4px;
-  color:var(--ink3);border-bottom:1px solid var(--line);font-weight:800}
-.tbl td{padding:5px 7px;border-bottom:1px solid var(--line2);vertical-align:top}
-.tbl tr:nth-child(even) td{background:#fcfdfe}
-.tbl td.n,.tbl th.n{text-align:right;font-variant-numeric:tabular-nums}
-.tbl td.b{font-weight:800;color:var(--brand2)}
-.muted{color:var(--ink3)}
-.mono{font-family:var(--mono)}
-.tag{display:inline-block;background:var(--r1);border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:10px;font-weight:700;color:var(--ink2)}
-.empty{padding:40px 20px;text-align:center;color:var(--ink3)}
-.empty b{display:block;font-size:15px;color:var(--ink2);margin-bottom:5px}
-.count{font-size:11.5px;color:var(--ink3);padding:7px 12px;background:#fbfcfe;border-bottom:1px solid var(--line)}
-.count b{color:var(--brand2)}
-
-/* protocol cards */
-.proto{background:#fff;border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:9px;padding:11px 13px;margin-bottom:11px}
-.proto h3{font-size:14px;color:var(--brand2);margin-bottom:3px}
-.proto .pp{font-size:11.5px;color:var(--ink3);margin-bottom:8px}
-.proto ol{margin:0;padding-left:19px}
-.proto ol li{font-size:12.3px;margin-bottom:5px;line-height:1.45}
-.proto ol li b{color:var(--ink)}
-.step-drug{font-weight:700;color:var(--brand2);background:none;border:0;border-bottom:1px dashed currentColor;
-  padding:0;margin:0;font:inherit;cursor:pointer;border-radius:0}
-.step-drug:hover{background:var(--brand-soft);color:var(--brand)}
-.step-vol{font-weight:800;color:var(--crit);font-family:var(--mono)}
-
-/* modal */
-.modal-bd{position:fixed;inset:0;background:rgba(10,20,35,.55);z-index:200;display:none;align-items:center;justify-content:center;padding:16px}
-.modal-bd.open{display:flex}
-.modal{background:#fff;border-radius:12px;max-width:860px;width:100%;max-height:88vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.35)}
-.modal .mh{padding:12px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;position:sticky;top:0;background:#fff;z-index:2}
-.modal .mh h2{font-size:15px;color:var(--brand2)}
-.modal .mb{padding:15px}
-.xbtn{margin-left:auto;border:1px solid var(--line);background:#fff;border-radius:7px;padding:4px 10px;cursor:pointer;font-weight:700;color:var(--ink2)}
-
-/* toast */
-.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;
-  padding:9px 16px;border-radius:8px;font-size:12.5px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:300;box-shadow:0 6px 20px rgba(0,0,0,.3)}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-footer.foot{max-width:1560px;margin:0 auto;padding:14px 16px 40px;font-size:11px;color:var(--ink3);border-top:1px solid var(--line)}
-footer.foot b{color:var(--ink2)}
-
-/* ---------- print ---------- */
-@media print{
-  :root{--shadow:none}
-  body{background:#fff;font-size:10.5px}
-  .topbar{position:static;background:#0b5394!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:7px 12px}
-  .topbar .tbtn,.topbar .meta .noprint{display:none}
-  .no-print,.tabs,.toolbar,.chips,.toast,.modal-bd{display:none!important}
-  .wrap{grid-template-columns:1fr;padding:0;max-width:none}
-  .sticky{position:static}
-  .panel,.card,.utile{box-shadow:none;break-inside:avoid;page-break-inside:avoid}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:7px}
-  .card .ch{padding:6px 8px}
-  .dose{padding:6px 8px}
-  .dose .dv{font-size:17px}
-  table.fx th,table.fx td{padding:3px 5px}
-  .refbox{padding:4px 8px}
-  .sysgroup>h3{border-bottom:1px solid #000;color:#000}
-  a[href]:after{content:""}
-  .printonly{display:block!important}
+/* --------------------------------------------------------- patient strip */
+.pbar{
+  display:none; position:sticky; top:0; z-index:55;
+  align-items:center; gap:10px;
+  background:var(--panel); border-bottom:1px solid var(--line);
+  padding:8px 14px; box-shadow:var(--sh-1);
 }
-.printonly{display:none}
-.print-head{margin:0 0 8px}
-.print-head h1{font-size:16px}
+.pbar .pmini{display:flex;align-items:center;gap:9px;min-width:0;flex:1 1 auto}
+.pbar .pw{font-size:var(--fs-5);font-weight:800;letter-spacing:-.2px;white-space:nowrap}
+.pbar .pa{font-size:var(--fs-2);color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pbar .btn{flex:0 0 auto}
+.pbar.warnstate{background:var(--warn-soft);border-bottom-color:var(--warn-line)}
+.pbar.nostate{background:var(--info-soft);border-bottom-color:var(--info-line)}
 
-/* ---------- continuous infusion "mix & run" ---------- */
-.mixwrap{padding:12px;display:flex;flex-direction:column;gap:12px}
-.mixpanel{background:var(--panel);border:1px solid var(--line);border-radius:12px;
-  box-shadow:var(--shadow);overflow:hidden}
-.mixpanel .mph{padding:12px 16px;background:linear-gradient(180deg,var(--brand) 0%,var(--brand2) 100%);color:#fff}
-.mixpanel .mph h3{margin:0;font-size:15.5px;letter-spacing:.2px}
-.mixpanel .mph .mps{font-size:12px;opacity:.88;margin-top:4px;max-width:72ch}
-.mixpanel .mbody{padding:14px 16px;display:grid;gap:14px}
-.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
-.mgrid .field>label{font-weight:700}
-.inl{color:var(--ink2);font-size:13px;align-self:center;white-space:nowrap}
-.mxpre{font-family:var(--mono);font-size:11.5px}
-.conc-line{background:var(--brand-soft);border:1.5px solid #b9d4ee;border-radius:10px;
-  padding:10px 14px;font-size:14px;color:var(--ink)}
-.conc-line b{font-size:16.5px;color:var(--brand2)}
-.rate-hero{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;padding:4px 0 0}
-.rate-hero .rh{font-size:42px;font-weight:800;color:var(--brand2);line-height:1;
-  font-variant-numeric:tabular-nums}
-.rate-hero .rh small{font-size:15px;font-weight:700;color:var(--ink2)}
-.rate-hero .rs{font-size:13px;color:var(--ink2)}
-.lbl{border:1.6px dashed var(--ink3);border-radius:10px;padding:10px 12px;
-  font-size:12.5px;background:#fffdf4}
-.lbl table{width:100%;border-collapse:collapse}
-.lbl td{padding:3px 6px;border-bottom:1px dotted var(--line);vertical-align:top}
-.lbl tr:last-child td{border-bottom:0}
-#lblPrintArea{display:none}
-@media print{
-  body.lbl-only > *:not(#lblPrintArea){display:none !important}
-  body.lbl-only #lblPrintArea{display:block;font-size:15px}
-  body.lbl-only #lblPrintArea .lbl, body.lbl-only #lblPrintArea table{border:0}
+/* --------------------------------------------------------------- layout */
+.wrap{
+  display:grid; grid-template-columns:340px minmax(0,1fr); gap:16px;
+  padding:16px; align-items:start; max-width:1720px; margin:0 auto;
 }
-
-/* ============ navigation & usability layer ============ */
-.tbtn.icon{padding:5px 9px;font-size:14px;line-height:1.2}
-#btnRail{display:none}
-.scrim{position:fixed;inset:0;background:rgba(6,16,32,.5);z-index:70;opacity:0;pointer-events:none;transition:opacity .18s}
+main{min-width:0}
+aside{min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-2);overflow:clip}
+.panel + .panel{margin-top:14px}
+.ph{display:flex;align-items:baseline;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line2);background:var(--panel2)}
+.ph h2{font-size:var(--fs-3);font-weight:700;letter-spacing:.2px}
+.ph .rt{margin-left:auto;font-size:var(--fs-1);color:var(--ink3);font-weight:600}
+.pb{padding:13px 14px}
+.sticky{position:sticky;top:calc(var(--stick) + 10px)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.grow{flex:1 1 auto}
+.scrim{position:fixed;inset:0;background:rgba(8,16,30,.45);opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:64}
 body.rail-open .scrim{opacity:1;pointer-events:auto}
-@media(max-width:1080px){
-  #btnRail{display:inline-flex}
-  .wrap>aside{position:fixed;top:0;left:0;bottom:0;width:min(88vw,350px);z-index:80;background:var(--bg);
-    overflow:auto;transform:translateX(-103%);transition:transform .2s ease;padding:12px;
-    box-shadow:0 0 44px rgba(0,0,0,.3)}
-  body.rail-open .wrap>aside{transform:none}
-  .wrap>aside .sticky{position:static}
+
+/* ------------------------------------------------------- patient fields */
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:var(--fs-1);font-weight:700;color:var(--ink3);letter-spacing:.3px;text-transform:uppercase}
+.field .hint{font-size:var(--fs-1);color:var(--ink3);line-height:1.35}
+input[type=number],input[type=text],select,textarea{
+  width:100%; padding:9px 11px; border-radius:var(--r-sm);
+  border:1px solid var(--line3); background:var(--raised); color:var(--ink);
+  font-size:var(--fs-4); font-variant-numeric:tabular-nums; transition:border-color .15s ease, box-shadow .15s ease;
 }
+input:focus,select:focus,textarea:focus{border-color:var(--brand3);box-shadow:0 0 0 3px var(--brand-soft);outline:none}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink3) 50%),linear-gradient(135deg,var(--ink3) 50%,transparent 50%);
+  background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:30px}
+input[type=checkbox]{width:auto;accent-color:var(--brand)}
+.big{font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1.1;color:var(--ink)}
+.big small{font-size:15px;font-weight:700;color:var(--ink3);margin-left:3px;letter-spacing:0}
+.big-out{color:var(--crit)}
+.rng{font-size:var(--fs-2);color:var(--ink3);margin-top:2px}
+.flag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.4px;padding:2px 6px;border-radius:5px;vertical-align:1px;text-transform:uppercase}
+.f-measured{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line)}
+.f-est{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line)}
+.f-crit{background:var(--crit-soft);color:var(--crit);border:1px solid var(--crit-line)}
+.f-info{background:var(--info-soft);color:var(--info);border:1px solid var(--info-line)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:9px 0 0;font-size:var(--fs-2)}
+.kv dt{color:var(--ink3);font-weight:600}
+.kv dd{margin:0;text-align:right;font-weight:600;color:var(--ink)}
+.wbox:empty{display:none}
+.wbox{margin-top:10px}
+
+/* ---------------------------------------------------------------- chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-top:1px solid var(--line2);background:var(--panel2)}
+.chip{
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--raised);border:1px solid var(--line3);color:var(--ink2);
+  padding:6px 11px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:600;
+  transition:all .13s ease;
+}
+.chip:hover{border-color:var(--brand3);color:var(--brand);background:var(--brand-soft)}
+.chip[aria-pressed="true"],.chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.chip.risk,.chip.warn{border-color:var(--warn-line);color:var(--warn);background:var(--warn-soft)}
+.chip.risk[aria-pressed="true"]{background:var(--crit);border-color:var(--crit);color:#fff}
+.chip.goto{background:var(--raised);border-color:var(--line3);color:var(--ink2);width:100%;justify-content:flex-start}
+.chip.goto:hover{background:var(--crit-soft);border-color:var(--crit-line);color:var(--crit)}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  background:var(--brand);border:1px solid var(--brand);color:#fff;
+  padding:10px 14px;border-radius:var(--r-sm);font-size:var(--fs-3);font-weight:650;
+  transition:filter .15s ease, transform .12s ease;
+}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:var(--raised);color:var(--brand);border-color:var(--brand-line)}
+.btn.ghost:hover{background:var(--brand-soft)}
+.btn.sm{padding:7px 11px;font-size:var(--fs-2);flex:1 1 auto}
+.btn.big{padding:13px 18px;font-size:var(--fs-4)}
+
+/* ----------------------------------------------------------------- tabs */
+.tabs{
+  display:flex;gap:4px;padding:9px 14px;border-bottom:1px solid var(--line);
+  background:var(--panel2);position:sticky;top:var(--stick);z-index:45;overflow-x:auto;scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+  background:transparent;border:1px solid transparent;color:var(--ink2);
+  padding:8px 13px;border-radius:var(--r-pill);font-size:var(--fs-3);font-weight:650;
+  transition:background .15s ease,color .15s ease;
+}
+.tabs button .ti{font-size:15px;line-height:1}
+.tabs button:hover{background:var(--brand-soft);color:var(--brand)}
+.tabs button[aria-selected="true"]{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:var(--sh-1)}
 .btabs{display:none}
-@media(max-width:760px){
-  .tabs{display:none}
-  .btabs{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:65;background:var(--panel);
-    border-top:1px solid var(--line);padding:4px 2px calc(4px + env(safe-area-inset-bottom,0px));
-    box-shadow:0 -4px 16px rgba(16,32,56,.12)}
-  .btabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;
-    color:var(--ink2);font-size:9.5px;padding:5px 0 4px;font-weight:700;letter-spacing:.2px}
-  .btabs button .bi{font-size:17px;line-height:1}
-  .btabs button[aria-selected=true]{color:var(--brand)}
-  body{padding-bottom:60px}
-  .fab{bottom:74px}
-}
-.fbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:0 0 9px}
-.fbar .fbl{font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px}
-.fbar .fb{display:inline-flex;align-items:center;gap:6px;background:var(--brand-soft);border:1px solid #b9d4ee;
-  color:var(--brand2);border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:600;cursor:pointer}
-.fbar .fb b{font-weight:800}
-.fbar .fb .x{opacity:.65;font-weight:800}
-.star{border:0;background:none;cursor:pointer;font-size:16px;color:var(--ink3);padding:2px 5px;line-height:1;align-self:flex-start}
-.star.on{color:#e0a400}
-.card.pinned{box-shadow:inset 0 0 0 2px #ffd97a,var(--shadow)}
-.tiles{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:thin}
-.tile{flex:0 0 auto;min-width:138px;border:1px solid var(--line);border-radius:10px;background:var(--panel);
-  padding:9px 11px;cursor:pointer;text-align:left;box-shadow:var(--shadow);color:var(--ink)}
-.tile .ti{font-size:17px;line-height:1}
-.tile .tn{font-size:12.5px;font-weight:700;margin-top:4px}
-.tile .td{font-size:10.5px;color:var(--ink2);margin-top:1px}
-.pal{position:fixed;inset:0;z-index:90;background:rgba(6,16,32,.55);display:none;padding:9vh 14px 0}
-.pal.open{display:block}
-.palbox{max-width:660px;margin:0 auto;background:var(--panel);border-radius:12px;overflow:hidden;
-  box-shadow:0 24px 70px rgba(0,0,0,.4);border:1px solid var(--line)}
-.palbox input{width:100%;border:0;border-bottom:1px solid var(--line);padding:13px 16px;font-size:15px;
-  background:transparent;color:var(--ink)}
-.palbox input:focus{outline:0}
-.palres{max-height:52vh;overflow:auto}
-.palres button{display:flex;gap:10px;width:100%;text-align:left;border:0;background:none;
-  padding:9px 16px;font-size:13.5px;color:var(--ink);cursor:pointer;border-bottom:1px solid var(--line2)}
-.palres button:hover,.palres button.sel{background:var(--brand-soft)}
-.palres .pk{flex:0 0 auto;font-size:9.5px;font-weight:800;color:var(--brand2);background:var(--brand-soft);
-  border:1px solid #b9d4ee;border-radius:5px;padding:2px 6px;height:fit-content;margin-top:2px;text-transform:uppercase}
-.palhint{padding:8px 16px;font-size:11px;color:var(--ink3)}
-.fab{position:fixed;right:14px;bottom:20px;z-index:64;width:42px;height:42px;border-radius:50%;
-  border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow);font-size:16px;cursor:pointer;display:none}
-.fab.show{display:block}
-body.big{font-size:17.5px}
-body.big .nm{font-size:17px}
-body.big .dose .dv{font-size:17px}
-body.big .tbl{font-size:14.5px}
-body.dark{--bg:#0d1520;--panel:#151f2d;--ink:#e7edf5;--ink2:#a7b5c8;--ink3:#7d8ca0;--line:#293648;--line2:#202d3d;
-  --brand-soft:#12283c;--ok-soft:#0f271c;--warn-soft:#2a2010;--crit-soft:#2a1416;--info-soft:#0e242e;--neu-soft:#1c1830;--r1:#192331}
-body.dark .safety{background:#2a1416;border-color:#57292c;color:#f3d7d9}
-body.dark .lbl{background:#1c2634}
-body.dark .topbar{background:linear-gradient(180deg,#0a3c6d 0%,#062a4d 100%)}
-body.dark .conc-line{border-color:#2b4a68}
-body.dark .fbar .fb{border-color:#2b4a68}
 
-/* ============ answer-first cards, recents, ten-fold guard ============ */
-.fxdet{border:0;margin:0}
-.fxdet>summary{list-style:none;cursor:pointer;background:var(--brand-soft);border:1px solid #b9d4ee;
-  border-radius:8px;padding:7px 11px;font-size:12.5px;color:var(--ink);margin:9px 0 0;line-height:1.45}
+/* -------------------------------------------------------------- toolbar */
+.toolbar{
+  display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,1.5fr) minmax(0,1.1fr);gap:9px;align-items:end;
+  padding:12px 14px;border-bottom:1px solid var(--line2);background:var(--panel);
+}
+.toolbar .frow{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.toolbar .search{position:relative}
+.toolbar .search input{padding-left:34px;font-size:var(--fs-4);height:42px}
+.toolbar .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink3);pointer-events:none;z-index:1}
+.fbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line2);background:var(--panel2)}
+.fbl{font-size:var(--fs-1);font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--ink3)}
+.fb{display:inline-flex;align-items:center;gap:6px;background:var(--brand-soft);border:1px solid var(--brand-line);color:var(--brand);
+  padding:4px 9px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:650}
+.fb .x{font-size:10px;opacity:.75}
+.fb:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+.count{padding:9px 14px;font-size:var(--fs-2);color:var(--ink3);border-bottom:1px solid var(--line2);background:var(--panel)}
+.count b{color:var(--ink);font-size:var(--fs-3)}
+
+/* ------------------------------------------------------------- shortcuts */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;padding:12px 14px;border-bottom:1px solid var(--line2);background:var(--panel2)}
+.tile{
+  display:flex;flex-direction:column;gap:3px;text-align:left;
+  background:var(--raised);border:1px solid var(--line3);border-radius:var(--r-md);padding:10px 11px;
+  transition:transform .13s ease, box-shadow .13s ease, border-color .13s ease;
+}
+.tile:hover{transform:translateY(-1px);box-shadow:var(--sh-2);border-color:var(--crit-line)}
+.tile .ti{font-size:19px;line-height:1.1}
+.tile .tn{font-size:var(--fs-3);font-weight:700;color:var(--ink)}
+.tile .td{font-size:var(--fs-1);color:var(--ink3)}
+.recentbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line2);background:var(--panel)}
+
+/* --------------------------------------------------------------- groups */
+.sysgroup{scroll-margin-top:150px}
+.sysgroup h3{
+  display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;
+  margin:0;padding:14px 14px 6px;font-size:var(--fs-5);font-weight:750;letter-spacing:-.1px;
+  border-top:1px solid var(--line2);
+}
+.sysgroup:first-of-type h3{border-top:0}
+.sysgroup .cnt{font-size:var(--fs-1);font-weight:800;background:var(--brand-soft);color:var(--brand);border:1px solid var(--brand-line);
+  padding:1px 7px;border-radius:var(--r-pill)}
+.sysgroup .desc{font-size:var(--fs-2);color:var(--ink3);font-weight:500}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:6px 14px 16px;align-items:start}
+
+/* ---------------------------------------------------------------- cards */
+.card{
+  background:var(--raised);border:1px solid var(--line);border-left:4px solid var(--risk1);
+  border-radius:var(--r-md);box-shadow:var(--sh-1);overflow:hidden;
+  scroll-margin-top:160px; transition:box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+}
+.card:hover{box-shadow:var(--sh-2)}
+.card.risk2{border-left-color:var(--risk2)}
+.card.risk3{border-left-color:var(--risk3)}
+.card.risk4{border-left-color:var(--risk4)}
+.card.risk5{border-left-color:var(--risk5)}
+.card.risk5{background:linear-gradient(180deg,var(--crit-soft) 0,var(--panel) 74px)}
+.card.openCard{box-shadow:var(--sh-3);border-color:var(--brand-line)}
+.card.pinned{border-left-style:double;border-left-width:6px}
+
+.ch{display:flex;gap:9px;align-items:flex-start;padding:11px 13px 8px}
+.chead{min-width:0;flex:1}
+.nm{font-size:var(--fs-5);font-weight:730;letter-spacing:-.15px;line-height:1.25;color:var(--ink)}
+.ind{font-size:var(--fs-2);color:var(--ink3);margin-top:2px;line-height:1.35}
+.badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.bdg{font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:5px;letter-spacing:.35px;text-transform:uppercase;white-space:nowrap;border:1px solid transparent}
+.b-age{background:var(--brand-soft);color:var(--brand);border-color:var(--brand-line)}
+.b-risk{background:var(--panel2);color:var(--ink3);border-color:var(--line)}
+.card.risk3 .b-risk{background:var(--warn-soft);color:var(--warn);border-color:var(--warn-line)}
+.card.risk4 .b-risk{background:var(--warn-soft);color:var(--risk4);border-color:var(--warn-line)}
+.card.risk5 .b-risk{background:var(--crit-soft);color:var(--crit);border-color:var(--crit-line)}
+.b-route{background:var(--panel2);color:var(--ink2);border-color:var(--line)}
+.b-route.iv{background:var(--brand-soft);color:var(--brand);border-color:var(--brand-line)}
+.b-route.po{background:var(--ok-soft);color:var(--ok);border-color:var(--ok-line)}
+.b-route.im{background:var(--neu-soft);color:var(--neu);border-color:var(--neu-line)}
+.b-route.neb{background:var(--info-soft);color:var(--info);border-color:var(--info-line)}
+.b-route.sc{background:var(--warn-soft);color:var(--warn);border-color:var(--warn-line)}
+.b-route.pr{background:var(--neu-soft);color:var(--neu);border-color:var(--neu-line)}
+.b-same{background:var(--panel2);color:var(--ink3);border-color:var(--line)}
+.star{
+  flex:0 0 auto;background:transparent;border:1px solid transparent;color:var(--ink4);
+  font-size:17px;line-height:1;padding:5px 7px;border-radius:var(--r-sm);transition:all .13s ease;
+}
+.star:hover{background:var(--warn-soft);color:var(--risk3);border-color:var(--warn-line)}
+.star.on{color:var(--risk3);border-color:var(--warn-line);background:var(--warn-soft)}
+
+/* the answer block: dose + the one-line volume, visually fused */
+.answer{margin:0 13px 10px;border:1px solid var(--brand-line);background:var(--brand-soft);border-radius:var(--r-sm)}
+.card.risk5 .answer{border-color:var(--crit-line);background:var(--crit-soft)}
+.dose{padding:10px 12px 9px}
+.dl{font-size:var(--fs-1);font-weight:800;text-transform:uppercase;letter-spacing:.45px;color:var(--ink3)}
+.dv{font-size:var(--fs-6);font-weight:800;letter-spacing:-.5px;line-height:1.2;margin-top:3px;color:var(--ink);overflow-wrap:anywhere}
+.dv small{font-size:var(--fs-2);font-weight:600;color:var(--ink2);letter-spacing:0}
+.card.risk5 .dv{color:var(--crit)}
+.dr{font-size:var(--fs-2);color:var(--ink2);margin-top:4px}
+.dr b{color:var(--ink)}
+.cap{font-size:var(--fs-2);color:var(--warn);margin-top:6px;font-weight:600}
+.cap.hit{color:var(--crit);font-weight:700}
+
+/* strength table disclosure */
+.fxdet{border:0;border-top:1px dashed var(--brand-line);background:transparent}
+.card.risk5 .fxdet{border-top-color:var(--crit-line)}
+.fxdet>summary{
+  cursor:pointer;list-style:none;display:flex;align-items:baseline;flex-wrap:wrap;
+  column-gap:10px;row-gap:2px;padding:9px 12px;font-size:var(--fs-3);font-weight:700;color:var(--brand);
+}
+.fxdet>summary .smA{white-space:nowrap;flex:0 1 auto;min-width:0}
+.fxdet>summary .smB{margin-left:auto;white-space:nowrap;color:var(--ink3);font-weight:600;font-size:var(--fs-2)}
+.fxdet>summary .smH{white-space:nowrap;color:var(--ink4);font-weight:600;font-size:var(--fs-1);text-transform:uppercase;letter-spacing:.3px}
+.volx{font-size:var(--fs-5);font-weight:820;color:var(--brand2);letter-spacing:-.2px}
+.card.risk5 .volx{color:var(--crit)}
+.sumwarn{white-space:nowrap;background:var(--crit-soft);color:var(--crit);border:1px solid var(--crit-line);border-radius:var(--r-pill);padding:0 7px;font-size:var(--fs-1);font-weight:800}
+.card.risk5 .fxdet>summary{color:var(--crit)}
 .fxdet>summary::-webkit-details-marker{display:none}
-.fxdet>summary::before{content:'▸ ';color:var(--brand);font-weight:800}
-.fxdet[open]>summary::before{content:'▾ ';color:var(--brand)}
-.fxdet>summary b{color:var(--brand2);font-size:14px}
-.fxdet>summary .sumwarn{color:var(--warn);font-weight:700}
-.fxdet .fxbody{padding-top:4px}
-.recentbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:0 0 9px}
-.recentbar .rb{font-size:10.5px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px}
-.recentbar button.rc{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:3px 11px;
-  font-size:12px;cursor:pointer;color:var(--ink)}
-.recentbar button.rc:hover{border-color:var(--brand);color:var(--brand2)}
-.recentbar button.rcx{border:0;background:none;color:var(--ink3);font-size:11px;cursor:pointer;text-decoration:underline}
-body.dark .fxdet>summary{border-color:#2b4a68}
+.fxdet>summary::before{content:"▸";font-size:12px;transition:transform .15s ease}
+.fxdet[open]>summary::before{transform:rotate(90deg)}
+.fxdet>summary:hover{background:rgba(255,255,255,.5)}
+.fxbody{padding:0 12px 11px;background:var(--panel);border-top:1px solid var(--line2)}
+.fx{width:100%;border-collapse:collapse;margin-top:8px;font-size:var(--fs-2)}
+.fx th{font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink3);text-align:left;font-weight:800;padding:6px 7px;border-bottom:1px solid var(--line)}
+.fx td{padding:7px;border-bottom:1px solid var(--line2);vertical-align:top}
+.fx tr:last-child td{border-bottom:0}
+.fx tr.hl{background:var(--ok-soft)}
+.fx .str{font-weight:650;color:var(--ink)}
+.vol{font-weight:800;color:var(--brand2);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:var(--fs-4)}
+body.dark .vol{color:var(--brand2)}
+.vol.big{font-size:var(--fs-5)}
+.syr,.na{font-size:var(--fs-1);color:var(--ink3);font-weight:600}
+.syr{color:var(--warn)}
+.pack{font-size:var(--fs-1);color:var(--ink3);margin-top:2px;line-height:1.35}
+.brand{font-size:var(--fs-1);color:var(--ink4);margin-top:2px;font-style:italic}
+.infx{margin-top:11px;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.infx .ih{background:var(--info-soft);color:var(--info);font-size:var(--fs-2);font-weight:750;padding:7px 9px;border-bottom:1px solid var(--info-line)}
+.infx table{width:100%;border-collapse:collapse;font-size:var(--fs-2)}
+.infx th{font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink3);text-align:left;padding:6px 8px;background:var(--panel2)}
+.infx td{padding:7px 8px;border-top:1px solid var(--line2)}
+.eq{font-size:var(--fs-1);color:var(--ink3);padding:7px 9px;background:var(--panel2);border-top:1px solid var(--line2);font-family:var(--mono)}
 
-@media print{
-  .fxdet>summary{background:none;border:0;border-bottom:1px solid #ccc;border-radius:0;padding:2px 0;margin:6px 0 0}
-  .fxdet>summary::before{content:''}
-  .recentbar{display:none!important}
+/* warnings & notes */
+.notebox,.warnbox,.infobox{font-size:var(--fs-2);line-height:1.45;border-radius:var(--r-sm);padding:8px 10px;margin-top:8px;border:1px solid var(--info-line);background:var(--info-soft);color:var(--ink2)}
+.notebox ul,.warnbox ul,.infobox ul{margin:0;padding-left:16px}
+.notebox.warn,.warnbox{border-color:var(--crit-line);background:var(--crit-soft);color:var(--crit)}
+.warnbox b,.notebox.warn b{color:inherit}
+.notebox.ok{border-color:var(--ok-line);background:var(--ok-soft);color:var(--ok)}
+.notebox.warn li::marker,.warnbox li::marker{color:var(--crit)}
+.card>.warnbox,.card>.notebox{margin:0 13px 10px}
+.cbody{padding:0 13px 12px}
+.sec{font-size:var(--fs-2);color:var(--ink2);margin-top:8px;line-height:1.45}
+.sec b{display:block;font-size:var(--fs-1);text-transform:uppercase;letter-spacing:.4px;color:var(--ink3);margin-bottom:2px}
+
+/* collapsed clinical detail (the long tail of a card) */
+.cdet{margin:0 13px 12px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--panel2)}
+.cdet>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;padding:8px 11px;font-size:var(--fs-2);font-weight:700;color:var(--ink2)}
+.cdet>summary::-webkit-details-marker{display:none}
+.cdet>summary::before{content:"▸";font-size:11px;transition:transform .15s ease;color:var(--ink3)}
+.cdet[open]>summary::before{transform:rotate(90deg)}
+.cdet[open]>summary{border-bottom:1px solid var(--line)}
+.cdet>summary:hover{color:var(--brand)}
+.cdet .inner{padding:2px 11px 11px}
+.moredet{margin-top:8px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--raised)}
+.moredet>summary{cursor:pointer;list-style:none;padding:7px 10px;font-size:var(--fs-2);font-weight:700;color:var(--ink2)}
+.moredet>summary::-webkit-details-marker{display:none}
+.moredet>summary::before{content:"▸ ";color:var(--ink3)}
+.moredet[open]>summary::before{content:"▾ "}
+.moredet .inner{padding:0 10px 10px}
+.tbl{width:100%;border-collapse:collapse;font-size:var(--fs-2);margin-top:6px}
+.tbl td{border:1px solid var(--line);padding:6px 8px;color:var(--ink3)}
+.refbox{font-size:var(--fs-1);color:var(--ink3);margin-top:9px;line-height:1.6}
+.refbox b{text-transform:uppercase;letter-spacing:.4px;font-size:9.5px;color:var(--ink4);display:block;margin-bottom:3px}
+.tag{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:var(--r-pill);padding:1px 8px;margin:1px 3px 1px 0;color:var(--ink2);font-size:var(--fs-1);font-weight:600}
+.refTag:hover{background:var(--brand-soft);border-color:var(--brand-line);color:var(--brand)}
+
+/* ------------------------------------------------------- empty / prompt */
+.empty{padding:34px 22px;text-align:center;color:var(--ink3)}
+.empty b{display:block;font-size:var(--fs-5);color:var(--ink);margin-bottom:6px}
+.hero{margin:14px;border:1px solid var(--brand-line);border-radius:var(--r-lg);background:linear-gradient(180deg,var(--brand-soft) 0,var(--panel) 70%);padding:18px;box-shadow:var(--sh-1)}
+.hero h2{font-size:var(--fs-7);letter-spacing:-.6px;font-weight:780}
+.hero .hs{font-size:var(--fs-3);color:var(--ink2);margin-top:6px;max-width:70ch}
+.hero .hrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.hero .hrow .chip{padding:9px 14px;font-size:var(--fs-3)}
+.hero .hnote{font-size:var(--fs-2);color:var(--ink3);margin-top:12px;border-top:1px dashed var(--line3);padding-top:10px}
+.hero .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:14px}
+.hero .steps .st{background:var(--raised);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px}
+.hero .steps .st b{display:block;font-size:var(--fs-3);margin-bottom:3px}
+.hero .steps .st span{font-size:var(--fs-2);color:var(--ink3)}
+.hero .sn{font-size:10px;font-weight:800;color:var(--brand);background:var(--panel);border:1px solid var(--brand-line);border-radius:var(--r-pill);padding:1px 7px;margin-right:6px}
+
+/* --------------------------------------------- pump / board / calculators */
+.pumptabs{display:flex;gap:6px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--line2);background:var(--panel2)}
+.seg{display:inline-flex;background:var(--raised);border:1px solid var(--line3);border-radius:var(--r-pill);padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{background:transparent;border:0;padding:7px 13px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:700;color:var(--ink2)}
+.seg button[aria-selected="true"],.seg button.on{background:var(--brand);color:#fff}
+.mixwrap,.boardwrap{padding:14px}
+.mixpanel{display:block}
+.mixpanel>.mph{padding:14px;border-bottom:1px solid var(--line2);background:var(--panel2)}
+.mixpanel>.mgrid{padding:14px}
+.mixpanel>.mixbody{padding:14px}
+.mixout{display:block;padding:14px;border-top:1px solid var(--line2);background:var(--panel2)}
+.board{display:grid;gap:12px}
+.utilgrid{display:grid;gap:12px}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px 16px;align-items:start}
+.mxpre{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.mxrange{font-size:var(--fs-2);color:var(--ink3);margin-top:6px}
+.rate-hero{border:1px solid var(--ok-line);background:var(--ok-soft);border-radius:var(--r-md);padding:14px;text-align:center}
+.rate-hero .rv{font-size:38px;font-weight:820;letter-spacing:-1.4px;color:var(--ok);line-height:1.05}
+.rate-hero .rl{font-size:var(--fs-2);font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.5px}
+.sumwarn{border-color:var(--crit-line)!important;background:var(--crit-soft)!important;color:var(--crit)!important}
+.board table,.mixout table,.mgrid table{width:100%;border-collapse:collapse;font-size:var(--fs-2)}
+.board th,.mixout th{font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink3);text-align:left;padding:6px 8px}
+.board td,.mixout td{padding:7px 8px;border-top:1px solid var(--line2)}
+.bleft,.conc-line{font-size:var(--fs-1);color:var(--ink3)}
+.bdi,.bdin,.bdose{font-variant-numeric:tabular-nums}
+.utilgrid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.utile{background:var(--raised);border:1px solid var(--line);border-radius:var(--r-md);padding:13px;box-shadow:var(--sh-1)}
+.utile h4{font-size:var(--fs-4);margin-bottom:8px}
+.proto,.rc{border:1px solid var(--line);border-radius:var(--r-md);margin:12px 14px;overflow:hidden;background:var(--raised);box-shadow:var(--sh-1)}
+.proto .rh{display:flex;align-items:center;gap:9px;padding:12px 14px;background:var(--panel2);border-bottom:1px solid var(--line2)}
+.proto .rh h3{font-size:var(--fs-5)}
+.proto .rb{padding:13px 14px}
+.proto .rb ol,.proto .rb ul{margin:0}
+.proto .step-drug{font-weight:750;color:var(--ink)}
+.proto .step-vol{font-weight:800;color:var(--brand2);font-variant-numeric:tabular-nums}
+.tickok,.tickbad{font-weight:700}
+.tickok{color:var(--ok)} .tickbad{color:var(--crit)}
+.inl{display:inline-flex;gap:6px;align-items:baseline}
+.lbl{border:1px dashed var(--line3);border-radius:var(--r-sm);padding:9px;font-family:var(--mono);font-size:var(--fs-2)}
+
+/* --------------------------------------------------------- modal / pal / toast */
+.modal-bd{position:fixed;inset:0;background:rgba(8,16,30,.5);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:90;padding:18px}
+.modal-bd.open{display:flex}
+.modal{background:var(--panel);border-radius:var(--r-lg);box-shadow:var(--sh-3);width:min(820px,100%);max-height:86vh;display:flex;flex-direction:column;overflow:hidden}
+.mh{display:flex;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid var(--line2);background:var(--panel2)}
+.mh h2{font-size:var(--fs-5)}
+.xbtn{margin-left:auto;background:var(--raised);border:1px solid var(--line3);border-radius:var(--r-sm);padding:7px 11px;font-size:var(--fs-2);font-weight:650;color:var(--ink2)}
+.xbtn:hover{background:var(--crit-soft);color:var(--crit);border-color:var(--crit-line)}
+.mb{padding:15px;overflow:auto;font-size:var(--fs-3);line-height:1.55}
+.mb h3{font-size:var(--fs-4);margin:14px 0 6px}
+.mb h3:first-child{margin-top:0}
+.palbox{position:fixed;inset:0;background:rgba(8,16,30,.5);display:none;z-index:95;padding:8vh 18px 18px;justify-content:center;align-items:flex-start}
+.palbox.open{display:flex}
+.pal{background:var(--panel);border-radius:var(--r-lg);box-shadow:var(--sh-3);width:min(680px,100%);overflow:hidden;border:1px solid var(--line)}
+.pal input{width:100%;border:0;border-bottom:1px solid var(--line);padding:16px 18px;font-size:var(--fs-5);border-radius:0;background:var(--panel)}
+.pal input:focus{box-shadow:none}
+.palhint{font-size:var(--fs-1);color:var(--ink3);padding:8px 18px;background:var(--panel2)}
+.palres{max-height:58vh;overflow:auto}
+.palres button{display:flex;gap:11px;align-items:center;width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--line2);padding:11px 18px;font-size:var(--fs-3)}
+.palres button:hover,.palres button.sel{background:var(--brand-soft)}
+.palres .pk{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--ink4);flex:0 0 78px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,14px);background:var(--ink);color:var(--panel);
+  padding:11px 16px;border-radius:var(--r-pill);font-size:var(--fs-3);font-weight:650;box-shadow:var(--sh-3);
+  opacity:0;pointer-events:none;transition:all .22s ease;z-index:99;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+
+/* ---------------------- mixture / board / reverse-check pieces -------- */
+.mixhead{padding:13px 14px;border-bottom:1px solid var(--line2);background:var(--panel2)}
+.mixhead h2{font-size:var(--fs-5)}
+.mixbody{padding:13px 14px}
+.mph h3{font-size:var(--fs-5);margin-bottom:4px}
+.mgrid>.field>label{font-size:var(--fs-2);color:var(--brand);letter-spacing:.2px}
+.mps{font-size:var(--fs-2);color:var(--ink3);line-height:1.5;max-width:76ch}
+.rate-hero .rh{font-size:40px;font-weight:820;letter-spacing:-1.6px;line-height:1.05;color:var(--ok);font-variant-numeric:tabular-nums}
+.rate-hero .rh small{font-size:var(--fs-4);font-weight:700;letter-spacing:0;color:var(--ink2)}
+.rate-hero .rs{font-size:var(--fs-2);color:var(--ink2);margin-top:4px;font-weight:600}
+.recentbar .rb{font-size:var(--fs-1);font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--ink3);margin-right:3px}
+
+/* ---------------------------------------------------------------- footer */
+.foot{padding:18px 16px 26px;font-size:var(--fs-1);color:var(--ink3);line-height:1.6;max-width:1720px;margin:0 auto}
+.foot b{color:var(--ink2)}
+
+/* ============================== responsive ============================= */
+@media (max-width:1179px){
+  .wrap{grid-template-columns:minmax(0,1fr);padding:12px}
+  .pbar{display:flex;position:sticky;top:var(--stick)}
+  .tabs{top:calc(var(--stick) + var(--h-pbar))}
+  aside{
+    position:fixed;top:0;left:0;bottom:0;width:min(360px,92vw);z-index:80;
+    background:var(--bg);border-right:1px solid var(--line);box-shadow:var(--sh-3);
+    overflow-y:auto;padding:12px;transform:translateX(-102%);transition:transform .24s ease;
+    -webkit-overflow-scrolling:touch;
+  }
+  body.rail-open aside{transform:none}
+  aside .panel .ph{border-radius:0}
+  .sticky{position:static}
+  #btnRail{display:inline-flex}
+  .grid{grid-template-columns:minmax(0,1fr)}
+  .toolbar{grid-template-columns:minmax(0,1fr);position:static}
+  .btabs{
+    display:flex;position:fixed;left:0;right:0;bottom:0;z-index:70;
+    background:var(--panel);border-top:1px solid var(--line);
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));
+    box-shadow:0 -3px 16px rgba(14,26,43,.1);
+  }
+  .btabs button{flex:1 1 0;display:flex;flex-direction:column;align-items:center;gap:2px;background:transparent;border:0;
+    padding:6px 2px;font-size:10px;font-weight:700;color:var(--ink3);border-radius:var(--r-sm)}
+  .btabs button .bi{font-size:19px;line-height:1}
+  .btabs button[aria-selected="true"]{color:var(--brand)}
+  body{padding-bottom:74px}
+  .toast{bottom:88px}
+}
+@media (min-width:1180px){
+  .pbar{display:none!important}
+  #btnRail{display:none}
+}
+@media (min-width:1500px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (min-width:1180px) and (max-width:1499px){ .grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:760px){
+  .topbar h1{font-size:var(--fs-4)}
+  .topbar .sub{display:none}
+  .topbar .meta{display:none}
+  .tbtn .tlab{display:none}
+  .tbtn{padding:8px 10px}
+  .dv{font-size:19px}
+  .hero h2{font-size:22px}
+  .tiles{grid-template-columns:repeat(auto-fill,minmax(132px,1fr))}
 }
 
-/* ================= pump sub-modes, reverse check, line board ================= */
-.pumptabs{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 10px;padding:4px;background:var(--brand-soft);
-  border:1px solid #b9d4ee;border-radius:11px}
-.pumptabs button{border:0;background:none;padding:7px 13px;border-radius:8px;font:inherit;font-size:12.5px;
-  cursor:pointer;color:var(--ink2);white-space:nowrap}
-.pumptabs button[aria-selected="true"]{background:var(--panel);box-shadow:0 1px 3px rgba(20,40,70,.14);color:var(--brand2)}
-.pumptabs button b{font-weight:800}
-.boardwrap{overflow-x:auto;margin-top:4px}
-table.board{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px}
-table.board th{text-align:left;font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--ink3);
-  padding:6px 8px;border-bottom:2px solid var(--line)}
-table.board td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-table.board tfoot td{padding-top:8px;border-top:2px solid var(--line);border-bottom:0;font-size:12.5px}
-table.board tr.flag td{background:#fff6f2}
-table.board .bdin{width:70px;font-size:12px;margin-top:3px}
-.tickok{color:var(--ok);font-weight:800}
-.tickbad{color:var(--warn);font-weight:800}
-button.x{border:0;background:none;color:var(--ink3);cursor:pointer;font-size:13px;padding:2px 5px}
-button.x:hover{color:var(--warn)}
-body.dark table.board tr.flag td{background:#3a2420}
-body.dark .pumptabs{background:#1b2a3a;border-color:#2b4a68}
-body.dark .pumptabs button[aria-selected="true"]{background:#243447}
-@media print{.pumptabs,.bdin,button.x{display:none!important}table.board{min-width:0}}
+/* ================================ print ================================
+   A printed sheet is a clinical document: complete, compact, legible in
+   black and white, and never split so that a dose lands on one page and
+   its volumes on the next.                                             */
+@media print{
+  @page{margin:11mm 10mm}
+  html,body{background:#fff!important;color:#000;font-size:9.5pt;line-height:1.35;padding:0!important}
+  .topbar,.safety,.pbar,.btabs,.tabs,.toolbar,.fbar,.tiles,.recentbar,.scrim,.toast,.palbox,
+  .no-print,.noprint,.star,.hero,aside,.foot .noprint{display:none!important}
+  .printonly{display:block!important}
+  .print-head{display:block;padding:0 0 6px;border-bottom:2px solid #000;margin-bottom:8px}
+  .print-head h1{font-size:13pt}
+  .print-head .pack{font-size:8.5pt;color:#333}
+  .wrap{display:block;padding:0;max-width:none;gap:0}
+  .panel,.utile,.proto,.card{box-shadow:none!important}
+  .panel{border:0;border-radius:0}
+  .grid{display:block;padding:0;gap:0}
+
+  /* cards flow; only the small blocks stay whole */
+  .card{break-inside:auto;margin:0 0 7px;border:1px solid #999;border-radius:4px;border-left:3px solid #555;page-break-inside:auto}
+  .card.risk5,.card.risk4{border-left-color:#000}
+  .card.risk5{background:#fff}
+  .answer,.infx,.rate-hero,.lbl{break-inside:avoid;page-break-inside:avoid}
+  .answer{border:1px solid #666;background:#fff;break-inside:avoid;page-break-inside:avoid;margin:0 8px 6px}
+  .dose{padding:6px 8px 5px}
+  .dv{font-size:12.5pt;color:#000!important;letter-spacing:0}
+  .card.risk5 .dv{color:#000}
+  .dl,.dr,.cap{font-size:8.5pt}
+  .cap{color:#000}
+  .vol,.volx{color:#000!important}
+  .volx{font-size:11.5pt}
+
+  /* disclosures print as plain labelled sections */
+  .fxdet,.cdet,.moredet{border:0;background:#fff;border-top:1px solid #ddd}
+  .fxdet>summary,.cdet>summary,.moredet>summary{padding:3px 8px;font-size:9pt;color:#000;font-weight:700;border-bottom:1px solid #eee}
+  .fxdet>summary::before,.cdet>summary::before,.moredet>summary::before{content:""}
+  .fxbody,.cdet .inner,.cbody{padding:0 8px 6px}
+  .moredet .inner{padding:0 8px 6px}
+  .fx th{font-size:7.5pt;color:#000;padding:3px 5px}
+  .fx td{padding:4px 5px;font-size:9pt}
+  .fx tr,.infx tr,.tbl tr{break-inside:avoid;page-break-inside:avoid}
+  .fx tr.hl{background:#fff}
+  .str,.pack,.brand,.syr,.na{font-size:8pt;color:#222}
+  .sec{margin-top:4px;font-size:9pt}
+  .sec b{font-size:7.5pt;color:#000}
+  .badges{margin-top:3px}
+  .badges .bdg{border:0;background:#fff;color:#000;padding:0 5px 0 0;font-size:7.5pt}
+  .nm{font-size:11.5pt}
+  .ind{font-size:8.5pt;color:#222}
+  .notebox,.warnbox,.infobox{background:#fff;border:1px solid #999;color:#000;font-size:8.5pt;padding:4px 6px;break-inside:avoid;page-break-inside:avoid}
+  .card>.warnbox,.card>.notebox{margin:0 8px 6px}
+  .refbox{font-size:7.5pt;color:#333}
+  .tag{border:0;background:#fff;color:#000;padding:0 6px 0 0}
+  .sysgroup{break-before:auto}
+  .sysgroup h3{font-size:12pt;padding:8px 0 3px;border-top:1px solid #999;page-break-after:avoid;break-after:avoid}
+  .sysgroup h3 .cnt,.sysgroup h3 .desc{font-size:8pt;color:#333;border:0;background:#fff}
+  .count{font-size:8.5pt;padding:4px 0;border:0;color:#000}
+  .tile,.chip{display:none!important}
+  .proto,.utile{break-inside:avoid}
+  a{color:#000;text-decoration:none}
+
+  /* printable line label: only the label, nothing else on the page */
+  body.lbl-only .wrap,body.lbl-only .topbar,body.lbl-only .safety,body.lbl-only .pbar,body.lbl-only .foot{display:none!important}
+  body.lbl-only #lblPrintArea{display:block!important;padding:0}
+  body.lbl-only .lbl{border:1px dashed #000;font-size:10pt}
+}
+
+/* ------------------------------------------------------------ utilities */
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.hi{scroll-margin-top:170px}
+.hl{background:var(--ok-soft)}
+.pinned{}
 </style>
 
 <!-- ===== installable / offline (PWA) ===== -->
@@ -465,14 +643,15 @@ body.dark .pumptabs button[aria-selected="true"]{background:#243447}
 </head>
 <body>
 
+<!-- ============================ HEADER ============================ -->
 <header class="topbar">
   <div class="logo">
     <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
-      <rect x="1" y="1" width="30" height="30" rx="7" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.5)" stroke-width="1.4"/>
+      <rect x="1" y="1" width="30" height="30" rx="8" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.5)" stroke-width="1.3"/>
       <path d="M16 7v18M7 16h18" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>
       <path d="M4 23h5l2-4 3 8 2.6-6 1.8 3H28" stroke="#9fd0ff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    <div>
+    <div style="min-width:0">
       <h1>Paediatric &amp; Neonatal Drug Calculator</h1>
       <div class="sub">24 weeks of gestation to 18 years · Indian formulations · guideline-referenced · dose- and volume-verified</div>
     </div>
@@ -480,125 +659,134 @@ body.dark .pumptabs button[aria-selected="true"]{background:#243447}
   <div class="spacer"></div>
   <div class="meta">
     <div id="metaCtx">No patient entered</div>
-    <div class="noprint">Offline build <span class="mono">86a5137d1f95</span></div>
+    <div class="mono">build 338b17379cdf</div>
   </div>
-  <button class="tbtn icon" id="btnRail" type="button" title="Patient panel & emergency shortcuts">☰</button>
-  <button class="tbtn icon" id="btnPal" type="button" title="Jump to any drug, protocol or tool (Ctrl+K)">🔍</button>
-  <button class="tbtn icon" id="btnType" type="button" title="Larger text on/off">Aa</button>
-  <button class="tbtn icon" id="btnTheme" type="button" title="Dark / light theme">◐</button>
-  <button class="tbtn" id="btnPrint" type="button">🖨 Print sheet</button>
-  <button class="tbtn" id="btnCsv" type="button">⬇ Export CSV</button>
-  <button class="tbtn" id="btnAbout" type="button">ℹ About &amp; safety</button>
+  <button class="tbtn icon" id="btnRail" type="button" title="Patient panel and emergency shortcuts" aria-label="Patient panel">☰</button>
+  <button class="tbtn icon" id="btnPal" type="button" title="Jump to any drug, protocol or tool (Ctrl+K)" aria-label="Find anything">🔍</button>
+  <button class="tbtn icon" id="btnType" type="button" title="Larger text on/off" aria-label="Text size">Aa</button>
+  <button class="tbtn icon" id="btnTheme" type="button" title="Dark / light theme" aria-label="Theme">◐</button>
+  <button class="tbtn icon" id="btnPrint" type="button" title="Print the calculated dose sheet" aria-label="Print"><span aria-hidden="true">🖨</span><span class="tlab">Print</span></button>
+  <button class="tbtn icon" id="btnCsv" type="button" title="Export every calculated row as CSV" aria-label="Export CSV"><span aria-hidden="true">⬇</span><span class="tlab">CSV</span></button>
+  <button class="tbtn icon" id="btnAbout" type="button" title="About, safety and clinical governance" aria-label="About"><span aria-hidden="true">ℹ</span><span class="tlab">About</span></button>
 </header>
 
-<div class="safety">
+<div class="safety" id="safetyBanner">
   <span><b>⚠ CLINICAL DECISION SUPPORT — NOT A PRESCRIPTION.</b>
   Verify the drug, the concentration on the vial in your hand and the calculated volume against your institutional protocol before administration.
-  High-alert drugs (red border) require an <b>independent double check</b> by two practitioners.
+  High-alert drugs require an <b>independent double check</b> by two practitioners.
   Weigh the patient whenever possible — a weight estimated from age can be wrong by 20–30%.</span>
+  <button class="sx" id="safetyX" type="button" title="Hide this notice for this session" aria-label="Dismiss">✕</button>
+</div>
+
+<!-- patient strip: phone / tablet only. Always tells you which patient the
+     numbers below belong to, and opens the full panel on tap. -->
+<div class="pbar" id="pbar">
+  <div class="pmini" id="pmini">
+    <span class="pw" id="pminiW">—</span>
+    <span class="pa" id="pminiA">No patient set — tap to add a weight or age</span>
+  </div>
+  <button class="btn ghost sm" id="pEdit" type="button">Patient</button>
 </div>
 
 <div class="wrap">
 
-  <!-- ============ LEFT: patient panel ============ -->
-  <aside>
-    <div class="panel sticky">
-      <div class="ph"><h2>Patient</h2><span class="rt">24 weeks to 18 years</span></div>
+  <!-- ======================= PATIENT PANEL ======================= -->
+  <aside id="rail">
+    <div class="panel">
+      <div class="ph"><h2>Patient</h2><span class="rt">24 weeks – 18 years</span></div>
       <div class="pb">
-        <div class="row" style="margin-bottom:8px">
-          <div class="field" style="flex:1 1 100%">
-            <label for="p_wt">Weight (kg) — use this if known</label>
-            <input id="p_wt" type="number" step="0.01" min="0" max="200" inputmode="decimal" placeholder="e.g. 3.4">
-            <span class="hint">Always preferred over an estimate — weigh every child if you can.</span>
-            <div class="row" style="margin-top:6px;gap:6px">
-              <button class="chip" type="button" id="btnDemo70">4-year-old, 16 kg</button>
-              <button class="chip" type="button" id="btnDemoPreterm">28+3 preterm, 14 days</button>
+
+        <div class="field">
+          <label for="p_wt">Weight (kg) — use this if you know it</label>
+          <input id="p_wt" type="number" step="0.01" min="0" max="200" inputmode="decimal" placeholder="e.g. 3.4" autocomplete="off">
+          <div class="row" style="margin-top:7px">
+            <button class="chip" type="button" id="btnDemo70">Example: 4 y, 16 kg</button>
+            <button class="chip" type="button" id="btnDemoPreterm">Example: 28+3 preterm</button>
+          </div>
+          <span class="hint">A measured weight beats every estimate — weigh every child you can.</span>
+        </div>
+
+        <div class="field" style="margin-top:12px">
+          <label for="p_ageY">Age — years / months / days</label>
+          <div class="row">
+            <input id="p_ageY" type="number" step="1" min="0" max="120" inputmode="numeric" placeholder="years" aria-label="Age in years" style="flex:1 1 70px">
+            <input id="p_ageM" type="number" step="1" min="0" max="11" inputmode="numeric" placeholder="months" aria-label="Age in months" style="flex:1 1 70px">
+            <input id="p_ageD" type="number" step="1" min="0" max="30" inputmode="numeric" placeholder="days" aria-label="Age in days" style="flex:1 1 70px">
+          </div>
+          <span class="hint">Age alone is enough: the calculator estimates the weight from the WHO median and flags it <b>ESTIMATED</b> everywhere it is used.</span>
+        </div>
+
+        <div class="field" style="margin-top:12px">
+          <label for="p_gaW">Born preterm? Gestation at birth (weeks + days)</label>
+          <div class="row">
+            <input id="p_gaW" type="number" step="1" min="24" max="42" inputmode="numeric" placeholder="weeks" aria-label="Gestational age at birth, weeks" style="flex:1 1 70px">
+            <input id="p_gaD" type="number" step="1" min="0" max="6" inputmode="numeric" placeholder="days" aria-label="Gestational age at birth, days" style="flex:1 1 70px">
+          </div>
+          <span class="hint">For every baby born before 37 weeks the calculator doses on <b>postmenstrual age</b>, estimates weight from the Fenton reference and shows the <b>corrected age</b>.</span>
+        </div>
+
+        <details class="cdet" style="margin:12px 0 0">
+          <summary>Sex, estimation method, height, creatinine, electrolytes</summary>
+          <div class="inner">
+            <div class="row" style="margin-top:8px">
+              <div class="field" style="flex:1 1 46%">
+                <label for="p_sex">Sex (affects the weight estimate)</label>
+                <select id="p_sex"><option value="male">Male</option><option value="female">Female</option></select>
+              </div>
+              <div class="field" style="flex:1 1 46%">
+                <label for="p_wm">Weight-estimation method</label>
+                <select id="p_wm">
+                  <option value="who">WHO median (most accurate)</option>
+                  <option value="apls">APLS formula</option>
+                  <option value="luscombe">Luscombe (3×age)+7</option>
+                </select>
+              </div>
             </div>
+            <div class="row" style="margin-top:9px">
+              <div class="field" style="flex:1 1 46%"><label for="p_ht">Height (cm)</label>
+                <input id="p_ht" type="number" step="0.1" min="0" max="250" inputmode="decimal" placeholder="optional"></div>
+              <div class="field" style="flex:1 1 46%"><label for="p_scr">Creatinine (mg/dL)</label>
+                <input id="p_scr" type="number" step="0.01" min="0" max="30" inputmode="decimal" placeholder="optional"></div>
+            </div>
+            <div class="row" style="margin-top:9px">
+              <div class="field" style="flex:1 1 30%"><label for="p_k">K⁺ mmol/L</label>
+                <input id="p_k" type="number" step="0.01" min="0" max="12" inputmode="decimal" placeholder="—"></div>
+              <div class="field" style="flex:1 1 30%"><label for="p_na">Na⁺ mmol/L</label>
+                <input id="p_na" type="number" step="0.1" min="80" max="200" inputmode="decimal" placeholder="—"></div>
+              <div class="field" style="flex:1 1 30%"><label for="p_glu">Glucose mg/dL</label>
+                <input id="p_glu" type="number" step="1" min="0" max="2000" inputmode="decimal" placeholder="—"></div>
+            </div>
+            <label class="field" style="flex-direction:row;align-items:flex-start;gap:7px;margin-top:11px;cursor:pointer">
+              <input id="p_ao" type="checkbox" style="margin-top:2px">
+              <span style="font-size:var(--fs-2);color:var(--ink2);font-weight:500">Dose this 12–16-year-old as an <b>adult</b> (large adolescent)</span>
+            </label>
           </div>
+        </details>
+
+        <div id="ctxOut" class="wbox"></div>
+
+        <div class="row" style="margin-top:10px">
+          <button class="btn ghost sm" id="btnReset" type="button">Clear patient</button>
         </div>
 
-        <div class="row" style="margin-bottom:8px">
-          <div class="field" style="flex:1 1 62px"><label for="p_ageY">Years</label>
-            <input id="p_ageY" type="number" step="1" min="0" max="120" inputmode="numeric" placeholder="0"></div>
-          <div class="field" style="flex:1 1 62px"><label for="p_ageM">Months</label>
-            <input id="p_ageM" type="number" step="1" min="0" max="11" inputmode="numeric" placeholder="0"></div>
-          <div class="field" style="flex:1 1 62px"><label for="p_ageD">Days</label>
-            <input id="p_ageD" type="number" step="1" min="0" max="30" inputmode="numeric" placeholder="0"></div>
-        </div>
-
-        <div class="row" style="margin-bottom:8px">
-          <div class="field" style="flex:1 1 46%">
-            <label for="p_gaW" title="Gestational age AT BIRTH — needed for every preterm infant">Born at (weeks)</label>
-            <input id="p_gaW" type="number" step="1" min="24" max="42" inputmode="numeric" placeholder="e.g. 28">
-          </div>
-          <div class="field" style="flex:1 1 46%">
-            <label for="p_gaD">… + days</label>
-            <input id="p_gaD" type="number" step="1" min="0" max="6" inputmode="numeric" placeholder="0">
-          </div>
-        </div>
-        <div class="hint" style="margin:-4px 0 8px">For every baby born before 37 weeks: the app then doses on
-          <b>postmenstrual age</b>, estimates weight from the Fenton reference and shows the <b>corrected age</b>.</div>
-
-        <div class="row" style="margin-bottom:8px">
-          <div class="field" style="flex:1 1 46%">
-            <label for="p_sex">Sex (affects weight estimate &amp; IBW)</label>
-            <select id="p_sex"><option value="male">Male</option><option value="female">Female</option></select>
-          </div>
-          <div class="field" style="flex:1 1 46%">
-            <label for="p_wm">Weight-estimation method</label>
-            <select id="p_wm">
-              <option value="who">WHO median (most accurate)</option>
-              <option value="apls">APLS formula</option>
-              <option value="luscombe">Luscombe (3×age)+7</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="row" style="margin-bottom:8px">
-          <div class="field" style="flex:1 1 46%"><label for="p_ht">Height (cm)</label>
-            <input id="p_ht" type="number" step="0.1" min="0" max="250" inputmode="decimal" placeholder="optional"></div>
-          <div class="field" style="flex:1 1 46%"><label for="p_scr">Creatinine (mg/dL)</label>
-            <input id="p_scr" type="number" step="0.01" min="0" max="30" inputmode="decimal" placeholder="optional"></div>
-        </div>
-
-        <div class="row" style="margin-bottom:4px">
-          <div class="field" style="flex:1 1 30%"><label for="p_k">K⁺ mmol/L</label>
-            <input id="p_k" type="number" step="0.01" min="0" max="12" inputmode="decimal" placeholder="—"></div>
-          <div class="field" style="flex:1 1 30%"><label for="p_na">Na⁺ mmol/L</label>
-            <input id="p_na" type="number" step="0.1" min="80" max="200" inputmode="decimal" placeholder="—"></div>
-          <div class="field" style="flex:1 1 30%"><label for="p_glu">Glucose mg/dL</label>
-            <input id="p_glu" type="number" step="1" min="0" max="2000" inputmode="decimal" placeholder="—"></div>
-        </div>
-
-        <label style="display:flex;gap:7px;align-items:flex-start;font-size:11.5px;color:var(--ink2);margin:8px 0 0;cursor:pointer">
-          <input id="p_ao" type="checkbox" style="width:auto;margin-top:2px">
-          <span>Dose this 12–16-year-old as an <b>adult</b> (large adolescent)</span>
-        </label>
-
-        <div id="ctxOut" class="wbox" style="margin-top:10px"></div>
-
-        <div class="row" style="margin-top:9px">
-          <button class="btn sm" id="btnReset" type="button">Clear patient</button>
-          <button class="btn sm" id="btnDemo70" type="button">Set 70 kg adult</button>
-        </div>
-        <div class="chips no-print" style="padding:9px 0 0;border:0;background:transparent">
-          <button class="chip quickfill" data-fill=",,," type="button" title="Clear">—</button>
-          <button class="chip quickfill" data-fill="3.4,,0,7" type="button">Term newborn (3 d)</button>
+        <div class="chips no-print" style="margin:12px -14px -13px;border-radius:0 0 var(--r-lg) var(--r-lg)">
+          <span style="font-size:var(--fs-1);font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--ink3);width:100%">Quick fill</span>
+          <button class="chip quickfill" data-fill=",,," type="button" title="Clear the patient">—</button>
+          <button class="chip quickfill" data-fill="3.4,,0,7" type="button">Term newborn</button>
           <button class="chip quickfill" data-fill="1.2,0,0,7" type="button">ELBW 1.2 kg</button>
-          <button class="chip quickfill" data-fill="9.6,1,0," type="button">1 year</button>
-          <button class="chip quickfill" data-fill="18.3,5,0," type="button">5 years</button>
-          <button class="chip quickfill" data-fill="31.9,10,0," type="button">10 years</button>
-          <button class="chip quickfill" data-fill="56.8,15,0," type="button">15 years</button>
-          <button class="chip quickfill" data-fill="70,35,0," type="button">Adult 70 kg</button>
+          <button class="chip quickfill" data-fill="9.6,1,0," type="button">1 year · 9.6 kg</button>
+          <button class="chip quickfill" data-fill="18.3,5,0," type="button">5 years · 18.3 kg</button>
+          <button class="chip quickfill" data-fill="31.9,10,0," type="button">10 years · 31.9 kg</button>
+          <button class="chip quickfill" data-fill="56.8,15,0," type="button">15 years · 56.8 kg</button>
         </div>
       </div>
     </div>
 
-    <div class="panel" style="margin-top:12px">
-      <div class="ph"><h2>Immediate actions</h2></div>
+    <div class="panel">
+      <div class="ph"><h2>Emergency shortcuts</h2><span class="rt">one tap</span></div>
       <div class="pb">
         <div class="chips" style="padding:0;border:0;background:transparent">
-          <button class="chip goto" data-goto="p-arrest-adult" type="button">🫀 Adult arrest</button>
+          <button class="chip goto" data-goto="p-arrest-adult" type="button">🫀 Adult cardiac arrest</button>
           <button class="chip goto" data-goto="p-arrest-paed" type="button">🧒 Paediatric arrest</button>
           <button class="chip goto" data-goto="p-anaphylaxis" type="button">💉 Anaphylaxis</button>
           <button class="chip goto" data-goto="p-septic-shock" type="button">🩸 Septic shock</button>
@@ -609,8 +797,8 @@ body.dark .pumptabs button[aria-selected="true"]{background:#243447}
           <button class="chip goto" data-goto="p-op-poisoning" type="button">☠️ OP poisoning</button>
           <button class="chip goto" data-goto="p-dka" type="button">🍬 DKA</button>
           <button class="chip goto" data-goto="p-eclampsia" type="button">🤰 Eclampsia</button>
-          <button class="chip goto" data-goto="p-pph" type="button">🩸 PPH</button>
-          <button class="chip goto" data-goto="p-neonatal-resus" type="button">👶 Neonatal resus</button>
+          <button class="chip goto" data-goto="p-pph" type="button">🩸 Postpartum haemorrhage</button>
+          <button class="chip goto" data-goto="p-neonatal-resus" type="button">👶 Neonatal resuscitation</button>
           <button class="chip goto" data-goto="p-antidote-table" type="button">🧾 Antidote table</button>
           <button class="chip goto" data-goto="p-never-events" type="button">🚫 Never events</button>
         </div>
@@ -618,7 +806,7 @@ body.dark .pumptabs button[aria-selected="true"]{background:#243447}
     </div>
   </aside>
 
-  <!-- ============ RIGHT: tabs + content ============ -->
+  <!-- =========================== CONTENT =========================== -->
   <main>
     <div class="panel">
       <div id="tabs"></div>
@@ -632,7 +820,7 @@ body.dark .pumptabs button[aria-selected="true"]{background:#243447}
 </div>
 
 <footer class="foot">
-  <b>Paediatric &amp; Neonatal Drug Calculator</b> · self-contained offline HTML · no network calls, no data leaves this device.<br>
+  <b>Paediatric &amp; Neonatal Drug Calculator</b> · self-contained offline page · no network calls, no data leaves this device.<br>
   Doses are taken from the guideline cited on each entry (AHA/ERC 2025, WHO, NICE, KDIGO, IDSA, ESC, ACOG, ISCCM, IAP/NNF, NTEP, NVBDCP, MoHFW national protocols, BNF/BNFC, Sanford, Nelson, Marino, Tintinalli, Goldfrank, APLS).
   Indian formulation strengths, pack sizes and brand names reflect the IP/NFDC market and change over time — <b>always read the label on the product in your hand</b>.<br>
   Reported errors and discrepancies should be acted on immediately: an error you catch is an error the next clinician will not make.
@@ -6100,6 +6288,30 @@ function renderPatient(){
      ? '<b>'+fmtNum(ctx.kg,1)+' kg</b> · '+esc(ctx.pop?popLabel(ctx.pop):'age not entered')+(ctx.crCl!=null?' · CrCl '+fmtNum(ctx.crCl,0):'')
      : 'No patient entered';
 
+  /* phone/tablet strip: this is the "which patient am I looking at?" answer */
+  var pbar=$('#pbar'), pw=$('#pminiW'), pa2=$('#pminiA');
+  if(pbar && pw && pa2){
+    if(ctx.scopeMsg){
+      pbar.className='pbar nostate';
+      pw.textContent='—';
+      pa2.innerHTML=esc(ctx.scopeMsg);
+    } else if(ctx.kg!=null){
+      pbar.className='pbar'+(ctx.weightSource==='estimated'?' warnstate':'');
+      pw.textContent=fmtNum(ctx.kg,1)+' kg';
+      var bits=[];
+      bits.push(ctx.pop?popLabel(ctx.pop):'age not entered');
+      if(ctx.pmaWeeks!=null && ctx.isPreterm){ var pw2=Math.floor(ctx.pmaWeeks); var pd2=Math.round((ctx.pmaWeeks-pw2)*7); if(pd2===7){pw2++;pd2=0;}
+        bits.push('PMA '+pw2+'+'+pd2+' wk'); }
+      else if(ctx.ageDays!=null && ctx.ageDays<28 && ctx.gaLabel) bits.push('born '+esc(ctx.gaLabel)+' wk');
+      bits.push(ctx.weightSource==='measured'?'MEASURED':'ESTIMATED — verify');
+      pa2.textContent=bits.join(' · ');
+    } else {
+      pbar.className='pbar nostate';
+      pw.textContent='—';
+      pa2.textContent='No patient set — tap Patient to add a weight or age'+(ctx.ageDays!=null?'':'. Age alone is enough.');
+    }
+  }
+
   return ctx;
 }
 function wMethodLabel(m){
@@ -6143,38 +6355,50 @@ function pickItem(reg, out){
   return iv||its[0];
 }
 function summaryLine(reg, out, ctx){
+  /* The one line a clinician reads when the card is closed:
+       [ the volume to draw ]  ............  [ weight -> dose ]
+     Volume first (biggest thing on the line), the arithmetic quiet on the
+     right, then any flag that must not be missed. */
   if(!out) return '—';
-  if(!out.ok) return esc(truncStr(out.doseText||out.error||'no computable dose',120));
-  var it=pickItem(reg,out), s=[];
-  if(ctx.kg!=null) s.push(fmtNum(ctx.kg,1)+' kg →');
-  if(!it){ s.push(esc(truncStr((out.dose&&out.dose.text)||out.doseText||'',120))); return s.join(' '); }
-  var solid = it.form==='solid';
-  var dose = fmtNum(it.doseAmtLo)+
+  if(!out.ok) return '<span class="smA">'+esc(truncStr(out.doseText||out.error||'no computable dose',120))+'</span>';
+  var it=pickItem(reg,out), A='', B=[], flags=[];
+  var dose = it ? fmtNum(it.doseAmtLo)+
     (it.doseAmtHi!=null && Math.abs(it.doseAmtHi-it.doseAmtLo)>1e-9 ? '–'+fmtNum(it.doseAmtHi) : '')+
-    ' '+esc(it.doseUnit);
-  if(out.kind==='rate' && it.mlPerHrLo!=null){
-    s.push('<b>'+fmtVol(it.mlPerHrLo)+
-      (it.mlPerHrHi!=null&&Math.abs(it.mlPerHrHi-it.mlPerHrLo)>1e-9?'–'+fmtVol(it.mlPerHrHi):'')+
-      ' mL/h</b> of '+fmtNum(it.conc)+' '+esc(it.concUnit)+'/mL');
-  } else if(it.volLo!=null && !solid){
-    s.push(dose+' = <b>'+fmtVol(it.volLo)+
-      (it.volHi!=null&&Math.abs(it.volHi-it.volLo)>1e-9?'–'+fmtVol(it.volHi):'')+' '+esc(it.perUnit)+'</b>'+
-      ' of '+fmtNum(it.conc)+' '+esc(it.concUnit)+'/mL');
-  } else if(it.volLo!=null && solid){
-    s.push(dose+' = <b>'+fmtNum(it.volLo)+
-      (it.volHi!=null&&Math.abs(it.volHi-it.volLo)>1e-9?'–'+fmtNum(it.volHi):'')+
-      ' '+esc(it.perUnit==='unit'?'dosage unit':it.perUnit)+'</b>');
-    if(it.fractional) s.push('<span class="sumwarn">part of a unit — prefer a liquid</span>');
-  } else if(it.give){
-    s.push('<b>'+esc(it.give)+'</b>');
-  } else {
-    s.push(esc(truncStr((out.dose&&out.dose.text)||'',120)));
+    ' '+esc(it.doseUnit) : '';
+  if(ctx.kg!=null) B.push(fmtNum(ctx.kg,1)+' kg →');
+  if(!it){
+    A = esc(truncStr((out.dose&&out.dose.text)||out.doseText||'',120));
+    return '<span class="smA">'+A+'</span>';
   }
-  if(it.needsDilution) s.push('<span class="sumwarn">dilute first (&lt;0.1 mL)</span>');
-  if(out.capApplied) s.push('<span class="sumwarn">cap applied</span>');
+  var solid = it.form==='solid';
+  if(out.kind==='rate' && it.mlPerHrLo!=null){
+    A = '<b class="volx">'+fmtVol(it.mlPerHrLo)+
+      (it.mlPerHrHi!=null&&Math.abs(it.mlPerHrHi-it.mlPerHrLo)>1e-9?'–'+fmtVol(it.mlPerHrHi):'')+
+      ' mL/h</b> of '+fmtNum(it.conc)+' '+esc(it.concUnit)+'/mL';
+    B.push(dose);
+  } else if(it.volLo!=null && !solid){
+    A = '<b class="volx">'+fmtVol(it.volLo)+
+      (it.volHi!=null&&Math.abs(it.volHi-it.volLo)>1e-9?'–'+fmtVol(it.volHi):'')+' '+esc(it.perUnit)+'</b>'+
+      ' of '+fmtNum(it.conc)+' '+esc(it.concUnit)+'/mL';
+    B.push(dose);
+  } else if(it.volLo!=null && solid){
+    A = '<b class="volx">'+fmtNum(it.volLo)+
+      (it.volHi!=null&&Math.abs(it.volHi-it.volLo)>1e-9?'–'+fmtNum(it.volHi):'')+
+      ' '+esc(it.perUnit==='unit'?'dosage unit':it.perUnit)+'</b>';
+    B.push(dose);
+    if(it.fractional) flags.push('part of a unit — prefer a liquid');
+  } else if(it.give){
+    A = '<b class="volx">'+esc(it.give)+'</b>';
+  } else {
+    A = esc(truncStr((out.dose&&out.dose.text)||'',120));
+  }
+  if(it.needsDilution) flags.push('dilute first (&lt;0.1 mL)');
+  if(out.capApplied) flags.push('cap applied');
   var tf=(out.alerts||[]).filter(function(a){ return a.indexOf('TEN-FOLD')===0; }).length;
-  if(tf) s.push('<span class="sumwarn">⚠ '+tf+' ten-fold check'+(tf>1?'s':'')+'</span>');
-  return s.join(' ');
+  if(tf) flags.push('⚠ '+tf+' ten-fold check'+(tf>1?'s':''));
+  return '<span class="smA">'+A+'</span>'+
+    (B.length?'<span class="smB">'+B.join(' ')+'</span>':'')+
+    flags.map(function(f){ return '<span class="sumwarn">'+f+'</span>'; }).join('');
 }
 
 function renderCard(reg, ctx){
@@ -6197,12 +6421,13 @@ function renderCard(reg, ctx){
   Object.keys(routes).slice(0,4).forEach(function(r){ badges+='<span class="bdg b-route '+routeClass(r)+'">'+esc(r)+'</span>'; });
   if(reg.inf) badges+='<span class="bdg b-same">INFUSION</span>';
   if(dw.label!=='actual body weight') badges+='<span class="bdg b-same">'+esc(dw.label)+'</span>';
-  h.push('<div class="ch"><div style="min-width:0;flex:1"><div class="nm">'+esc(reg.n)+'</div>'+
+  h.push('<div class="ch"><div class="chead"><div class="nm">'+esc(reg.n)+'</div>'+
          '<div class="ind">'+esc(reg.ind||'')+'</div><div class="badges">'+badges+'</div></div>'+
          '<button class="star'+(ST.fav.has(reg.id)?' on':'')+'" data-fav="'+esc(reg.id)+'" '+
          'aria-pressed="'+ST.fav.has(reg.id)+'" title="Pin this drug to the top of its system">★</button></div>');
 
-  /* ---- dose ---- */
+  /* ---- the answer block: the dose and the volume to draw, fused ---- */
+  h.push('<div class="answer">');
   h.push('<div class="dose">');
   if(out.error && !out.ok && !out.dose && !out.doseText){
     h.push('<div class="dl">Dose</div><div class="dv" style="color:var(--crit);font-size:14px">'+esc(out.error)+'</div>');
@@ -6235,8 +6460,10 @@ function renderCard(reg, ctx){
   }
 
   /* ---- formulations & pump rates, collapsed behind the answer line ---- */
+  var nStrength = (out.items||[]).length;
   h.push('<details class="fxdet" data-id="'+esc(reg.id)+'"'+(open?' open':'')+'>'+
-         '<summary>'+summaryLine(reg,out,ctx)+' · <span style="opacity:.7">all strengths</span></summary>'+
+         '<summary>'+summaryLine(reg,out,ctx)+
+         (nStrength?'<span class="smH">'+nStrength+(nStrength===1?' strength':' strengths')+'</span>':'')+'</summary>'+
          '<div class="fxbody">');
   var items = out.items||[];
   if(items.length){
@@ -6303,8 +6530,14 @@ function renderCard(reg, ctx){
     h.push('</div>');
   }
   h.push('</div></details>');
+  h.push('</div>');   /* /answer */
 
-  /* ---- administration ---- */
+  /* ---- warnings stay visible; the rest of the card is on demand ---- */
+  if(reg.warn && reg.warn.length){
+    h.push('<div class="warnbox"><ul>'+reg.warn.map(function(w){return '<li>'+esc(w)+'</li>';}).join('')+'</ul></div>');
+  }
+  var cdLabel = 'Administration, dilution, class' + (rk>=4 ? ' and the independent double check' : '') + ', notes &amp; references';
+  h.push('<details class="cdet"><summary>'+cdLabel+'</summary><div class="inner">');
   h.push('<div class="cbody">');
   if(reg.admin) h.push('<div class="sec"><b>Administration</b>'+esc(reg.admin)+'</div>');
   if(reg.dil)   h.push('<div class="sec"><b>Dilution &amp; compatibility</b>'+esc(reg.dil)+'</div>');
@@ -6312,9 +6545,6 @@ function renderCard(reg, ctx){
   h.push('</div>');
 
   /* ---- warnings / notes / info ---- */
-  if(reg.warn && reg.warn.length){
-    h.push('<div class="warnbox"><ul>'+reg.warn.map(function(w){return '<li>'+esc(w)+'</li>';}).join('')+'</ul></div>');
-  }
   if(reg.notes && reg.notes.length){
     h.push('<div class="notebox"><ul>'+reg.notes.map(function(w){return '<li>'+esc(w)+'</li>';}).join('')+'</ul></div>');
   }
@@ -6346,6 +6576,7 @@ function renderCard(reg, ctx){
       return '<span class="tag refTag" data-ref="'+esc(k)+'" style="cursor:pointer">'+esc(REFS[k].n)+'</span>';
     }).join(' ')+'</div>');
   }
+  h.push('</div></details>');   /* /cdet */
   h.push('</article>');
   return h.join('');
 }
@@ -6370,20 +6601,21 @@ function renderToolbar(ctx){
   REG.forEach(function(r){ if(childScope(r) && r.cls) classes[r.cls]=1; });
   var ck=Object.keys(classes).sort();
   return '<div class="toolbar no-print">'+
-    '<div class="field grow search"><label for="q">Search drug, brand, indication</label>'+
-      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>'+
-      '<input id="q" type="text" value="'+esc(ST.q)+'" placeholder="e.g. adrenaline, amiodarone, Ceftriaxone, snakebite…" autocomplete="off"></div>'+
+    '<div class="field search"><label for="q">Search — drug, brand or indication</label>'+
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>'+
+      '<input id="q" type="text" value="'+esc(ST.q)+'" placeholder="adrenaline · amiodarone · Ceftriaxone · snakebite…" autocomplete="off"></div>'+
     '<div class="field"><label for="cls">Pharmacological class</label><select id="cls"><option value="">All classes ('+ck.length+')</option>'+
       ck.map(function(c){return '<option value="'+esc(c)+'"'+(ST.cls===c?' selected':'')+'>'+esc(c)+'</option>';}).join('')+'</select></div>'+
     '<div class="field"><label for="pop">Show population</label><select id="pop">'+
       [['','Auto (from age)'],['adult','Adolescent 16–18 y'],['paed','Child 1 mo–16 y'],['neo','Neonate <28 d']].map(function(o){
         return '<option value="'+o[0]+'"'+(ST.pop===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>'+
-    '<div class="field"><label>&nbsp;</label><div style="display:flex;gap:6px">'+
-      '<button class="chip risk" id="haOnly" aria-pressed="'+ST.highAlertOnly+'">High-alert only</button>'+
+    '<div class="frow" style="grid-column:1/-1">'+
+      '<button class="chip risk" id="haOnly" aria-pressed="'+ST.highAlertOnly+'">⚠ High-alert only</button>'+
       '<button class="chip" id="favOnly" aria-pressed="'+ST.favOnly+'" title="Only the drugs you pinned">★ Pinned'+(ST.fav.size?' ('+ST.fav.size+')':'')+'</button>'+
-      '<button class="chip" id="expAll">Expand all</button>'+
-      '<button class="chip" id="colAll">Collapse</button>'+
-    '</div></div>'+
+      '<button class="chip" id="expAll">⇕ Expand all strengths</button>'+
+      '<button class="chip" id="colAll">⇕ Collapse all</button>'+
+      '<span class="hint" style="margin-left:auto;font-size:var(--fs-1);color:var(--ink3)">Press <b>Ctrl</b>+<b>K</b> to jump straight to any drug, protocol or tool</span>'+
+    '</div>'+
   '</div>';
 }
 var TILES=[
@@ -6451,6 +6683,24 @@ function renderRecentInto(){
   var cx=document.getElementById('rcClear');
   if(cx) cx.addEventListener('click',function(){ ST.recent=[]; renderRecentInto(); queueSave(); });
 }
+/* ---- first-run prompt: one clear call to action instead of 171 refusals --- */
+function heroHtml(){
+  return '<div class="hero" id="heroPanel">'+
+    '<h2>Who are we dosing?</h2>'+
+    '<div class="hs">Enter a <b>weight</b> (best) or an <b>age</b>. Every regimen below then shows the dose <i>and</i> the volume to draw from each strength available in India. Nothing is guessed — an age-derived weight is flagged <b>ESTIMATED</b> on every card, and outside 24 weeks of gestation – 18 years the calculator refuses to print a dose at all.</div>'+
+    '<div class="hrow">'+
+      '<button class="btn herofill" type="button" data-fill="18.3,5,0,">5 years · 18.3 kg</button>'+
+      '<button class="btn ghost herofill" type="button" data-fill="9.6,1,0,">1 year · 9.6 kg</button>'+
+      '<button class="btn ghost herofill" type="button" data-fill="3.4,,0,7">Term newborn · 3.4 kg</button>'+
+      '<button class="btn ghost railopen" type="button">Open the patient panel</button>'+
+    '</div>'+
+    '<div class="steps">'+
+      '<div class="st"><b><span class="sn">1</span>Weigh if you can</b><span>A measured weight beats every formula. Type it in the panel — that is the only number the whole app leans on.</span></div>'+
+      '<div class="st"><b><span class="sn">2</span>Preterm? add the gestation</b><span>Born before 37 weeks switches dosing to <b>postmenstrual age</b>, estimates weight from the Fenton reference and shows the corrected age.</span></div>'+
+      '<div class="st"><b><span class="sn">3</span>Read the answer strip</b><span>Each card leads with the dose and the volume to draw. Open <i>all strengths</i> for the other formulations, and the detail line for administration and references.</span></div>'+
+    '</div>'+
+  '</div>';
+}
 function renderDrugs(ctx){
   var list = visibleRegs(ctx);
   if(ctx.scopeMsg){
@@ -6466,8 +6716,12 @@ function renderDrugs(ctx){
   if(ctx.weightAgeMsg){
     h.push('<div class="notebox warn" style="margin:0 0 9px"><b>⚠ WEIGHT–AGE MISMATCH — possible decimal-point error.</b> '+esc(ctx.weightAgeMsg)+'</div>');
   }
-  h.push('<div class="count"><b>'+list.length+'</b> regimen'+(list.length===1?'':'s')+' shown of '+REG.length+' · weight '+
-     (ctx.kg!=null?fmtNum(ctx.kg,1)+' kg ('+ctx.weightSource+')':'not set')+' · '+(ctx.pop?esc(popLabel(ctx.pop)):'population not determined')+
+  if(ctx.kg==null && ctx.ageDays==null){
+    h.push(heroHtml());
+  }
+  h.push('<div class="count"><b>'+list.length+'</b> of '+REG.length+' regimens'+
+     (ctx.kg!=null?' · dosing on '+fmtNum(ctx.kg,1)+' kg ('+ctx.weightSource+')':' · no weight yet')+
+     (ctx.pop?' · '+esc(popLabel(ctx.pop)):'')+
      ' <span class="printonly">· printed '+new Date().toLocaleString()+'</span></div>');
   if(!list.length){
     h.push('<div class="empty"><b>No regimen matches these filters</b>Try clearing the search box, choosing “All systems”, or switching the population filter.</div>');
@@ -7601,7 +7855,8 @@ var TAB_ICONS={drugs:'💊',pump:'💉',drip:'💧',protocols:'📋',utils:'🧮
 var TAB_SHORT={drugs:'Drugs',pump:'Pump',drip:'Drip',protocols:'Protocols',utils:'Calc',refs:'Refs',about:'About'};
 function renderTabs(){
   return '<div class="tabs no-print" role="tablist">'+TABS.map(function(t){
-    return '<button role="tab" data-tab="'+t[0]+'" aria-selected="'+(ST.tab===t[0])+'">'+esc(t[1])+'</button>';
+    return '<button role="tab" data-tab="'+t[0]+'" aria-selected="'+(ST.tab===t[0])+'">'+
+      '<span class="ti" aria-hidden="true">'+(TAB_ICONS[t[0]]||'•')+'</span>'+esc(t[1])+'</button>';
   }).join('')+'</div>'+
   '<nav class="btabs no-print" aria-label="Sections">'+TABS.map(function(t){
     return '<button data-tab="'+t[0]+'" aria-selected="'+(ST.tab===t[0])+'"><span class="bi">'+
@@ -7625,6 +7880,18 @@ function renderAll(){
   $('#tabs').innerHTML=renderTabs();
   renderContent();
   wireInner();
+  syncStick();
+}
+/* the sticky offsets must match the real rendered header, not a guess */
+function syncStick(){
+  try{
+    var t=$('.topbar'), sb=$('#safetyBanner');
+    var h=(t&&t.offsetHeight)?t.offsetHeight:56;
+    if(sb && sb.style.display!=='none' && sb.offsetHeight) h+=sb.offsetHeight;
+    document.documentElement.style.setProperty('--stick',h+'px');
+    var pb=$('#pbar');
+    if(pb && pb.offsetHeight) document.documentElement.style.setProperty('--h-pbar',pb.offsetHeight+'px');
+  }catch(e){}
 }
 
 /* ------------------------------------------------------------------ */
@@ -7663,6 +7930,17 @@ function wireInner(){
       ST.q=e.value; renderContent(); wireInner();
       var n=$('#'+pr[0]); if(n){ n.focus(); try{n.setSelectionRange(n.value.length,n.value.length);}catch(_){} }
     });
+  });
+  $$('#content .herofill[data-fill]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var v=(b.getAttribute('data-fill')||'').split(',');
+      ST.pt.wt=v[0]||''; ST.pt.ageY=v[1]||''; ST.pt.ageM=v[2]||''; ST.pt.ageD=v[3]||'';
+      syncPanel(); renderAll();
+      var kg=$('#p_wt')?$('#p_wt').value:''; toast('Patient set'+(kg?' — '+kg+' kg':' from age'));
+    });
+  });
+  $$('#content .railopen').forEach(function(b){
+    b.addEventListener('click',function(){ document.body.classList.add('rail-open'); var w=$('#p_wt'); if(w) w.focus(); });
   });
   var cl=$('#cls'); if(cl) cl.addEventListener('change',function(){ ST.cls=cl.value; renderContent(); wireInner(); });
   var po=$('#pop'); if(po) po.addEventListener('change',function(){ ST.pop=po.value; renderContent(); wireInner(); });
@@ -7849,7 +8127,7 @@ function wirePanel(){
   $('#btnPrint').addEventListener('click',function(){
     /* a collapsed card would print only its one-line answer, so open every
        strength table and safety block first, then put them back afterwards */
-    var closed = $$('.fxdet:not([open])').concat($$('details.moredet:not([open])'));
+    var closed = $$('.fxdet:not([open])').concat($$('details.moredet:not([open])')).concat($$('details.cdet:not([open])'));
     closed.forEach(function(x){ x.open=true; });
     var restore=function(){ closed.forEach(function(x){ x.open=false; });
       window.removeEventListener('afterprint',restore); };
@@ -8013,6 +8291,16 @@ function init(){
   window.addEventListener('scroll', onScroll, {passive:true});
   onScroll();
 
+  /* a printed sheet must carry every section, even the collapsed ones */
+  window.addEventListener('beforeprint',function(){
+    var shut=$$('details:not([open])');
+    shut.forEach(function(x){ x.open=true; });
+    window.addEventListener('afterprint',function once(){
+      shut.forEach(function(x){ x.open=false; });
+      window.removeEventListener('afterprint',once);
+    });
+  });
+
   /* ---- topbar preference buttons ---- */
   var bt=$('#btnTheme');
   if(bt) bt.addEventListener('click',function(){ ST.theme=(ST.theme==='dark'?'':'dark'); applyPrefs(); queueSave(); });
@@ -8022,6 +8310,14 @@ function init(){
   if(bp) bp.addEventListener('click',palOpen);
   var br=$('#btnRail');
   if(br) br.addEventListener('click',function(){ document.body.classList.toggle('rail-open'); });
+  var pe=$('#pEdit');
+  if(pe) pe.addEventListener('click',function(){ document.body.classList.add('rail-open'); });
+  var sx=$('#safetyX');
+  if(sx) sx.addEventListener('click',function(){
+    var b=$('#safetyBanner'); if(b) b.style.display='none';
+    document.documentElement.style.setProperty('--stick','0px');
+    toast('Safety notice hidden for this session');
+  });
   var mc=$('#metaCtx');
   if(mc){ mc.style.cursor='pointer'; mc.title='Open the patient panel';
     mc.addEventListener('click',function(){ document.body.classList.add('rail-open'); }); }

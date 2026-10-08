@@ -47,3 +47,14 @@ number it cannot verify, it will fail — that is the point.
 `data: ibuprofen PDA higher course for >72 h (NeoFax 2024, Cochrane 2023)`.
 
 Include the build hash from `python3 build.py` in the pull request body.
+
+## Before you open a pull request
+
+```bash
+bash qa/run.sh            # the five gates
+node tools/browser-check.js   # only if you touched markup, CSS or layout
+```
+
+`qa/run.sh` will skip the browser stage if no Chromium is installed; if you
+changed anything visual, install one (`google-chrome` or `chromium`) so the
+layout is actually checked, and say in the PR what you looked at.

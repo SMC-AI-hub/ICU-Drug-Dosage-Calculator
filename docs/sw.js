@@ -2,7 +2,7 @@
    Strategy: install-time precache of the whole app, then cache-first for
    every same-origin request. Foreign origins are never contacted, so the
    app keeps working with the radio off, in a lift, or in a bunker. */
-var CACHE = 'icu-calc-v86a5137d1f95';
+var CACHE = 'icu-calc-v338b17379cdf';
 var CORE = [
   './', './index.html', './manifest.webmanifest', './sw.js',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',

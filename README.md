@@ -8,6 +8,30 @@ from each strength available in India.
 
 ---
 
+## The interface
+
+Built for a ward, not a demo: one screen, answer first.
+
+* **Answer strip.** Every card leads with the dose **and** the volume to draw
+  (`0.183 mL of 1 mg/mL → 18.3 kg → 183 mcg`), then the strength count. The
+  full formulation table, administration, dilution, cross-checks and
+  references are one tap below — closed by default, so 160+ regimens stay
+  scannable instead of becoming a wall.
+* **Never a blank page.** With no patient entered the page opens on a
+  *Who are we dosing?* panel: one tap for a 5-year-old or a term newborn, or
+  type a weight. Below 24 weeks of gestation or past the 18th birthday it
+  refuses to print a dose at all rather than estimating one.
+* **Find anything in one keystroke.** `Ctrl`/`Cmd`+`K` (or 🔍) searches every
+  drug, brand, indication, protocol and tool; `/` jumps to the drug search.
+* **Phone-first.** A patient strip stays pinned at the top ("18.3 kg ·
+  Paediatric · MEASURED") and a bottom bar mirrors the seven sections.
+* **Night mode.** A real dark theme for a 3 a.m. ward round, plus a larger-text
+  toggle, both remembered on the device.
+* **Prints as a document.** The print button opens every section first, so the
+  sheet carries the full card — formulation table, volumes, warnings, the
+  independent double-check block with signature lines — and no card is split
+  across a page break.
+
 ## Install it (no internet needed after this)
 
 | You want | Do this |
@@ -76,11 +100,14 @@ tools/make_icons.py       regenerates every icon at exact pixel sizes
 ```bash
 npm ci                 # one dev dependency: jsdom
 python3 build.py       # bundles src/ -> docs/, gates the output, writes the zip
-npm test               # the four gates, exactly as CI runs them
+bash qa/run.sh         # the four gates, in order, exactly as CI runs them
 python3 serve.py 8000  # preview at http://localhost:8000
 ```
 
 ### The gates
+
+The full record of what has been verified, and the defects found by looking
+rather than assuming, is in [`QA_REPORT.md`](QA_REPORT.md).
 
 | Stage | What it proves |
 |---|---|
@@ -88,17 +115,43 @@ python3 serve.py 8000  # preview at http://localhost:8000
 | `build.py` | Every source parses, no placeholder survives, and the output contains **no external network reference** — the file is provably offline. |
 | `qa/pwa.js` | Manifest, icons at exact sizes, service worker, deep links, and that the standalone file is byte-identical to the built site. |
 | `qa/smoke.js` | 163 assertions driving the **built artefact** in a DOM: dosing, scope refusals, the preterm flow, the pump workspace, the line board, search, palette, CSV export. |
+| `tools/browser-check.js` | Runs the built file over `file://` in headless Chromium: it boots with no errors, the answer strip leads with the volume, out-of-scope patients are refused rather than dosed, a 28+3-weeker is dosed on postmenstrual age from Fenton, dark mode applies, and the phone layout (patient strip, seven-item bottom bar, no sideways scroll) holds. This is the gate that catches layout defects jsdom cannot see — it is how the sticky-origin and print-pagination bugs were found. Skips loudly if no Chromium is installed. |
 
 CI runs all four plus a bare `file://` boot with no storage and no service
 worker, and **only deploys to Pages if every one of them passes**.
 
 ## Deployment
 
-Pushing to `main` runs the gates and publishes `docs/` to GitHub Pages
-(`.github/workflows/qa-and-deploy.yml`). One settings click is required the
-first time:
+Two ways to be live. Route A is instant and needs no token; Route B is the
+fully automated gated pipeline.
 
-> **Settings → Pages → Build and deployment → Source: GitHub Actions**
+**A — Pages from a branch (no token, live in about a minute)**
+
+1. **Settings → Pages → Build and deployment → Source: _Deploy from a branch_**
+2. Branch **`main`**, folder **`/docs`** → **Save**
+
+Live at <https://smc-ai-hub.github.io/ICU-Drug-Dosage-Calculator/>.
+The app is installable from that link (Chrome/Edge: *Install app*; Safari:
+*Add to Home Screen*). Keep `.github/workflows/qa-and-deploy.yml` out of the
+repository while the source is a branch — its deploy job can only publish when
+the source is *GitHub Actions*, so it would show a red cross for no reason.
+
+**B — GitHub Actions (gates every push, then publishes)**
+
+Requires the workflow file to be on `main`, which GitHub only accepts from a
+token with the **Workflows: Read and write** permission (or by creating the
+file in the browser):
+
+1. Push `.github/workflows/qa-and-deploy.yml` (or add it via
+   *Add file → Create new file*, pasting the file's contents).
+2. **Settings → Pages → Source: _GitHub Actions_**.
+3. Push to `main`. The `qa` job runs all four gates — numerical validation,
+   the offline/installable gate, the DOM smoke test and the bare-`file://`
+   boot — and the `deploy` job runs **only** after they pass.
+
+**A red gate publishes nothing.** The previously deployed version keeps
+serving, so a broken build can never replace a working one.
+
 
 ## Licence
 

@@ -287,6 +287,30 @@ function renderPatient(){
      ? '<b>'+fmtNum(ctx.kg,1)+' kg</b> · '+esc(ctx.pop?popLabel(ctx.pop):'age not entered')+(ctx.crCl!=null?' · CrCl '+fmtNum(ctx.crCl,0):'')
      : 'No patient entered';
 
+  /* phone/tablet strip: this is the "which patient am I looking at?" answer */
+  var pbar=$('#pbar'), pw=$('#pminiW'), pa2=$('#pminiA');
+  if(pbar && pw && pa2){
+    if(ctx.scopeMsg){
+      pbar.className='pbar nostate';
+      pw.textContent='—';
+      pa2.innerHTML=esc(ctx.scopeMsg);
+    } else if(ctx.kg!=null){
+      pbar.className='pbar'+(ctx.weightSource==='estimated'?' warnstate':'');
+      pw.textContent=fmtNum(ctx.kg,1)+' kg';
+      var bits=[];
+      bits.push(ctx.pop?popLabel(ctx.pop):'age not entered');
+      if(ctx.pmaWeeks!=null && ctx.isPreterm){ var pw2=Math.floor(ctx.pmaWeeks); var pd2=Math.round((ctx.pmaWeeks-pw2)*7); if(pd2===7){pw2++;pd2=0;}
+        bits.push('PMA '+pw2+'+'+pd2+' wk'); }
+      else if(ctx.ageDays!=null && ctx.ageDays<28 && ctx.gaLabel) bits.push('born '+esc(ctx.gaLabel)+' wk');
+      bits.push(ctx.weightSource==='measured'?'MEASURED':'ESTIMATED — verify');
+      pa2.textContent=bits.join(' · ');
+    } else {
+      pbar.className='pbar nostate';
+      pw.textContent='—';
+      pa2.textContent='No patient set — tap Patient to add a weight or age'+(ctx.ageDays!=null?'':'. Age alone is enough.');
+    }
+  }
+
   return ctx;
 }
 function wMethodLabel(m){
@@ -330,38 +354,50 @@ function pickItem(reg, out){
   return iv||its[0];
 }
 function summaryLine(reg, out, ctx){
+  /* The one line a clinician reads when the card is closed:
+       [ the volume to draw ]  ............  [ weight -> dose ]
+     Volume first (biggest thing on the line), the arithmetic quiet on the
+     right, then any flag that must not be missed. */
   if(!out) return '—';
-  if(!out.ok) return esc(truncStr(out.doseText||out.error||'no computable dose',120));
-  var it=pickItem(reg,out), s=[];
-  if(ctx.kg!=null) s.push(fmtNum(ctx.kg,1)+' kg →');
-  if(!it){ s.push(esc(truncStr((out.dose&&out.dose.text)||out.doseText||'',120))); return s.join(' '); }
-  var solid = it.form==='solid';
-  var dose = fmtNum(it.doseAmtLo)+
+  if(!out.ok) return '<span class="smA">'+esc(truncStr(out.doseText||out.error||'no computable dose',120))+'</span>';
+  var it=pickItem(reg,out), A='', B=[], flags=[];
+  var dose = it ? fmtNum(it.doseAmtLo)+
     (it.doseAmtHi!=null && Math.abs(it.doseAmtHi-it.doseAmtLo)>1e-9 ? '–'+fmtNum(it.doseAmtHi) : '')+
-    ' '+esc(it.doseUnit);
-  if(out.kind==='rate' && it.mlPerHrLo!=null){
-    s.push('<b>'+fmtVol(it.mlPerHrLo)+
-      (it.mlPerHrHi!=null&&Math.abs(it.mlPerHrHi-it.mlPerHrLo)>1e-9?'–'+fmtVol(it.mlPerHrHi):'')+
-      ' mL/h</b> of '+fmtNum(it.conc)+' '+esc(it.concUnit)+'/mL');
-  } else if(it.volLo!=null && !solid){
-    s.push(dose+' = <b>'+fmtVol(it.volLo)+
-      (it.volHi!=null&&Math.abs(it.volHi-it.volLo)>1e-9?'–'+fmtVol(it.volHi):'')+' '+esc(it.perUnit)+'</b>'+
-      ' of '+fmtNum(it.conc)+' '+esc(it.concUnit)+'/mL');
-  } else if(it.volLo!=null && solid){
-    s.push(dose+' = <b>'+fmtNum(it.volLo)+
-      (it.volHi!=null&&Math.abs(it.volHi-it.volLo)>1e-9?'–'+fmtNum(it.volHi):'')+
-      ' '+esc(it.perUnit==='unit'?'dosage unit':it.perUnit)+'</b>');
-    if(it.fractional) s.push('<span class="sumwarn">part of a unit — prefer a liquid</span>');
-  } else if(it.give){
-    s.push('<b>'+esc(it.give)+'</b>');
-  } else {
-    s.push(esc(truncStr((out.dose&&out.dose.text)||'',120)));
+    ' '+esc(it.doseUnit) : '';
+  if(ctx.kg!=null) B.push(fmtNum(ctx.kg,1)+' kg →');
+  if(!it){
+    A = esc(truncStr((out.dose&&out.dose.text)||out.doseText||'',120));
+    return '<span class="smA">'+A+'</span>';
   }
-  if(it.needsDilution) s.push('<span class="sumwarn">dilute first (&lt;0.1 mL)</span>');
-  if(out.capApplied) s.push('<span class="sumwarn">cap applied</span>');
+  var solid = it.form==='solid';
+  if(out.kind==='rate' && it.mlPerHrLo!=null){
+    A = '<b class="volx">'+fmtVol(it.mlPerHrLo)+
+      (it.mlPerHrHi!=null&&Math.abs(it.mlPerHrHi-it.mlPerHrLo)>1e-9?'–'+fmtVol(it.mlPerHrHi):'')+
+      ' mL/h</b> of '+fmtNum(it.conc)+' '+esc(it.concUnit)+'/mL';
+    B.push(dose);
+  } else if(it.volLo!=null && !solid){
+    A = '<b class="volx">'+fmtVol(it.volLo)+
+      (it.volHi!=null&&Math.abs(it.volHi-it.volLo)>1e-9?'–'+fmtVol(it.volHi):'')+' '+esc(it.perUnit)+'</b>'+
+      ' of '+fmtNum(it.conc)+' '+esc(it.concUnit)+'/mL';
+    B.push(dose);
+  } else if(it.volLo!=null && solid){
+    A = '<b class="volx">'+fmtNum(it.volLo)+
+      (it.volHi!=null&&Math.abs(it.volHi-it.volLo)>1e-9?'–'+fmtNum(it.volHi):'')+
+      ' '+esc(it.perUnit==='unit'?'dosage unit':it.perUnit)+'</b>';
+    B.push(dose);
+    if(it.fractional) flags.push('part of a unit — prefer a liquid');
+  } else if(it.give){
+    A = '<b class="volx">'+esc(it.give)+'</b>';
+  } else {
+    A = esc(truncStr((out.dose&&out.dose.text)||'',120));
+  }
+  if(it.needsDilution) flags.push('dilute first (&lt;0.1 mL)');
+  if(out.capApplied) flags.push('cap applied');
   var tf=(out.alerts||[]).filter(function(a){ return a.indexOf('TEN-FOLD')===0; }).length;
-  if(tf) s.push('<span class="sumwarn">⚠ '+tf+' ten-fold check'+(tf>1?'s':'')+'</span>');
-  return s.join(' ');
+  if(tf) flags.push('⚠ '+tf+' ten-fold check'+(tf>1?'s':''));
+  return '<span class="smA">'+A+'</span>'+
+    (B.length?'<span class="smB">'+B.join(' ')+'</span>':'')+
+    flags.map(function(f){ return '<span class="sumwarn">'+f+'</span>'; }).join('');
 }
 
 function renderCard(reg, ctx){
@@ -384,12 +420,13 @@ function renderCard(reg, ctx){
   Object.keys(routes).slice(0,4).forEach(function(r){ badges+='<span class="bdg b-route '+routeClass(r)+'">'+esc(r)+'</span>'; });
   if(reg.inf) badges+='<span class="bdg b-same">INFUSION</span>';
   if(dw.label!=='actual body weight') badges+='<span class="bdg b-same">'+esc(dw.label)+'</span>';
-  h.push('<div class="ch"><div style="min-width:0;flex:1"><div class="nm">'+esc(reg.n)+'</div>'+
+  h.push('<div class="ch"><div class="chead"><div class="nm">'+esc(reg.n)+'</div>'+
          '<div class="ind">'+esc(reg.ind||'')+'</div><div class="badges">'+badges+'</div></div>'+
          '<button class="star'+(ST.fav.has(reg.id)?' on':'')+'" data-fav="'+esc(reg.id)+'" '+
          'aria-pressed="'+ST.fav.has(reg.id)+'" title="Pin this drug to the top of its system">★</button></div>');
 
-  /* ---- dose ---- */
+  /* ---- the answer block: the dose and the volume to draw, fused ---- */
+  h.push('<div class="answer">');
   h.push('<div class="dose">');
   if(out.error && !out.ok && !out.dose && !out.doseText){
     h.push('<div class="dl">Dose</div><div class="dv" style="color:var(--crit);font-size:14px">'+esc(out.error)+'</div>');
@@ -422,8 +459,10 @@ function renderCard(reg, ctx){
   }
 
   /* ---- formulations & pump rates, collapsed behind the answer line ---- */
+  var nStrength = (out.items||[]).length;
   h.push('<details class="fxdet" data-id="'+esc(reg.id)+'"'+(open?' open':'')+'>'+
-         '<summary>'+summaryLine(reg,out,ctx)+' · <span style="opacity:.7">all strengths</span></summary>'+
+         '<summary>'+summaryLine(reg,out,ctx)+
+         (nStrength?'<span class="smH">'+nStrength+(nStrength===1?' strength':' strengths')+'</span>':'')+'</summary>'+
          '<div class="fxbody">');
   var items = out.items||[];
   if(items.length){
@@ -490,8 +529,14 @@ function renderCard(reg, ctx){
     h.push('</div>');
   }
   h.push('</div></details>');
+  h.push('</div>');   /* /answer */
 
-  /* ---- administration ---- */
+  /* ---- warnings stay visible; the rest of the card is on demand ---- */
+  if(reg.warn && reg.warn.length){
+    h.push('<div class="warnbox"><ul>'+reg.warn.map(function(w){return '<li>'+esc(w)+'</li>';}).join('')+'</ul></div>');
+  }
+  var cdLabel = 'Administration, dilution, class' + (rk>=4 ? ' and the independent double check' : '') + ', notes &amp; references';
+  h.push('<details class="cdet"><summary>'+cdLabel+'</summary><div class="inner">');
   h.push('<div class="cbody">');
   if(reg.admin) h.push('<div class="sec"><b>Administration</b>'+esc(reg.admin)+'</div>');
   if(reg.dil)   h.push('<div class="sec"><b>Dilution &amp; compatibility</b>'+esc(reg.dil)+'</div>');
@@ -499,9 +544,6 @@ function renderCard(reg, ctx){
   h.push('</div>');
 
   /* ---- warnings / notes / info ---- */
-  if(reg.warn && reg.warn.length){
-    h.push('<div class="warnbox"><ul>'+reg.warn.map(function(w){return '<li>'+esc(w)+'</li>';}).join('')+'</ul></div>');
-  }
   if(reg.notes && reg.notes.length){
     h.push('<div class="notebox"><ul>'+reg.notes.map(function(w){return '<li>'+esc(w)+'</li>';}).join('')+'</ul></div>');
   }
@@ -533,6 +575,7 @@ function renderCard(reg, ctx){
       return '<span class="tag refTag" data-ref="'+esc(k)+'" style="cursor:pointer">'+esc(REFS[k].n)+'</span>';
     }).join(' ')+'</div>');
   }
+  h.push('</div></details>');   /* /cdet */
   h.push('</article>');
   return h.join('');
 }
@@ -557,20 +600,21 @@ function renderToolbar(ctx){
   REG.forEach(function(r){ if(childScope(r) && r.cls) classes[r.cls]=1; });
   var ck=Object.keys(classes).sort();
   return '<div class="toolbar no-print">'+
-    '<div class="field grow search"><label for="q">Search drug, brand, indication</label>'+
-      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>'+
-      '<input id="q" type="text" value="'+esc(ST.q)+'" placeholder="e.g. adrenaline, amiodarone, Ceftriaxone, snakebite…" autocomplete="off"></div>'+
+    '<div class="field search"><label for="q">Search — drug, brand or indication</label>'+
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>'+
+      '<input id="q" type="text" value="'+esc(ST.q)+'" placeholder="adrenaline · amiodarone · Ceftriaxone · snakebite…" autocomplete="off"></div>'+
     '<div class="field"><label for="cls">Pharmacological class</label><select id="cls"><option value="">All classes ('+ck.length+')</option>'+
       ck.map(function(c){return '<option value="'+esc(c)+'"'+(ST.cls===c?' selected':'')+'>'+esc(c)+'</option>';}).join('')+'</select></div>'+
     '<div class="field"><label for="pop">Show population</label><select id="pop">'+
       [['','Auto (from age)'],['adult','Adolescent 16–18 y'],['paed','Child 1 mo–16 y'],['neo','Neonate <28 d']].map(function(o){
         return '<option value="'+o[0]+'"'+(ST.pop===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select></div>'+
-    '<div class="field"><label>&nbsp;</label><div style="display:flex;gap:6px">'+
-      '<button class="chip risk" id="haOnly" aria-pressed="'+ST.highAlertOnly+'">High-alert only</button>'+
+    '<div class="frow" style="grid-column:1/-1">'+
+      '<button class="chip risk" id="haOnly" aria-pressed="'+ST.highAlertOnly+'">⚠ High-alert only</button>'+
       '<button class="chip" id="favOnly" aria-pressed="'+ST.favOnly+'" title="Only the drugs you pinned">★ Pinned'+(ST.fav.size?' ('+ST.fav.size+')':'')+'</button>'+
-      '<button class="chip" id="expAll">Expand all</button>'+
-      '<button class="chip" id="colAll">Collapse</button>'+
-    '</div></div>'+
+      '<button class="chip" id="expAll">⇕ Expand all strengths</button>'+
+      '<button class="chip" id="colAll">⇕ Collapse all</button>'+
+      '<span class="hint" style="margin-left:auto;font-size:var(--fs-1);color:var(--ink3)">Press <b>Ctrl</b>+<b>K</b> to jump straight to any drug, protocol or tool</span>'+
+    '</div>'+
   '</div>';
 }
 var TILES=[
@@ -638,6 +682,24 @@ function renderRecentInto(){
   var cx=document.getElementById('rcClear');
   if(cx) cx.addEventListener('click',function(){ ST.recent=[]; renderRecentInto(); queueSave(); });
 }
+/* ---- first-run prompt: one clear call to action instead of 171 refusals --- */
+function heroHtml(){
+  return '<div class="hero" id="heroPanel">'+
+    '<h2>Who are we dosing?</h2>'+
+    '<div class="hs">Enter a <b>weight</b> (best) or an <b>age</b>. Every regimen below then shows the dose <i>and</i> the volume to draw from each strength available in India. Nothing is guessed — an age-derived weight is flagged <b>ESTIMATED</b> on every card, and outside 24 weeks of gestation – 18 years the calculator refuses to print a dose at all.</div>'+
+    '<div class="hrow">'+
+      '<button class="btn herofill" type="button" data-fill="18.3,5,0,">5 years · 18.3 kg</button>'+
+      '<button class="btn ghost herofill" type="button" data-fill="9.6,1,0,">1 year · 9.6 kg</button>'+
+      '<button class="btn ghost herofill" type="button" data-fill="3.4,,0,7">Term newborn · 3.4 kg</button>'+
+      '<button class="btn ghost railopen" type="button">Open the patient panel</button>'+
+    '</div>'+
+    '<div class="steps">'+
+      '<div class="st"><b><span class="sn">1</span>Weigh if you can</b><span>A measured weight beats every formula. Type it in the panel — that is the only number the whole app leans on.</span></div>'+
+      '<div class="st"><b><span class="sn">2</span>Preterm? add the gestation</b><span>Born before 37 weeks switches dosing to <b>postmenstrual age</b>, estimates weight from the Fenton reference and shows the corrected age.</span></div>'+
+      '<div class="st"><b><span class="sn">3</span>Read the answer strip</b><span>Each card leads with the dose and the volume to draw. Open <i>all strengths</i> for the other formulations, and the detail line for administration and references.</span></div>'+
+    '</div>'+
+  '</div>';
+}
 function renderDrugs(ctx){
   var list = visibleRegs(ctx);
   if(ctx.scopeMsg){
@@ -653,8 +715,12 @@ function renderDrugs(ctx){
   if(ctx.weightAgeMsg){
     h.push('<div class="notebox warn" style="margin:0 0 9px"><b>⚠ WEIGHT–AGE MISMATCH — possible decimal-point error.</b> '+esc(ctx.weightAgeMsg)+'</div>');
   }
-  h.push('<div class="count"><b>'+list.length+'</b> regimen'+(list.length===1?'':'s')+' shown of '+REG.length+' · weight '+
-     (ctx.kg!=null?fmtNum(ctx.kg,1)+' kg ('+ctx.weightSource+')':'not set')+' · '+(ctx.pop?esc(popLabel(ctx.pop)):'population not determined')+
+  if(ctx.kg==null && ctx.ageDays==null){
+    h.push(heroHtml());
+  }
+  h.push('<div class="count"><b>'+list.length+'</b> of '+REG.length+' regimens'+
+     (ctx.kg!=null?' · dosing on '+fmtNum(ctx.kg,1)+' kg ('+ctx.weightSource+')':' · no weight yet')+
+     (ctx.pop?' · '+esc(popLabel(ctx.pop)):'')+
      ' <span class="printonly">· printed '+new Date().toLocaleString()+'</span></div>');
   if(!list.length){
     h.push('<div class="empty"><b>No regimen matches these filters</b>Try clearing the search box, choosing “All systems”, or switching the population filter.</div>');
@@ -1788,7 +1854,8 @@ var TAB_ICONS={drugs:'💊',pump:'💉',drip:'💧',protocols:'📋',utils:'🧮
 var TAB_SHORT={drugs:'Drugs',pump:'Pump',drip:'Drip',protocols:'Protocols',utils:'Calc',refs:'Refs',about:'About'};
 function renderTabs(){
   return '<div class="tabs no-print" role="tablist">'+TABS.map(function(t){
-    return '<button role="tab" data-tab="'+t[0]+'" aria-selected="'+(ST.tab===t[0])+'">'+esc(t[1])+'</button>';
+    return '<button role="tab" data-tab="'+t[0]+'" aria-selected="'+(ST.tab===t[0])+'">'+
+      '<span class="ti" aria-hidden="true">'+(TAB_ICONS[t[0]]||'•')+'</span>'+esc(t[1])+'</button>';
   }).join('')+'</div>'+
   '<nav class="btabs no-print" aria-label="Sections">'+TABS.map(function(t){
     return '<button data-tab="'+t[0]+'" aria-selected="'+(ST.tab===t[0])+'"><span class="bi">'+
@@ -1812,6 +1879,18 @@ function renderAll(){
   $('#tabs').innerHTML=renderTabs();
   renderContent();
   wireInner();
+  syncStick();
+}
+/* the sticky offsets must match the real rendered header, not a guess */
+function syncStick(){
+  try{
+    var t=$('.topbar'), sb=$('#safetyBanner');
+    var h=(t&&t.offsetHeight)?t.offsetHeight:56;
+    if(sb && sb.style.display!=='none' && sb.offsetHeight) h+=sb.offsetHeight;
+    document.documentElement.style.setProperty('--stick',h+'px');
+    var pb=$('#pbar');
+    if(pb && pb.offsetHeight) document.documentElement.style.setProperty('--h-pbar',pb.offsetHeight+'px');
+  }catch(e){}
 }
 
 /* ------------------------------------------------------------------ */
@@ -1850,6 +1929,17 @@ function wireInner(){
       ST.q=e.value; renderContent(); wireInner();
       var n=$('#'+pr[0]); if(n){ n.focus(); try{n.setSelectionRange(n.value.length,n.value.length);}catch(_){} }
     });
+  });
+  $$('#content .herofill[data-fill]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var v=(b.getAttribute('data-fill')||'').split(',');
+      ST.pt.wt=v[0]||''; ST.pt.ageY=v[1]||''; ST.pt.ageM=v[2]||''; ST.pt.ageD=v[3]||'';
+      syncPanel(); renderAll();
+      var kg=$('#p_wt')?$('#p_wt').value:''; toast('Patient set'+(kg?' — '+kg+' kg':' from age'));
+    });
+  });
+  $$('#content .railopen').forEach(function(b){
+    b.addEventListener('click',function(){ document.body.classList.add('rail-open'); var w=$('#p_wt'); if(w) w.focus(); });
   });
   var cl=$('#cls'); if(cl) cl.addEventListener('change',function(){ ST.cls=cl.value; renderContent(); wireInner(); });
   var po=$('#pop'); if(po) po.addEventListener('change',function(){ ST.pop=po.value; renderContent(); wireInner(); });
@@ -2036,7 +2126,7 @@ function wirePanel(){
   $('#btnPrint').addEventListener('click',function(){
     /* a collapsed card would print only its one-line answer, so open every
        strength table and safety block first, then put them back afterwards */
-    var closed = $$('.fxdet:not([open])').concat($$('details.moredet:not([open])'));
+    var closed = $$('.fxdet:not([open])').concat($$('details.moredet:not([open])')).concat($$('details.cdet:not([open])'));
     closed.forEach(function(x){ x.open=true; });
     var restore=function(){ closed.forEach(function(x){ x.open=false; });
       window.removeEventListener('afterprint',restore); };
@@ -2200,6 +2290,16 @@ function init(){
   window.addEventListener('scroll', onScroll, {passive:true});
   onScroll();
 
+  /* a printed sheet must carry every section, even the collapsed ones */
+  window.addEventListener('beforeprint',function(){
+    var shut=$$('details:not([open])');
+    shut.forEach(function(x){ x.open=true; });
+    window.addEventListener('afterprint',function once(){
+      shut.forEach(function(x){ x.open=false; });
+      window.removeEventListener('afterprint',once);
+    });
+  });
+
   /* ---- topbar preference buttons ---- */
   var bt=$('#btnTheme');
   if(bt) bt.addEventListener('click',function(){ ST.theme=(ST.theme==='dark'?'':'dark'); applyPrefs(); queueSave(); });
@@ -2209,6 +2309,14 @@ function init(){
   if(bp) bp.addEventListener('click',palOpen);
   var br=$('#btnRail');
   if(br) br.addEventListener('click',function(){ document.body.classList.toggle('rail-open'); });
+  var pe=$('#pEdit');
+  if(pe) pe.addEventListener('click',function(){ document.body.classList.add('rail-open'); });
+  var sx=$('#safetyX');
+  if(sx) sx.addEventListener('click',function(){
+    var b=$('#safetyBanner'); if(b) b.style.display='none';
+    document.documentElement.style.setProperty('--stick','0px');
+    toast('Safety notice hidden for this session');
+  });
   var mc=$('#metaCtx');
   if(mc){ mc.style.cursor='pointer'; mc.title='Open the patient panel';
     mc.addEventListener('click',function(){ document.body.classList.add('rail-open'); }); }
