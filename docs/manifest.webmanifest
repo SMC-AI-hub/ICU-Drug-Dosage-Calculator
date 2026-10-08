@@ -1,0 +1,85 @@
+{
+  "name": "Paediatric & Neonatal Drug Calculator — 24 weeks to 18 years",
+  "short_name": "Paeds Doses",
+  "description": "Offline paediatric and neonatal drug calculator, 24 weeks of gestation to 18 years: postmenstrual-age dosing for preterm infants, Fenton/WHO weight estimation, Indian formulations with mg/mL concentrations for IV and oral routes, enforced dose caps, pump-rate and infusion-board checks, and guideline references.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "any",
+  "background_color": "#0b5394",
+  "theme_color": "#0b5394",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": [
+    "medical",
+    "health",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Infusion pump rates",
+      "short_name": "Pump",
+      "url": "./?tab=pump",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Emergency protocols",
+      "short_name": "Protocols",
+      "url": "./?tab=protocols",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Calculators (CrCl, fluids, sodium)",
+      "short_name": "Calculators",
+      "url": "./?tab=utils",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

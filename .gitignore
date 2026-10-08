@@ -1,0 +1,17 @@
+# dependencies and build caches (never committed)
+node_modules/
+__pycache__/
+*.pyc
+.cache/
+
+# generated at build time — the site is rebuilt in CI and committed for
+# "open it straight from the repo" convenience, so these stay tracked:
+#   docs/standalone.html, docs/index.html, docs/Paediatric-Drug-Calculator.html
+#   docs/manifest.webmanifest, docs/sw.js, docs/icons/
+# the distribution zip is a release artefact, not source
+Paediatric-Drug-Calculator-offline.zip
+
+# editor / OS noise
+.DS_Store
+Thumbs.db
+*.swp

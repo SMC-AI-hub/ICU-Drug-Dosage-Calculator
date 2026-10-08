@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="description" content="Offline ICU emergency drug calculator for Indian practice: age- or weight-driven dosing, Indian formulations with mg/mL concentrations for IV and oral routes, system-wise and class-wise grouping, guideline references, enforced dose caps and high-alert double-check blocks.">
+<title>Paediatric &amp; Neonatal Drug Calculator — 24 weeks to 18 years</title>
+<style>/*__CSS__*/</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+      <rect x="1" y="1" width="30" height="30" rx="7" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.5)" stroke-width="1.4"/>
+      <path d="M16 7v18M7 16h18" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>
+      <path d="M4 23h5l2-4 3 8 2.6-6 1.8 3H28" stroke="#9fd0ff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <h1>Paediatric &amp; Neonatal Drug Calculator</h1>
+      <div class="sub">24 weeks of gestation to 18 years · Indian formulations · guideline-referenced · dose- and volume-verified</div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <div class="meta">
+    <div id="metaCtx">No patient entered</div>
+    <div class="noprint">Offline build <span class="mono">/*__BUILD__*/</span></div>
+  </div>
+  <button class="tbtn icon" id="btnRail" type="button" title="Patient panel & emergency shortcuts">☰</button>
+  <button class="tbtn icon" id="btnPal" type="button" title="Jump to any drug, protocol or tool (Ctrl+K)">🔍</button>
+  <button class="tbtn icon" id="btnType" type="button" title="Larger text on/off">Aa</button>
+  <button class="tbtn icon" id="btnTheme" type="button" title="Dark / light theme">◐</button>
+  <button class="tbtn" id="btnPrint" type="button">🖨 Print sheet</button>
+  <button class="tbtn" id="btnCsv" type="button">⬇ Export CSV</button>
+  <button class="tbtn" id="btnAbout" type="button">ℹ About &amp; safety</button>
+</header>
+
+<div class="safety">
+  <span><b>⚠ CLINICAL DECISION SUPPORT — NOT A PRESCRIPTION.</b>
+  Verify the drug, the concentration on the vial in your hand and the calculated volume against your institutional protocol before administration.
+  High-alert drugs (red border) require an <b>independent double check</b> by two practitioners.
+  Weigh the patient whenever possible — a weight estimated from age can be wrong by 20–30%.</span>
+</div>
+
+<div class="wrap">
+
+  <!-- ============ LEFT: patient panel ============ -->
+  <aside>
+    <div class="panel sticky">
+      <div class="ph"><h2>Patient</h2><span class="rt">24 weeks to 18 years</span></div>
+      <div class="pb">
+        <div class="row" style="margin-bottom:8px">
+          <div class="field" style="flex:1 1 100%">
+            <label for="p_wt">Weight (kg) — use this if known</label>
+            <input id="p_wt" type="number" step="0.01" min="0" max="200" inputmode="decimal" placeholder="e.g. 3.4">
+            <span class="hint">Always preferred over an estimate — weigh every child if you can.</span>
+            <div class="row" style="margin-top:6px;gap:6px">
+              <button class="chip" type="button" id="btnDemo70">4-year-old, 16 kg</button>
+              <button class="chip" type="button" id="btnDemoPreterm">28+3 preterm, 14 days</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-bottom:8px">
+          <div class="field" style="flex:1 1 62px"><label for="p_ageY">Years</label>
+            <input id="p_ageY" type="number" step="1" min="0" max="120" inputmode="numeric" placeholder="0"></div>
+          <div class="field" style="flex:1 1 62px"><label for="p_ageM">Months</label>
+            <input id="p_ageM" type="number" step="1" min="0" max="11" inputmode="numeric" placeholder="0"></div>
+          <div class="field" style="flex:1 1 62px"><label for="p_ageD">Days</label>
+            <input id="p_ageD" type="number" step="1" min="0" max="30" inputmode="numeric" placeholder="0"></div>
+        </div>
+
+        <div class="row" style="margin-bottom:8px">
+          <div class="field" style="flex:1 1 46%">
+            <label for="p_gaW" title="Gestational age AT BIRTH — needed for every preterm infant">Born at (weeks)</label>
+            <input id="p_gaW" type="number" step="1" min="24" max="42" inputmode="numeric" placeholder="e.g. 28">
+          </div>
+          <div class="field" style="flex:1 1 46%">
+            <label for="p_gaD">… + days</label>
+            <input id="p_gaD" type="number" step="1" min="0" max="6" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+        <div class="hint" style="margin:-4px 0 8px">For every baby born before 37 weeks: the app then doses on
+          <b>postmenstrual age</b>, estimates weight from the Fenton reference and shows the <b>corrected age</b>.</div>
+
+        <div class="row" style="margin-bottom:8px">
+          <div class="field" style="flex:1 1 46%">
+            <label for="p_sex">Sex (affects weight estimate &amp; IBW)</label>
+            <select id="p_sex"><option value="male">Male</option><option value="female">Female</option></select>
+          </div>
+          <div class="field" style="flex:1 1 46%">
+            <label for="p_wm">Weight-estimation method</label>
+            <select id="p_wm">
+              <option value="who">WHO median (most accurate)</option>
+              <option value="apls">APLS formula</option>
+              <option value="luscombe">Luscombe (3×age)+7</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row" style="margin-bottom:8px">
+          <div class="field" style="flex:1 1 46%"><label for="p_ht">Height (cm)</label>
+            <input id="p_ht" type="number" step="0.1" min="0" max="250" inputmode="decimal" placeholder="optional"></div>
+          <div class="field" style="flex:1 1 46%"><label for="p_scr">Creatinine (mg/dL)</label>
+            <input id="p_scr" type="number" step="0.01" min="0" max="30" inputmode="decimal" placeholder="optional"></div>
+        </div>
+
+        <div class="row" style="margin-bottom:4px">
+          <div class="field" style="flex:1 1 30%"><label for="p_k">K⁺ mmol/L</label>
+            <input id="p_k" type="number" step="0.01" min="0" max="12" inputmode="decimal" placeholder="—"></div>
+          <div class="field" style="flex:1 1 30%"><label for="p_na">Na⁺ mmol/L</label>
+            <input id="p_na" type="number" step="0.1" min="80" max="200" inputmode="decimal" placeholder="—"></div>
+          <div class="field" style="flex:1 1 30%"><label for="p_glu">Glucose mg/dL</label>
+            <input id="p_glu" type="number" step="1" min="0" max="2000" inputmode="decimal" placeholder="—"></div>
+        </div>
+
+        <label style="display:flex;gap:7px;align-items:flex-start;font-size:11.5px;color:var(--ink2);margin:8px 0 0;cursor:pointer">
+          <input id="p_ao" type="checkbox" style="width:auto;margin-top:2px">
+          <span>Dose this 12–16-year-old as an <b>adult</b> (large adolescent)</span>
+        </label>
+
+        <div id="ctxOut" class="wbox" style="margin-top:10px"></div>
+
+        <div class="row" style="margin-top:9px">
+          <button class="btn sm" id="btnReset" type="button">Clear patient</button>
+          <button class="btn sm" id="btnDemo70" type="button">Set 70 kg adult</button>
+        </div>
+        <div class="chips no-print" style="padding:9px 0 0;border:0;background:transparent">
+          <button class="chip quickfill" data-fill=",,," type="button" title="Clear">—</button>
+          <button class="chip quickfill" data-fill="3.4,,0,7" type="button">Term newborn (3 d)</button>
+          <button class="chip quickfill" data-fill="1.2,0,0,7" type="button">ELBW 1.2 kg</button>
+          <button class="chip quickfill" data-fill="9.6,1,0," type="button">1 year</button>
+          <button class="chip quickfill" data-fill="18.3,5,0," type="button">5 years</button>
+          <button class="chip quickfill" data-fill="31.9,10,0," type="button">10 years</button>
+          <button class="chip quickfill" data-fill="56.8,15,0," type="button">15 years</button>
+          <button class="chip quickfill" data-fill="70,35,0," type="button">Adult 70 kg</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:12px">
+      <div class="ph"><h2>Immediate actions</h2></div>
+      <div class="pb">
+        <div class="chips" style="padding:0;border:0;background:transparent">
+          <button class="chip goto" data-goto="p-arrest-adult" type="button">🫀 Adult arrest</button>
+          <button class="chip goto" data-goto="p-arrest-paed" type="button">🧒 Paediatric arrest</button>
+          <button class="chip goto" data-goto="p-anaphylaxis" type="button">💉 Anaphylaxis</button>
+          <button class="chip goto" data-goto="p-septic-shock" type="button">🩸 Septic shock</button>
+          <button class="chip goto" data-goto="p-status-epilepticus" type="button">⚡ Status epilepticus</button>
+          <button class="chip goto" data-goto="p-hyperkalaemia" type="button">🧪 Hyperkalaemia</button>
+          <button class="chip goto" data-goto="p-snakebite" type="button">🐍 Snakebite (India)</button>
+          <button class="chip goto" data-goto="p-scorpion" type="button">🦂 Scorpion sting</button>
+          <button class="chip goto" data-goto="p-op-poisoning" type="button">☠️ OP poisoning</button>
+          <button class="chip goto" data-goto="p-dka" type="button">🍬 DKA</button>
+          <button class="chip goto" data-goto="p-eclampsia" type="button">🤰 Eclampsia</button>
+          <button class="chip goto" data-goto="p-pph" type="button">🩸 PPH</button>
+          <button class="chip goto" data-goto="p-neonatal-resus" type="button">👶 Neonatal resus</button>
+          <button class="chip goto" data-goto="p-antidote-table" type="button">🧾 Antidote table</button>
+          <button class="chip goto" data-goto="p-never-events" type="button">🚫 Never events</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ RIGHT: tabs + content ============ -->
+  <main>
+    <div class="panel">
+      <div id="tabs"></div>
+      <div class="printonly print-head">
+        <h1>Paediatric &amp; Neonatal Drug Calculator — calculated dose sheet</h1>
+        <div class="pack">Printed from the offline build. Verify every entry against the product label and your institutional protocol before administration.</div>
+      </div>
+      <div id="content"></div>
+    </div>
+  </main>
+</div>
+
+<footer class="foot">
+  <b>Paediatric &amp; Neonatal Drug Calculator</b> · self-contained offline HTML · no network calls, no data leaves this device.<br>
+  Doses are taken from the guideline cited on each entry (AHA/ERC 2025, WHO, NICE, KDIGO, IDSA, ESC, ACOG, ISCCM, IAP/NNF, NTEP, NVBDCP, MoHFW national protocols, BNF/BNFC, Sanford, Nelson, Marino, Tintinalli, Goldfrank, APLS).
+  Indian formulation strengths, pack sizes and brand names reflect the IP/NFDC market and change over time — <b>always read the label on the product in your hand</b>.<br>
+  Reported errors and discrepancies should be acted on immediately: an error you catch is an error the next clinician will not make.
+</footer>
+
+<div class="modal-bd" id="modal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="mh"><h2 id="modalT">Reference</h2><button class="xbtn" id="modalX" type="button">Close ✕</button></div>
+    <div class="mb" id="modalB"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>/*__JS__*/</script>
+<script>
+/* Bootstrap only. Every event handler lives in ui.js so that there is
+   exactly ONE definition of each behaviour (a duplicated handler here once
+   fought with the one in ui.js and cancelled its highlight). */
+(function(){
+  function boot(){ try{ App.init(); }catch(e){
+    var c=document.getElementById('content');
+    if(c) c.innerHTML='<div class="empty" style="padding:40px"><b>The interface failed to start.</b><div class="pack">'+
+      String(e && e.message ? e.message : e)+'</div></div>';
+  } }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
+</body>
+</html>

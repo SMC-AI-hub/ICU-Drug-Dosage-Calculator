@@ -1,0 +1,6 @@
+* text=auto eol=lf
+*.png binary
+*.zip binary
+docs/standalone.html -diff
+docs/index.html -diff
+docs/Paediatric-Drug-Calculator.html -diff
