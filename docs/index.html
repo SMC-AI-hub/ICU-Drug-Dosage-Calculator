@@ -625,6 +625,98 @@ body.dark .vol{color:var(--brand2)}
 .hi{scroll-margin-top:170px}
 .hl{background:var(--ok-soft)}
 .pinned{}
+
+/* ============================ CARE-PATHWAY COMMAND BAR ====================
+   Replaces hunting through 20 organ-system chips. Four pathways, each showing
+   its live count, sitting above the drug list so the whole app is one tap from
+   the patient bed. Dense by design: 34px tall, no wasted whitespace.        */
+.catbar{
+  display:flex;gap:6px;flex-wrap:wrap;
+  padding:9px 14px;border-top:1px solid var(--line2);background:var(--panel2);
+}
+.cat{
+  display:inline-flex;align-items:center;gap:7px;
+  min-height:34px;padding:0 12px;
+  background:var(--raised);border:1px solid var(--line3);color:var(--ink2);
+  border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:700;
+  letter-spacing:.2px;transition:all .13s ease;cursor:pointer;
+}
+.cat .ct{white-space:nowrap}
+.cat .cn{
+  font-variant-numeric:tabular-nums;
+  min-width:20px;padding:1px 5px;border-radius:99px;
+  background:var(--panel);border:1px solid var(--line2);
+  font-size:var(--fs-1);font-weight:700;color:var(--ink3);text-align:center;
+}
+.cat:hover{border-color:var(--brand3);color:var(--brand);background:var(--brand-soft)}
+.cat:hover .cn{border-color:var(--brand3);color:var(--brand)}
+.cat[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.cat[aria-pressed="true"] .cn{background:rgba(255,255,255,.2);border-color:transparent;color:#fff}
+/* the two cardiac pathways are the ones a CICU reaches for first */
+.cat-chd{border-color:var(--crit-line);color:var(--crit);background:var(--raised)}
+.cat-chd[aria-pressed="true"]{background:var(--crit);border-color:var(--crit);color:#fff}
+.cathint{
+  margin:0;padding:0 14px 9px;background:var(--panel2);
+  font-size:var(--fs-1);color:var(--ink3);line-height:1.4;
+  border-bottom:1px solid var(--line2);
+}
+@media print{.catbar,.cathint{display:none!important}}
+
+/* ==================== VERIFICATION TAGS & SAFETY STATES ==================
+   The tags sit under the dose on every card. They are live assertions, not
+   decoration: a tag turns amber when the weight is estimated or a ceiling was
+   applied, and red when a limit is breached or a dilution fails to reconcile.
+   The card border/background transitions rather than snapping, so the eye is
+   drawn to the change instead of being ambushed by it.                    */
+.verif{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.vt{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:var(--fs-1);font-weight:700;letter-spacing:.2px;
+  padding:2px 8px;border-radius:var(--r-pill);
+  border:1px solid var(--line3);background:var(--panel2);color:var(--ink3);
+  white-space:nowrap;
+}
+.vt::before{font-size:9px;line-height:1}
+.vt.v-y{border-color:var(--ok-line);background:var(--ok-soft);color:var(--ok)}
+.vt.v-y::before{content:"\2713"}
+.vt.v-w{border-color:var(--warn-line);background:var(--warn-soft);color:var(--warn)}
+.vt.v-w::before{content:"\26A0"}
+.vt.v-c{border-color:var(--crit-line);background:var(--crit-soft);color:var(--crit)}
+.vt.v-c::before{content:"\2715"}
+.vt.v-n{opacity:.75}
+.vt.v-n::before{content:"\2014"}
+
+/* the answer block carries the alert state for the whole calculation */
+.answer{transition:border-color .28s ease,background-color .28s ease,box-shadow .28s ease}
+.answer.ans-warn{
+  border-color:var(--warn-line);background:var(--warn-soft);
+  box-shadow:inset 3px 0 0 var(--warn);
+}
+
+/* amber/red treatment on the infusion (pump) output */
+.notebox.amber{border-color:var(--warn-line);background:var(--warn-soft);color:var(--warn)}
+.notebox.crit{border-color:var(--crit-line);background:var(--crit-soft);color:var(--crit)}
+.notebox.crit b,.notebox.amber b{color:inherit}
+
+.mxwrap{border:1px solid transparent;border-radius:var(--r-sm);
+  transition:border-color .28s ease,background-color .28s ease,box-shadow .28s ease}
+.mxwrap.mx-ok{border-color:var(--ok-line);background:var(--ok-soft)}
+.mxwrap.mx-warn{border-color:var(--warn-line);background:var(--warn-soft);box-shadow:inset 3px 0 0 var(--warn)}
+.mxwrap.mx-crit{border-color:var(--crit-line);background:var(--crit-soft);box-shadow:inset 3px 0 0 var(--crit)}
+.mxwrap.mx-ok .rate-hero,.mxwrap.mx-warn .rate-hero,.mxwrap.mx-crit .rate-hero{
+  background:transparent;border-color:transparent;
+}
+/* The headline rate must not stay green while the block is amber or red —
+   green reads as "all clear" and would contradict the warning next to it. */
+.mxwrap.mx-warn .rate-hero{border-color:var(--warn-line)}
+.mxwrap.mx-warn .rate-hero .rh,.mxwrap.mx-warn .rate-hero .rv{color:var(--warn)}
+.mxwrap.mx-crit .rate-hero{border-color:var(--crit-line)}
+.mxwrap.mx-crit .rate-hero .rh,.mxwrap.mx-crit .rate-hero .rv{color:var(--crit)}
+
+@media print{
+  .vt{border-color:#999;background:#fff;color:#000}
+  .answer.ans-warn,.mxwrap.mx-warn,.mxwrap.mx-crit{background:#fff;border-color:#000}
+}
 </style>
 
 <!-- ===== installable / offline (PWA) ===== -->
@@ -659,7 +751,7 @@ body.dark .vol{color:var(--brand2)}
   <div class="spacer"></div>
   <div class="meta">
     <div id="metaCtx">No patient entered</div>
-    <div class="mono">build 338b17379cdf</div>
+    <div class="mono">build 6c783f23d6be</div>
   </div>
   <button class="tbtn icon" id="btnRail" type="button" title="Patient panel and emergency shortcuts" aria-label="Patient panel">☰</button>
   <button class="tbtn icon" id="btnPal" type="button" title="Jump to any drug, protocol or tool (Ctrl+K)" aria-label="Find anything">🔍</button>
@@ -1188,7 +1280,7 @@ R({ id:'digoxin-ad', n:'Digoxin', sys:'arrhythmia', cls:'Cardiac glycoside (Na�
   warn:['Check potassium, magnesium, calcium and renal function BEFORE each dose — hypokalaemia and hypomagnesaemia precipitate toxicity.','Reduce dose by 50% if eGFR <30 mL/min; avoid loading in renal failure.','Toxicity: nausea, yellow-green vision, bradycardia, AV block, bidirectional VT. Antidote: digoxin-specific Fab (very limited in India), KCl, magnesium, atropine, pacing.','Never give IV calcium rapidly with digoxin (stone-heart risk — theoretical).'],
   ref:['AHA2025','BNF','MARINO'] });
 
-R({ id:'digoxin-pd', n:'Digoxin', sys:'arrhythmia', cls:'Cardiac glycoside',
+R({ id:'digoxin-pd', chd:'acyanotic', n:'Digoxin', sys:'arrhythmia', cls:'Cardiac glycoside',
   ind:'Paediatric SVT / rate control in heart failure', pop:'paed', risk:5,
   d:{t:'mcgkg', lo:20, hi:30, capDay:1000},
   fx:[{s:'0.25 mg/mL', c:0.25, u:'mg', p:'2 mL ampoule (0.5 mg)', b:'Lanoxin (GSK), Cardoxin', r:'IV/PO', hl:1},
@@ -1251,7 +1343,7 @@ R({ id:'dobutamine-inf', n:'Dobutamine', sys:'vasoactive', cls:'Predominant β1 
   warn:['Causes vasodilation → hypotension in hypovolaemic patients; ensure adequate preload first.','Tachycardia, ectopy and increased myocardial oxygen demand; reduce if HR rises >10% of baseline.','Do not mix with sodium bicarbonate or any alkaline solution.','Inactivated with heparin in the same line.'],
   ref:['SSC2021','MARINO','AHA2025-PALS','BNFC','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY'] });
 
-R({ id:'milrinone-inf', n:'Milrinone', sys:'vasoactive', cls:'Phosphodiesterase-3 inhibitor (inodilator)',
+R({ id:'milrinone-inf', chd:'acyanotic', n:'Milrinone', sys:'vasoactive', cls:'Phosphodiesterase-3 inhibitor (inodilator)',
   ind:'Low-output cardiogenic shock, post-cardiac-surgery, pulmonary hypertension/RV failure, β-blocker–refractory failure', pop:'all', risk:5, inf:true,
   d:{t:'mcgkgmin', lo:0.25, hi:0.75},
   diln:[{l:'20 mg in 20 mL NS → 1 mg/mL (1000 mcg/mL) syringe pump', amt:20, in:20, u:'mg', bag:'20 mL 0.9% NaCl'},
@@ -2384,7 +2476,7 @@ R({ id:'steroid-asthma-pd', n:'Hydrocortisone / Prednisolone — paediatric asth
   warn:['Give steroids EARLY (within 1 h of presentation) in every acute asthma attack — this reduces admissions and relapse.','Check the oral solution concentration: 1 mg/mL and 5 mg/mL presentations are both available in India and a mix-up causes a 5-fold error.','Short courses (<5 days) do not need tapering.','Hyperglycaemia and behavioural change are common in children.'],
   ref:['GINA2024','IAP-ASTHMA','BTS-ASTHMA','BNFC','NICE-CG25','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY','NELSON','GHAI10','IAP-STG'] });
 
-R({ id:'sildenafil-ph', n:'Sildenafil', sys:'respiratory', cls:'Phosphodiesterase-5 inhibitor (pulmonary vasodilator)',
+R({ id:'sildenafil-ph', chd:'acyanotic', n:'Sildenafil', sys:'respiratory', cls:'Phosphodiesterase-5 inhibitor (pulmonary vasodilator)',
   ind:'Pulmonary arterial hypertension; persistent pulmonary hypertension of the newborn; right ventricular failure; weaning off inhaled NO', pop:'all', risk:4,
   d:{t:'mgkg', lo:0.5, hi:2, cap:80, rep:'every 6–8 h orally (paediatric/PPHN); adult PAH 20 mg TDS'},
   fx:[{s:'20 mg tablet', c:20, u:'mg', p:'strip of 4', b:'Sildenafil 20 mg — Suhagra 20 (Cipla), Revita, Silvitra, Manforce (PAH dosing uses the 20 mg strength)', r:'PO', hl:1},
@@ -2442,7 +2534,7 @@ R({ id:'furosemide-ad', n:'Furosemide', sys:'renal', cls:'Loop diuretic (NKCC2 i
   warn:['Hypokalaemia, hyponatraemia, hypomagnesaemia, hypocalcaemia, metabolic alkalosis, dehydration, AKI (pre-renal) — check electrolytes daily.','Ototoxicity — risk rises with rapid bolus (>4 mg/min), doses >1–2 g/day, renal failure, and concurrent aminoglycosides.','Sulfa allergy (cross-reactivity is rare but reported).','In oliguric AKI, diuretics do NOT reduce the need for dialysis or mortality — use them only to achieve fluid balance.'],
   ref:['ESC-HF','KDIGO-AKI','BNF','MARINO'] });
 
-R({ id:'furosemide-pd', n:'Furosemide — paediatric', sys:'renal', cls:'Loop diuretic',
+R({ id:'furosemide-pd', chd:'acyanotic', n:'Furosemide — paediatric', sys:'renal', cls:'Loop diuretic',
   ind:'Paediatric volume overload, heart failure, pulmonary oedema, BPD, nephrotic syndrome', pop:'paed', risk:3,
   d:{t:'mgkg', lo:0.5, hi:2, cap:40, rep:'0.5–1 mg/kg IV (max 20 mg/dose) every 6–12 h; infusion 0.05–0.2 mg/kg/h'},
   fx:[{s:'10 mg/mL', c:10, u:'mg', p:'2 mL ampoule (20 mg)', b:'Lasix (Sanofi), Frusemide IP — Neon, Samarth', r:'IV/PO', hl:1},
@@ -2473,7 +2565,7 @@ R({ id:'bumetanide', n:'Bumetanide', sys:'renal', cls:'Loop diuretic (40× more 
   warn:['A 40-fold potency difference from furosemide — a mg-for-mg substitution causes massive overdose. Always convert explicitly.','More profound hypokalaemia than furosemide.','Myalgia and muscle cramps; rarely rhabdomyolysis.'],
   ref:['ESC-HF','BNF'] });
 
-R({ id:'spironolactone', n:'Spironolactone', sys:'renal', cls:'Mineralocorticoid receptor antagonist (potassium-sparing)',
+R({ id:'spironolactone', chd:'acyanotic', n:'Spironolactone', sys:'renal', cls:'Mineralocorticoid receptor antagonist (potassium-sparing)',
   ind:'Cirrhotic ascites (first-line), heart failure with reduced EF, primary aldosteronism, resistant hypertension', pop:'all', risk:4,
   d:{t:'mg', lo:25, hi:100, cap:400, capDay:400, rep:'heart failure 25–50 mg daily; ascites 100–400 mg daily (with furosemide 40–160 mg)'},
   fx:[{s:'25 mg tablet', c:25, u:'mg', p:'strip of 10', b:'Aldactone (RPG/Sanofi), Lactone, Verospiron', r:'PO', hl:1},
@@ -3825,7 +3917,7 @@ R({ id:'caffeine-apnoea', n:'Caffeine citrate', sys:'neonatal', cls:'Methylxanth
   warn:['CITRATE vs BASE CONFUSION is a classic neonatal medication error — always prescribe and check in terms of the CITRATE.','Tachycardia (>180/min), feeding intolerance, hyperglycaemia, jitteriness, diuresis, hypokalaemia.','Reduce or hold if the heart rate exceeds 180–200/min or if significant reflux/feeding intolerance develops.','Caffeine is superior to aminophylline/theophylline (fewer side effects, no level monitoring, once-daily dosing) — it is the drug of choice for apnoea of prematurity.','Monitor for necrotising enterocolitis (no clear increased risk) and ROP (no increased risk).'],
   ref:['CAP-TRIAL','NRP2025','IAP-NICU','BNFC','EURO-RDS','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY','NELSON','GHAI10','PG-TB-PED','IAP-STG'] });
 
-R({ id:'pge1-ductus', n:'Alprostadil (Prostaglandin E1)', sys:'neonatal', cls:'Vasodilator prostaglandin — maintains ductal patency',
+R({ id:'pge1-ductus', chd:'cyanotic', n:'Alprostadil (Prostaglandin E1)', sys:'neonatal', cls:'Vasodilator prostaglandin — maintains ductal patency',
   ind:'Duct-dependent congenital heart disease (duct-dependent systemic or pulmonary circulation) until surgical/interventional correction; transposition of the great arteries, coarctation/aortic interruption, pulmonary atresia, critical PS, HLHS', pop:'neo', maxAge:0.2, risk:5, inf:true,
   d:{t:'mcgkgmin', lo:0.01, hi:0.1},
   diln:[{l:'500 mcg in 50 mL D5W → 10 mcg/mL (0.05 mcg/kg/min in a 3-kg neonate = 0.9 mL/h)', amt:500, in:50, u:'mcg', bag:'50 mL 5% dextrose'},
@@ -3860,7 +3952,7 @@ R({ id:'neonatal-sepsis', n:'Neonatal sepsis — empirical antibiotics', sys:'ne
   ref:['IAP-NEO-SEPSIS','WHO-NEO','NRP2025','NICE-NG195','SANFORD','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY','NELSON','GHAI10','PG-TB-PED','IAP-STG'] });
 
 /* ================= PAEDIATRIC PROGRAMMES ================= */
-R({ id:'ibuprofen-pda', n:'Ibuprofen — patent ductus arteriosus (PDA)', sys:'neonatal', cls:'Non-selective COX inhibitor (prostaglandin synthesis blocker)',
+R({ id:'ibuprofen-pda', chd:'acyanotic', n:'Ibuprofen — patent ductus arteriosus (PDA)', sys:'neonatal', cls:'Non-selective COX inhibitor (prostaglandin synthesis blocker)',
   ind:'Haemodynamically significant patent ductus arteriosus in preterm infants (first-line medical closure); also used in term infants awaiting intervention', pop:'neo', risk:4, inf:false,
   d:{t:'mgkg', lo:5, hi:10, cap:20, rep:'STANDARD course: 10 mg/kg, then 5 mg/kg at 24 h and 5 mg/kg at 48 h (three doses). If treatment starts AFTER 72 h of life, units using the HIGHER course give 20 mg/kg, then 10 mg/kg at 24 h and 10 mg/kg at 48 h. A second course may be given if the duct remains significant.'},
   fx:[{s:'5 mg/mL ibuprofen (Pedea, IV)', c:5, u:'mg', p:'2 mL ampoule (10 mg)', b:'Pedea (Orphan Europe); generic ibuprofen IV where licensed', r:'IV', hl:1},
@@ -3873,7 +3965,7 @@ R({ id:'ibuprofen-pda', n:'Ibuprofen — patent ductus arteriosus (PDA)', sys:'n
         'Do not run concurrently with other prostaglandin inhibitors (indomethacin/paracetamol courses) without a definite plan.'],
   notes:['Roughly 70–80 % of ducts close after one course. The dose is the same by the IV and oral routes, but the oral route is only for babies tolerating enteral feeds.'],
   ref:['HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY','IAP-STG','NELSON']});
-R({ id:'indomethacin-pda', n:'Indomethacin — patent ductus arteriosus (PDA)', sys:'neonatal', cls:'Non-selective COX inhibitor (prostaglandin synthesis blocker)',
+R({ id:'indomethacin-pda', chd:'acyanotic', n:'Indomethacin — patent ductus arteriosus (PDA)', sys:'neonatal', cls:'Non-selective COX inhibitor (prostaglandin synthesis blocker)',
   ind:'Haemodynamically significant PDA where ibuprofen is unavailable, contraindicated or has failed', pop:'neo', risk:4,
   d:{t:'mgkg', lo:0.1, hi:0.2, rep:'INITIAL dose 0.2 mg/kg IV over 30 min, then TWO further doses at 12–24 h intervals. Maintenance dose by postnatal age: <48 h old or weight <1 kg = 0.1 mg/kg; 2–7 days old = 0.2 mg/kg; >7 days old = 0.25 mg/kg.'},
   fx:[{s:'1 mg lyophilised powder (indomethacin sodium trihydrate)', c:1, u:'mg', p:'1 mg vial — reconstitute with 1 mL of the supplied diluent or WFI → 1 mg/mL', b:'Indocid (imported/restricted supply); indomethacin injection IP where stocked', r:'IV', hl:1}],
@@ -6011,7 +6103,7 @@ var App = (function(){
 /* ------------------------------------------------------------------ */
 var ST = {
   tab:'drugs',
-  sys:new Set(), cls:'', q:'', pop:'', riskOnly:false, highAlertOnly:false,
+  cat:'', sys:new Set(), cls:'', q:'', pop:'', riskOnly:false, highAlertOnly:false,
   expand:new Set(),
   pt:{ wt:'', ageY:'', ageM:'', ageD:'', sex:'male', ht:'', scr:'', wMethod:'who', adultOverride:false,
        k:'', na:'', glu:'' },
@@ -6034,7 +6126,7 @@ function queueSave(){
 function saveState(){
   try{
     localStorage.setItem(LS_KEY, JSON.stringify({
-      tab:ST.tab, q:ST.q, cls:ST.cls, pop:ST.pop, ha:ST.highAlertOnly,
+      tab:ST.tab, cat:ST.cat, q:ST.q, cls:ST.cls, pop:ST.pop, ha:ST.highAlertOnly,
       sys:Array.from(ST.sys), fav:Array.from(ST.fav), favOnly:ST.favOnly,
       pt:ST.pt, mix:ST.mix, theme:ST.theme, typeBig:ST.typeBig, tilesOpen:ST.tilesOpen,
       recent:ST.recent, pumpMode:ST.pumpMode, step:ST.step, rev:ST.rev,
@@ -6048,6 +6140,7 @@ function loadState(){
     if(!o) return;
     if(o.tab) ST.tab=o.tab;
     ST.q=o.q||''; ST.cls=o.cls||''; ST.pop=o.pop||'';
+    ST.cat=o.cat||'';
     ST.highAlertOnly=!!o.ha; ST.favOnly=!!o.favOnly;
     ST.sys=new Set(o.sys||[]); ST.fav=new Set(o.fav||[]);
     if(o.pt) Object.keys(o.pt).forEach(function(k){ if(k in ST.pt) ST.pt[k]=o.pt[k]; });
@@ -6195,11 +6288,62 @@ function matchQ(reg, q){
   var fx=(reg.fx||[]).map(function(f){return f.s+' '+(f.b||'');}).join(' ').toLowerCase();
   return fx.indexOf(q)>=0;
 }
+/* ---------------- care-pathway categories (top command bar) ----------------
+   The four pathways a high-acuity team actually thinks in. Buckets are
+   EXCLUSIVE and resolved in the order below, so every regimen lands in exactly
+   one place and the counts always add up to the visible total:
+
+     1. Cyanotic CHD          — duct-dependent cyanotic lesions, spell drugs
+     2. Acyanotic CHD         — shunt failure, PDA, CHD-associated PAH
+     3. Continuous infusions  — anything run on a pump (reg.inf)
+     4. General ICU & emergencies — everything else
+
+   Cardiac-specific drugs win over the generic infusion bucket on purpose: a
+   nurse looking for milrinone during a shunt case looks under the heart, not
+   under "infusions".
+
+   Naming note: "cyanotic / acyanotic" describes PAEDIATRIC lesions. The adult
+   term is ACHD, which is out of scope for a 24-week-to-18-year calculator.  */
+var CATS=[
+  ['cyanotic','Cyanotic CHD','Duct-dependent cyanotic lesions — TGA, pulmonary atresia, critical PS, tricuspid atresia. Hypercyanotic-spell drugs.'],
+  ['acyanotic','Acyanotic CHD','Left-to-right shunt failure (VSD, ASD, PDA), post-cardiac-surgery low output, CHD-associated pulmonary hypertension.'],
+  ['infusion','Continuous infusions','Everything titrated on a syringe or volumetric pump: inotropes, vasopressors, sedatives, antiarrhythmics.'],
+  ['icu','General ICU & emergencies','Resuscitation, antibiotics, antiepileptics, toxicology, electrolytes, ventilation, sedation.']
+];
+function catOf(r){
+  if(r.chd==='cyanotic') return 'cyanotic';
+  if(r.chd==='acyanotic') return 'acyanotic';
+  if(r.inf) return 'infusion';
+  return 'icu';
+}
+function catCounts(ctx){
+  var c={cyanotic:0,acyanotic:0,infusion:0,icu:0};
+  REG.forEach(function(r){ if(childScope(r) && popVisible(r,ctx)) c[catOf(r)]++; });
+  return c;
+}
+function renderCatBar(ctx){
+  var c=catCounts(ctx);
+  var total=c.cyanotic+c.acyanotic+c.infusion+c.icu;
+  var h=['<nav class="catbar no-print" aria-label="Care pathway">'];
+  h.push('<button type="button" class="cat" data-cat="" aria-pressed="'+(ST.cat==='')+'">'+
+         '<span class="ct">All drugs</span><span class="cn n">'+total+'</span></button>');
+  CATS.forEach(function(k){
+    h.push('<button type="button" class="cat'+(k[0]==='cyanotic'||k[0]==='acyanotic'?' cat-chd':'')+
+           '" data-cat="'+k[0]+'" aria-pressed="'+(ST.cat===k[0])+'" title="'+esc(k[2])+'">'+
+           '<span class="ct">'+esc(k[1])+'</span><span class="cn n">'+c[k[0]]+'</span></button>');
+  });
+  h.push('</nav>');
+  var active=CATS.filter(function(k){return k[0]===ST.cat;})[0];
+  if(active) h.push('<p class="cathint no-print">'+esc(active[2])+'</p>');
+  return h.join('');
+}
+
 function visibleRegs(ctx){
   /* paediatric scope: entries that are explicitly adult-only never appear */
   var C=REG.filter(childScope);
   var q=ST.q.trim();
   return C.filter(function(r){
+    if(ST.cat && catOf(r)!==ST.cat) return false;
     if(ST.sys.size && !ST.sys.has(r.sys)) return false;
     if(ST.cls && r.cls!==ST.cls) return false;
     if(ST.highAlertOnly && (r.risk||1)<4) return false;
@@ -6401,6 +6545,50 @@ function summaryLine(reg, out, ctx){
     flags.map(function(f){ return '<span class="sumwarn">'+f+'</span>'; }).join('');
 }
 
+/* ---------------- verification tags ------------------------------------
+   NOT decoration. Each tag states a check that actually ran and passed, and
+   it CHANGES when the check does not:
+     Dose    green  weight measured, within the cited range, no ceiling hit
+             amber  a documented ceiling was applied to the calculation
+             amber  the weight was estimated from age rather than weighed
+             red    no computable dose
+     Volume  green  every dilution shown reconciles: mL/h x drug-per-mL
+                    returns the prescribed amount per hour for this patient
+             grey   nothing to verify (oral, or a fixed unit dose)
+
+   A tag that reads "verified" unconditionally would be worse than no tag at
+   all, because it would claim a check nobody performed.                  */
+function verifTags(reg, out, ctx, dw){
+  var t=[];
+  if(!out || !out.ok){
+    t.push('<span class="vt v-c">Dose not computable</span>');
+  } else if(out.capApplied){
+    t.push('<span class="vt v-w" title="'+esc(out.capMsg||'')+'">Ceiling applied to dose</span>');
+  } else if(ctx && ctx.weightSource==='estimated'){
+    t.push('<span class="vt v-w" title="Weight estimated from age. An estimate can be wrong by 20-30 per cent - weigh the child wherever possible.">On estimated weight</span>');
+  } else if(dw && dw.label!=='actual body weight'){
+    t.push('<span class="vt v-w" title="Dosed on the adjusted body weight.">'+esc(dw.label)+'</span>');
+  } else {
+    t.push('<span class="vt v-y" title="Measured weight, dose inside the cited range, no ceiling applied.">Dose verified</span>');
+  }
+  /* volume: re-check every pump row for this patient, live */
+  var rows=(out.pump||[]), bad=0, good=0;
+  for(var i=0;i<rows.length;i++){
+    var pr=rows[i];
+    if(pr.concPerMl==null||pr.mlPerHrLo==null||out.ratePerMinLo==null) continue;
+    var expect=out.ratePerMinLo*60, got=pr.mlPerHrLo*pr.concPerMl;
+    if(Math.abs(got-expect)<=Math.abs(expect)*0.005+1e-12) good++; else bad++;
+  }
+  if(!good && !bad){
+    t.push('<span class="vt v-n">Volume not applicable</span>');
+  } else if(bad){
+    t.push('<span class="vt v-c" title="'+bad+' of '+(bad+good)+' dilutions did not reconcile. Re-check by hand before programming the pump.">Volume check failed</span>');
+  } else {
+    t.push('<span class="vt v-y" title="mL/h x drug-per-mL returns the prescribed amount per hour, on all '+good+' dilution'+(good===1?'':'s')+' shown.">Volume verified</span>');
+  }
+  return '<div class="verif">'+t.join('')+'</div>';
+}
+
 function renderCard(reg, ctx){
   var dw = dosingWeightFor(reg, ctx);
   var lctx = {kg:dw.kg, dosingWeight:dw.kg, ageDays:ctx.ageDays, pop:ctx.pop};
@@ -6427,7 +6615,7 @@ function renderCard(reg, ctx){
          'aria-pressed="'+ST.fav.has(reg.id)+'" title="Pin this drug to the top of its system">★</button></div>');
 
   /* ---- the answer block: the dose and the volume to draw, fused ---- */
-  h.push('<div class="answer">');
+  h.push('<div class="answer'+(out.capApplied?' ans-warn':'')+'">');
   h.push('<div class="dose">');
   if(out.error && !out.ok && !out.dose && !out.doseText){
     h.push('<div class="dl">Dose</div><div class="dv" style="color:var(--crit);font-size:14px">'+esc(out.error)+'</div>');
@@ -6450,6 +6638,7 @@ function renderCard(reg, ctx){
       h.push('<div class="cap">Ceiling enforced: '+esc(caps.join(' · '))+'</div>');
     }
     if(reg.d && reg.d.rep) h.push('<div class="dr">'+esc(reg.d.rep)+'</div>');
+    h.push(verifTags(reg, out, ctx, dw));
   }
   h.push('</div>');
 
@@ -6704,13 +6893,13 @@ function heroHtml(){
 function renderDrugs(ctx){
   var list = visibleRegs(ctx);
   if(ctx.scopeMsg){
-    var head=[renderToolbar(ctx), renderChips(ctx), renderFilterBar()];
+    var head=[renderCatBar(ctx), renderToolbar(ctx), renderChips(ctx), renderFilterBar()];
     head.push('<div class="notebox warn" style="margin:9px 0"><b>Outside this calculator.</b> '+esc(ctx.scopeMsg)+
       '</div>');
     head.push('<div class="pack">No doses are shown, deliberately: a paediatric calculator that silently prints a number for an out-of-range patient is worse than one that refuses.</div>');
     return head.join('');
   }
-  var h=[renderToolbar(ctx), renderChips(ctx),
+  var h=[renderCatBar(ctx), renderToolbar(ctx), renderChips(ctx),
     '<span id="recentSlot" style="display:contents">'+recentHtml()+'</span>',
     renderTiles(), renderFilterBar()];
   if(ctx.weightAgeMsg){
@@ -6839,7 +7028,7 @@ function renderMixPanel(ctx){
   }
   h.push('</div>');
   h.push('<div class="pack" style="margin-top:6px">Guideline range: <b>'+esc(reg.d.rep ||
-      (reg.d.lo!=null ? fmtNum(reg.d.lo)+'–'+fmtNum(reg.d.hi)+' '+perLabel(dt.u,dt.per) : 'see the drug card'))+'</b></div>');
+      (reg.d.lo!=null ? rangeText(reg.d.lo,reg.d.hi,perLabel(dt.u,dt.per)) : 'see the drug card'))+'</b></div>');
   h.push('</div></div>');
 
   /* ---- row 2: the preparation ---- */
@@ -6902,10 +7091,17 @@ function mixCompute(ctx){
   return r;
 }
 
+function rangeText(lo,hi,unitTxt){
+  /* "15–15 mg/kg/h" reads like a typo. When low and high agree, say it once. */
+  if(lo==null||hi==null) return '';
+  if(Math.abs(hi-lo)<1e-12) return fmtNum(lo)+' '+unitTxt;
+  return fmtNum(lo)+'–'+fmtNum(hi)+' '+unitTxt;
+}
+
 function mixOutHtml(r){
   if(!r) return '<div class="pack">No infusion selected.</div>';
   if(!r.ok) return '<div class="notebox warn"><b>Cannot compute yet.</b> '+esc(r.err||'')+'</div>';
-  var reg=r.reg, dt=dtOf(reg.d.t), h=[];
+  var reg=r.reg, dt=dtOf(reg.d.t), h=[], verifState='';
   /* headline: what each mL holds */
   var pl=(r.perMl||[]).map(function(p,i){
     return (i===0? '<b>'+fmtNum(p.v)+' '+esc(p.u)+'</b>' : fmtNum(p.v)+' '+esc(p.u));
@@ -6953,11 +7149,37 @@ function mixOutHtml(r){
       }
     }
     if(vb!=null){
-      if(vb<reg.d.lo) h.push('<div class="notebox"><b>Below the usual range</b> '+fmtNum(reg.d.lo)+'–'+fmtNum(reg.d.hi)+' '+esc(perLabel(dt.u,dt.per))+note+'. Confirm the indication before running it slower.</div>');
-      else if(vb>reg.d.hi) h.push('<div class="notebox warn"><b>Above the usual range</b> '+fmtNum(reg.d.lo)+'–'+fmtNum(reg.d.hi)+' '+esc(perLabel(dt.u,dt.per))+note+'. A second clinician must confirm this dose before it runs.</div>');
-      else h.push('<div class="notebox ok" style="background:var(--ok-soft);border-color:#bfe3cf"><b>Within the cited range</b> '+fmtNum(reg.d.lo)+'–'+fmtNum(reg.d.hi)+' '+esc(perLabel(dt.u,dt.per))+note+'.</div>');
+      if(vb<reg.d.lo) h.push('<div class="notebox"><b>Below the usual range</b> '+rangeText(reg.d.lo,reg.d.hi,esc(perLabel(dt.u,dt.per)))+note+'. Confirm the indication before running it slower.</div>');
+      else if(vb>reg.d.hi){ verifState='warn'; h.push('<div class="notebox warn"><b>Above the usual range</b> '+rangeText(reg.d.lo,reg.d.hi,esc(perLabel(dt.u,dt.per)))+note+'. A second clinician must confirm this dose before it runs.</div>'); }
+      else { if(verifState!=='crit') verifState='ok'; h.push('<div class="notebox ok" style="background:var(--ok-soft);border-color:#bfe3cf"><b>Within the cited range</b> '+rangeText(reg.d.lo,reg.d.hi,esc(perLabel(dt.u,dt.per)))+note+'.</div>'); }
     } else if(v!=null){
       h.push('<div class="pack">Prescribed basis is '+esc(perLabel(dt.u,dt.per))+' — you are ordering in '+esc(perLabel(r.du,r.per))+', which is not an exact conversion. Convert and confirm against the drug card.</div>');
+    }
+  }
+  /* ---- documented 24-hour ceiling ------------------------------------
+     The pump panel is the one place a clinician TYPES a dose. If what was
+     ordered delivers more than the maximum this database records for that
+     weight, that is a breach of a stated limit: red, and the limit named.
+     Only fires when a ceiling is actually in the data AND the conversion is
+     exact. No threshold is ever invented that the sources do not carry.   */
+  if(reg.d.capDay!=null || reg.d.capDayKg!=null){
+    var ceilV=[];
+    if(reg.d.capDayKg!=null && r.kg>0){ ceilV.push(reg.d.capDayKg*r.kg);
+      }
+    if(reg.d.capDay!=null){ ceilV.push(reg.d.capDay);
+      }
+    var ceiling=Math.min.apply(null,ceilV);
+    /* name the binding limit; only add a derivation when it is per-kg,
+       otherwise the parenthetical just repeats the number above it */
+    var why = (reg.d.capDayKg!=null && r.kg>0 && reg.d.capDayKg*r.kg<=ceiling+1e-9)
+      ? ' = '+fmtNum(reg.d.capDayKg)+' '+dt.u+'/kg/24 h × '+fmtNum(r.kg,1)+' kg'
+      : '';   /* absolute ceilings are already the number named above */
+    var dayAmt=(r.deliver && r.deliver.amtPerDay!=null) ? convertUnit(r.deliver.amtPerDay, r.du, dt.u) : null;
+    if(dayAmt!=null && ceiling>0 && dayAmt>ceiling*(1+1e-9)){
+      verifState='crit';
+      h.push('<div class="notebox crit"><b>Above the documented maximum.</b> This order delivers <b>'+
+        fmtNum(dayAmt,1)+' '+esc(dt.u)+'/24 h</b> at '+fmtNum(r.kg,1)+' kg. The maximum recorded here is '+
+        fmtNum(ceiling,1)+' '+esc(dt.u)+'/24 h'+esc(why)+'. Reduce the ordered dose, or confirm the indication and the ceiling with the prescriber before this runs.</div>');
     }
   }
   (r.checks||[]).forEach(function(c){
@@ -6966,7 +7188,7 @@ function mixOutHtml(r){
   h.push('<div class="row" style="margin-top:10px"><button class="btn sm" id="mxPrintLbl">Print line label</button>'+
     '<button class="btn sm openCard" data-id="'+esc(reg.id)+'" style="margin-left:8px">Open full drug card →</button></div>');
   h.push('<div class="lbl" id="mxLbl" style="margin-top:10px">'+labelHtml(r)+'</div>');
-  return h.join('');
+  return '<div class="mxwrap'+(verifState?' mx-'+verifState:'')+'">'+h.join('')+'</div>';
 }
 
 function labelHtml(r){
@@ -7916,6 +8138,24 @@ function gotoProto(pid){
 }
 
 function wireInner(){
+  $$('#content .cat[data-cat]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var k=b.getAttribute('data-cat');
+      /* clicking the active pathway returns to All — never a dead end */
+      ST.cat = (ST.cat===k) ? '' : k;
+      ST.sys.clear();            /* systems only make sense inside one pathway */
+      renderContent(); wireInner();
+      /* a chosen pathway should land you on the answers, not on the shortcuts.
+         Clearing back to All stays put, so it never feels like a jump cut.   */
+      if(ST.cat){
+        var first=document.querySelector('#content .card');
+        if(first) scrollToEl(first,'start');
+      }else{
+        var bar=document.querySelector('#content .catbar');
+        if(bar) scrollToEl(bar,'nearest');
+      }
+    });
+  });
   $$('#content .chip[data-sys]').forEach(function(b){
     b.addEventListener('click',function(){
       var k=b.getAttribute('data-sys');
@@ -8012,7 +8252,7 @@ function wireInner(){
   $$('.fbar .fb').forEach(function(b){
     b.addEventListener('click',function(){
       var k=b.getAttribute('data-clear');
-      if(k==='*'){ ST.q=''; ST.cls=''; ST.pop=''; ST.sys=new Set(); ST.highAlertOnly=false; ST.favOnly=false; }
+      if(k==='*'){ ST.q=''; ST.cls=''; ST.pop=''; ST.cat=''; ST.sys=new Set(); ST.highAlertOnly=false; ST.favOnly=false; }
       else if(k==='q') ST.q='';
       else if(k==='cls') ST.cls='';
       else if(k==='pop') ST.pop='';

@@ -1,0 +1,25 @@
+Paediatric & Neonatal Drug Calculator — deployed build
+=======================================================
+
+build          6c783f23d6be
+built          2026-10-08 14:07 UTC
+regimens       279   (655 formulations, 20 systems)
+dose checks    4185  independently re-derived and agreed
+gate           validate PASS · build PASS · pwa 73/73 · smoke 163/163 · browser 8/8
+
+What is new in this build
+-------------------------
+1. Care-pathway command bar: Cyanotic CHD (1) · Acyanotic CHD (7) ·
+   Continuous infusions (48) · General ICU & emergencies (223).
+   Exclusive and exhaustive buckets — the validator fails the build if
+   they do not sum to 279.
+2. Verification tags on every calculated card: [Dose verified] and
+   [Volume verified], which turn amber when a ceiling was applied or the
+   weight was estimated, and red when a limit is breached.
+3. Live safety states: a documented 24-hour ceiling breached in the
+   infusion panel turns the output red and names the limit.
+
+Scope unchanged: 24 weeks of gestation to 18 years. No dosing number
+changed in this build.
+
+If this file does not show the build above, the deployed copy is stale.
