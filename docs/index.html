@@ -218,8 +218,13 @@ input[type=checkbox]{width:auto;accent-color:var(--brand)}
 .chip.np-chip[aria-pressed="true"]{background:var(--neu, #6366f1);border-color:var(--neu, #6366f1);color:#fff}
 .chip.risk,.chip.warn{border-color:var(--warn-line);color:var(--warn);background:var(--warn-soft)}
 .chip.risk[aria-pressed="true"]{background:var(--crit);border-color:var(--crit);color:#fff}
-.chip.goto{background:var(--raised);border-color:var(--line3);color:var(--ink2);width:100%;justify-content:flex-start}
+.chip.goto{background:var(--raised);border-color:var(--line3);color:var(--ink2);width:100%;justify-content:flex-start;padding:6px 10px;font-size:var(--fs-2);border-radius:var(--r-sm)}
 .chip.goto:hover{background:var(--crit-soft);border-color:var(--crit-line);color:var(--crit)}
+.quickfill-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.quickfill-wrap .chip{flex:1 1 auto;font-size:var(--fs-1);padding:4px 8px;justify-content:center}
+.emergency-list{display:flex;flex-direction:column;gap:5px;max-height:260px;overflow-y:auto;padding-right:2px;scrollbar-width:thin}
+.emergency-list::-webkit-scrollbar{width:4px}
+.emergency-list::-webkit-scrollbar-thumb{background:var(--line3);border-radius:2px}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
   background:var(--brand);border:1px solid var(--brand);color:#fff;
@@ -352,10 +357,29 @@ input[type=checkbox]{width:auto;accent-color:var(--brand)}
 .card-toggle .ctog-icon{font-size:12px;line-height:1;display:inline-block;transition:transform .15s ease}
 .card-toggle .ctog-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.3px}
 
-.card.is-expanded{border-color:var(--brand-line);box-shadow:var(--sh-2)}
+/* Card Collapsed & Expanded states */
+.card:not(.is-expanded) .card-body{
+  display:none !important;
+}
+.card:not(.is-expanded){
+  cursor:pointer;
+}
+.card:not(.is-expanded) .ch{
+  border-radius:var(--r-md);
+  padding:10px 13px;
+}
+.card:not(.is-expanded):hover{
+  background:var(--panel2);
+  border-color:var(--brand-line);
+  box-shadow:var(--sh-2);
+}
+.card.is-expanded{border-color:var(--brand-line);box-shadow:var(--sh-2);margin-bottom:6px}
+.card.is-expanded .ch{border-bottom:1px solid var(--line2);background:var(--panel2)}
 .card.is-expanded .card-toggle{background:var(--brand-soft);color:var(--brand);border-color:var(--brand-line)}
 .card.is-expanded.risk5{border-color:var(--crit-line)}
 .card.is-expanded.risk5 .card-toggle{background:var(--crit-soft);color:var(--crit);border-color:var(--crit-line)}
+.card.is-expanded .card-body{display:block;padding-top:10px}
+.b-dose-pill{background:var(--ok-soft,#ecfdf5);color:var(--ok,#059669);border:1px solid var(--ok-line,#a7f3d0);font-weight:800;font-size:10px}
 
 
 /* the answer block: dose + the one-line volume, visually fused */
@@ -940,7 +964,7 @@ body.dark .vol-callout{color:var(--brand2)}
   <div class="spacer"></div>
   <div class="meta">
     <div id="metaCtx">No patient entered</div>
-    <div class="mono">build 9e00ec770761</div>
+    <div class="mono">build 6acf87bec5fa</div>
   </div>
   <button class="tbtn icon" id="btnWiz" type="button" title="Guided 3-step patient entry wizard" aria-label="Patient wizard"><span aria-hidden="true">👶</span><span class="tlab">Wizard</span></button>
   <button class="tbtn icon" id="btnGuide" type="button" title="Junior staff quick start & safety guide" aria-label="Junior guide"><span aria-hidden="true">💡</span><span class="tlab">Guide</span></button>
@@ -1052,38 +1076,64 @@ body.dark .vol-callout{color:var(--brand2)}
           <button class="btn ghost sm" id="btnReset" type="button">Clear patient</button>
         </div>
 
-        <div class="chips no-print" style="margin:12px -14px -13px;border-radius:0 0 var(--r-lg) var(--r-lg)">
-          <span style="font-size:var(--fs-1);font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--ink3);width:100%">Quick fill</span>
-          <button class="chip quickfill" data-fill=",,," type="button" title="Clear the patient">—</button>
-          <button class="chip quickfill" data-fill="3.4,,0,7" type="button">Term newborn</button>
-          <button class="chip quickfill" data-fill="1.2,0,0,7" type="button">ELBW 1.2 kg</button>
-          <button class="chip quickfill" data-fill="9.6,1,0," type="button">1 year · 9.6 kg</button>
-          <button class="chip quickfill" data-fill="18.3,5,0," type="button">5 years · 18.3 kg</button>
-          <button class="chip quickfill" data-fill="31.9,10,0," type="button">10 years · 31.9 kg</button>
-          <button class="chip quickfill" data-fill="56.8,15,0," type="button">15 years · 56.8 kg</button>
+        <div class="quickfill-box no-print" style="margin:14px -14px -13px;padding:10px 14px 12px;border-top:1px solid var(--line2);background:var(--panel2);border-radius:0 0 var(--r-lg) var(--r-lg)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:var(--fs-1);font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--ink3)">⚡ Quick Fill Preset</span>
+            <span style="font-size:10px;font-weight:700;color:var(--brand);background:var(--brand-soft);padding:1px 6px;border-radius:var(--r-pill)">Dropdown</span>
+          </div>
+          <select id="selQuickFill" class="inp" aria-label="Select quick patient preset" style="width:100%;font-weight:600;font-size:var(--fs-2);cursor:pointer;background:var(--raised);border:1.5px solid var(--line3);padding:7px 10px;border-radius:var(--r-md);margin-bottom:8px">
+            <option value="">⚡ Select patient preset...</option>
+            <option value="3.4,,0,7">👶 Term newborn · 3.4 kg (40 wk)</option>
+            <option value="1.2,0,0,7">🍼 Preterm ELBW · 1.2 kg (28+3 wk)</option>
+            <option value="9.6,1,0,">🧒 1 year infant · 9.6 kg</option>
+            <option value="18.3,5,0,">🧒 5 years child · 18.3 kg</option>
+            <option value="31.9,10,0,">🧑 10 years child · 31.9 kg</option>
+            <option value="56.8,15,0,">🧑 15 years adolescent · 56.8 kg</option>
+            <option value=",,,">🧹 Clear patient fields</option>
+          </select>
+          <div class="quickfill-wrap">
+            <button class="chip quickfill" data-fill=",,," type="button" title="Clear the patient">—</button>
+            <button class="chip quickfill" data-fill="3.4,,0,7" type="button">Term 3.4 kg</button>
+            <button class="chip quickfill" data-fill="1.2,0,0,7" type="button">ELBW 1.2 kg</button>
+            <button class="chip quickfill" data-fill="9.6,1,0," type="button">1y · 9.6 kg</button>
+            <button class="chip quickfill" data-fill="18.3,5,0," type="button">5y · 18.3 kg</button>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="panel">
-      <div class="ph"><h2>Emergency shortcuts</h2><span class="rt">one tap</span></div>
+      <div class="ph"><h2>Emergency shortcuts</h2><span class="rt">dropdown menu</span></div>
       <div class="pb">
-        <div class="chips" style="padding:0;border:0;background:transparent">
-          <button class="chip goto" data-goto="p-arrest-adult" type="button">🫀 Adult cardiac arrest</button>
+        <select id="selEmergency" class="inp" aria-label="Jump to emergency protocol" style="width:100%;font-weight:650;font-size:var(--fs-2);cursor:pointer;background:var(--raised);border:1.5px solid var(--line3);padding:8px 10px;border-radius:var(--r-md);margin-bottom:8px">
+          <option value="">🚨 Jump to emergency protocol...</option>
+          <option value="p-arrest-paed">🧒 Paediatric cardiac arrest (AHA 2025)</option>
+          <option value="p-arrest-adult">🫀 Adult cardiac arrest</option>
+          <option value="p-anaphylaxis">💉 Anaphylaxis (Adrenaline IM)</option>
+          <option value="p-septic-shock">🩸 Septic shock (Hour-1 bundle)</option>
+          <option value="p-status-epilepticus">⚡ Status epilepticus</option>
+          <option value="p-hyperkalaemia">🧪 Hyperkalaemia emergency</option>
+          <option value="p-snakebite">🐍 Snakebite (India ASV)</option>
+          <option value="p-scorpion">🦂 Scorpion sting (Prazosin)</option>
+          <option value="p-op-poisoning">☠️ OP poisoning (Atropine)</option>
+          <option value="p-dka">🍬 DKA (Paediatric protocol)</option>
+          <option value="p-neonatal-resus">👶 Neonatal resuscitation</option>
+          <option value="p-eclampsia">🤰 Eclampsia (MgSO4)</option>
+          <option value="p-pph">🩸 Postpartum haemorrhage</option>
+          <option value="p-antidote-table">🧾 Antidote table</option>
+          <option value="p-never-events">🚫 Never events</option>
+        </select>
+        <div class="emergency-list">
           <button class="chip goto" data-goto="p-arrest-paed" type="button">🧒 Paediatric arrest</button>
+          <button class="chip goto" data-goto="p-arrest-adult" type="button">🫀 Adult cardiac arrest</button>
           <button class="chip goto" data-goto="p-anaphylaxis" type="button">💉 Anaphylaxis</button>
           <button class="chip goto" data-goto="p-septic-shock" type="button">🩸 Septic shock</button>
           <button class="chip goto" data-goto="p-status-epilepticus" type="button">⚡ Status epilepticus</button>
-          <button class="chip goto" data-goto="p-hyperkalaemia" type="button">🧪 Hyperkalaemia</button>
           <button class="chip goto" data-goto="p-snakebite" type="button">🐍 Snakebite (India)</button>
           <button class="chip goto" data-goto="p-scorpion" type="button">🦂 Scorpion sting</button>
           <button class="chip goto" data-goto="p-op-poisoning" type="button">☠️ OP poisoning</button>
           <button class="chip goto" data-goto="p-dka" type="button">🍬 DKA</button>
-          <button class="chip goto" data-goto="p-eclampsia" type="button">🤰 Eclampsia</button>
-          <button class="chip goto" data-goto="p-pph" type="button">🩸 Postpartum haemorrhage</button>
-          <button class="chip goto" data-goto="p-neonatal-resus" type="button">👶 Neonatal resuscitation</button>
-          <button class="chip goto" data-goto="p-antidote-table" type="button">🧾 Antidote table</button>
-          <button class="chip goto" data-goto="p-never-events" type="button">🚫 Never events</button>
+          <button class="chip goto" data-goto="p-neonatal-resus" type="button">👶 Neonatal resus</button>
         </div>
       </div>
     </div>
@@ -7027,6 +7077,9 @@ function renderCard(reg, ctx){
   Object.keys(routes).slice(0,4).forEach(function(r){ badges+='<span class="bdg b-route '+routeClass(r)+'">'+esc(r)+'</span>'; });
   if(reg.inf) badges+='<span class="bdg b-same">INFUSION</span>';
   if(dw.label!=='actual body weight') badges+='<span class="bdg b-same">'+esc(dw.label)+'</span>';
+  if(dw.kg!=null && out.dose && out.dose.text){
+    badges+='<span class="bdg b-dose-pill" title="Calculated dose: '+esc(out.dose.text)+'">⚡ '+esc(out.dose.text)+'</span>';
+  }
   h.push('<div class="ch" role="button" tabindex="0" aria-expanded="'+open+'" title="'+(open?'Click to collapse card':'Click to expand full details')+'">'+
          '<div class="chead"><div class="nm">'+esc(reg.n)+'</div>'+
          '<div class="ind">'+esc(reg.ind||'')+'</div><div class="badges">'+badges+'</div></div>'+
@@ -7036,6 +7089,9 @@ function renderCard(reg, ctx){
          '<span class="ctog-icon" aria-hidden="true">'+(open?'▾':'▸')+'</span>'+
          '<span class="ctog-lbl">'+(open?'Collapse':'Details')+'</span></button>'+
          '</div>');
+
+  /* ---- collapsible card body ---- */
+  h.push('<div class="card-body">');
 
   /* ---- the answer block: the dose and the volume to draw, fused ---- */
   h.push('<div class="answer'+(out.capApplied?' ans-warn':'')+'">');
@@ -7242,6 +7298,7 @@ function renderCard(reg, ctx){
          '</div>');
 
   h.push('</div></details>');   /* /cdet */
+  h.push('</div>');             /* /card-body */
   h.push('</article>');
   return h.join('');
 }
@@ -9431,6 +9488,15 @@ function wirePanel(){
   $$('.chip.goto').forEach(function(b){
     b.addEventListener('click',function(){ gotoProto(b.getAttribute('data-goto')); });
   });
+  var selEm = $('#selEmergency');
+  if(selEm){
+    selEm.addEventListener('change', function(){
+      if(this.value){
+        gotoProto(this.value);
+        this.value = '';
+      }
+    });
+  }
 
   /* demo quick-fill */
   $$('.quickfill').forEach(function(b){
@@ -9440,6 +9506,17 @@ function wirePanel(){
       syncPanel(); renderAll(); toast('Patient set: '+(v[0]?v[0]+' kg':'')+(v[1]?' · '+v[1]+' y':'')+(v[2]?' '+v[2]+' m':''));
     });
   });
+  var selQf = $('#selQuickFill');
+  if(selQf){
+    selQf.addEventListener('change', function(){
+      if(this.value !== ''){
+        var v = this.value.split(',');
+        ST.pt.wt = v[0]; ST.pt.ageY = v[1]; ST.pt.ageM = v[2]; ST.pt.ageD = v[3]||'';
+        syncPanel(); renderAll(); toast('Patient set: '+(v[0]?v[0]+' kg':'')+(v[1]?' · '+v[1]+' y':'')+(v[2]?' '+v[2]+' m':''));
+        this.value = '';
+      }
+    });
+  }
 }
 var _dh=null;
 function debounceRender(){ clearTimeout(_dh); _dh=setTimeout(renderAll,10); }
