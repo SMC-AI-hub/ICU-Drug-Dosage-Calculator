@@ -1,25 +1,39 @@
 Paediatric & Neonatal Drug Calculator — deployed build
 =======================================================
 
-build          6c783f23d6be
-built          2026-10-08 14:07 UTC
+build          5bc54da1c135
+built          2026-10-26 15:10 UTC
 regimens       279   (655 formulations, 20 systems)
 dose checks    4185  independently re-derived and agreed
 gate           validate PASS · build PASS · pwa 73/73 · smoke 163/163 · browser 8/8
 
-What is new in this build
--------------------------
-1. Care-pathway command bar: Cyanotic CHD (1) · Acyanotic CHD (7) ·
-   Continuous infusions (48) · General ICU & emergencies (223).
-   Exclusive and exhaustive buckets — the validator fails the build if
-   they do not sum to 279.
-2. Verification tags on every calculated card: [Dose verified] and
-   [Volume verified], which turn amber when a ceiling was applied or the
-   weight was estimated, and red when a limit is breached.
-3. Live safety states: a documented 24-hour ceiling breached in the
-   infusion panel turns the output red and names the limit.
+What is new in this build (Junior Clinical-UX Redesign)
+------------------------------------------------------
+1. Task-First Home Dashboard:
+   - 3 primary workflow paths: 🚨 Emergency Now, 👶 Guided Patient Wizard, 💊 Find a Drug.
+   - Quick patient presets (5y 18.3kg, 1y 9.6kg, Term newborn 3.4kg, 28+3 preterm 1.1kg).
+   - Junior Doctor & Nurse Quick-Start Guide modal.
 
-Scope unchanged: 24 weeks of gestation to 18 years. No dosing number
-changed in this build.
+2. 3-Step Guided Patient Entry Wizard:
+   - Step 1: Population selector (Neonate <28d vs Child/Adolescent 1m–18y).
+   - Step 2: Measured Weight vs Gestational Age (weeks+days) + Fenton preterm curves / WHO medians.
+   - Step 3: Optional Renal/Electrolyte labs (Creatinine for eGFR/CrCl, K+, Na+, Glucose).
 
-If this file does not show the build above, the deployed copy is stale.
+3. Unified 9-Part Clinical Dose Card:
+   - Clear visual hierarchy with prominent DOSE and VOLUME TO DRAW UP.
+   - Verified check tags: [✓ Dose verified], [✓ Volume verified], [⚠ Estimated weight], [⚠ Ceiling applied].
+   - Collapsible Calculation Formula & Working expander.
+   - Sub-0.1 mL micro-volume dilution instructions.
+   - ISMP High-Alert Independent Double-Check interactive checklist for high-risk drugs.
+   - 1-tap "📋 Copy Dose Note" for clinical handovers and EMR notes.
+
+4. Emergency Resuscitation Mode & CPR Timer:
+   - Real-time CPR Cycle Timer with 2-minute rhythm check & adrenaline alert.
+   - Weight-based Defibrillation energy table (1st shock 2 J/kg, 2nd shock 4 J/kg, Cardioversion 1 J/kg).
+   - Emergency bolus medication quick-reference.
+
+5. Neonatal Calculators Suite:
+   - Feed volume progression calculator: 2-hourly (12/d), 3-hourly (8/d), and 4-hourly (6/d) aliquots.
+   - Glucose Infusion Rate (GIR mg/kg/min) calculator.
+   - Neonatal interval banding guidance for Gentamicin, Vancomycin, Caffeine, and Paracetamol.
+
