@@ -29,6 +29,8 @@
     <div id="metaCtx">No patient entered</div>
     <div class="mono">build /*__BUILD__*/</div>
   </div>
+  <button class="tbtn icon" id="btnWiz" type="button" title="Guided 3-step patient entry wizard" aria-label="Patient wizard"><span aria-hidden="true">👶</span><span class="tlab">Wizard</span></button>
+  <button class="tbtn icon" id="btnGuide" type="button" title="Junior staff quick start & safety guide" aria-label="Junior guide"><span aria-hidden="true">💡</span><span class="tlab">Guide</span></button>
   <button class="tbtn icon" id="btnRail" type="button" title="Patient panel and emergency shortcuts" aria-label="Patient panel">☰</button>
   <button class="tbtn icon" id="btnPal" type="button" title="Jump to any drug, protocol or tool (Ctrl+K)" aria-label="Find anything">🔍</button>
   <button class="tbtn icon" id="btnType" type="button" title="Larger text on/off" aria-label="Text size">Aa</button>
@@ -198,6 +200,26 @@
   <div class="modal">
     <div class="mh"><h2 id="modalT">Reference</h2><button class="xbtn" id="modalX" type="button">Close ✕</button></div>
     <div class="mb" id="modalB"></div>
+  </div>
+</div>
+
+<div class="wiz-modal-bd" id="wizModal" role="dialog" aria-modal="true" aria-labelledby="wizTitle">
+  <div class="wiz-card">
+    <div class="wiz-head">
+      <h2 id="wizTitle">👶 Guided Patient Entry Wizard</h2>
+      <button class="xbtn" id="wizClose" type="button" aria-label="Close wizard">✕</button>
+    </div>
+    <div class="wiz-body" id="wizBody"></div>
+  </div>
+</div>
+
+<div class="wiz-modal-bd" id="walkModal" role="dialog" aria-modal="true" aria-labelledby="walkTitle">
+  <div class="wiz-card">
+    <div class="wiz-head">
+      <h2 id="walkTitle">💡 Junior Doctor &amp; Nurse Quick-Start</h2>
+      <button class="xbtn" id="walkClose" type="button" aria-label="Close guide">✕</button>
+    </div>
+    <div class="wiz-body" id="walkBody"></div>
   </div>
 </div>
 

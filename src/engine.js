@@ -1563,3 +1563,60 @@ PROT = [
    'Reconcile all infusion rates at every handover and document them in mL/h AND in dose units.',
    'This calculator\'s pump tab works out the mL/h from the ordered dose and the prepared concentration — use it, then verify the answer makes clinical sense (a rate above 50 mL/h for a vasopressor usually means the bag is too dilute).']}
 ];
+
+/* ------------------------------------------------------------------ */
+/* Neonatal & Resuscitation Clinical Helpers                          */
+/* ------------------------------------------------------------------ */
+function calcFeedVolumes(wtKg, targetMlKgDay){
+  if(wtKg==null||targetMlKgDay==null||wtKg<=0||targetMlKgDay<=0) return null;
+  var totalDay = wtKg * targetMlKgDay;
+  return {
+    totalDay: totalDay,
+    q2h: totalDay / 12,
+    q3h: totalDay / 8,
+    q4h: totalDay / 6,
+    hourly: totalDay / 24
+  };
+}
+
+function calcDefibJoules(wtKg){
+  if(wtKg==null||wtKg<=0) return null;
+  var w = Number(wtKg);
+  return {
+    initialShock: Math.min(200, Math.max(2, Math.round(w * 2))),
+    subsequentShock: Math.min(360, Math.max(4, Math.round(w * 4))),
+    synchronizedCardioversion: Math.min(100, Math.max(1, Math.round(w * 1))),
+    maxShock: Math.min(360, Math.max(10, Math.round(w * 10))),
+    shock1: Math.min(200, Math.max(2, Math.round(w * 2))),
+    shock2: Math.min(360, Math.max(4, Math.round(w * 4))),
+    shockSync: Math.min(100, Math.max(1, Math.round(w * 1)))
+  };
+}
+
+function neonatalIntervalAdvice(id, gaW, ageD){
+  var ga = Number(gaW)||40;
+  var d = Number(ageD)||0;
+  var pma = ga + Math.floor(d/7);
+  if(id === 'gentamicin' || id === 'genta-sepsis-neo'){
+    if(pma < 30) return { interval: 'every 48 hours', reason: 'PMA <30 weeks (immature GFR) — dose: 5 mg/kg q48h', band: 'PMA <30 wk' };
+    if(pma <= 34) return { interval: 'every 36 hours', reason: 'PMA 30–34 weeks — dose: 5 mg/kg q36h', band: 'PMA 30–34 wk' };
+    if(d <= 7) return { interval: 'every 24 hours', reason: 'PMA ≥35 weeks & age ≤7 days — dose: 5 mg/kg q24h', band: 'Term/PMA ≥35 wk ≤7d' };
+    return { interval: 'every 24 hours', reason: 'PMA ≥35 weeks & age >7 days — dose: 5 mg/kg q24h', band: 'Term/PMA ≥35 wk >7d' };
+  }
+  if(id === 'vancomycin-inf' || id === 'vanc-neo'){
+    if(pma < 30) return { interval: 'every 24 hours', reason: 'PMA <30 weeks — dose: 15 mg/kg q24h', band: 'PMA <30 wk' };
+    if(pma <= 36) return { interval: 'every 18 hours', reason: 'PMA 30–36 weeks — dose: 15 mg/kg q18h', band: 'PMA 30–36 wk' };
+    if(pma <= 44) return { interval: 'every 12 hours', reason: 'PMA 37–44 weeks — dose: 15 mg/kg q12h', band: 'PMA 37–44 wk' };
+    return { interval: 'every 8 hours', reason: 'PMA ≥45 weeks — dose: 15 mg/kg q8h', band: 'PMA ≥45 wk' };
+  }
+  if(id === 'caffeine-apnoea'){
+    return { interval: 'Loading stat, then every 24 hours', reason: 'Loading 20 mg/kg caffeine citrate (10 mg/kg base), then maintenance 5–10 mg/kg/day q24h', band: 'Preterm apnoea protocol' };
+  }
+  if(id === 'paracetamol-iv' || id === 'pcm-iv-pd'){
+    if(ga < 32 || pma < 32) return { interval: 'every 8–12 hours', reason: 'Preterm <32 weeks — 10 mg/kg q8–12h (max 30 mg/kg/day)', band: 'Preterm <32 wk' };
+    if(pma < 37) return { interval: 'every 6–8 hours', reason: 'Late preterm 32–36 weeks — 12.5 mg/kg q6–8h (max 45 mg/kg/day)', band: 'Preterm 32–36 wk' };
+    return { interval: 'every 4–6 hours', reason: 'Term neonate/infant — 15 mg/kg q4–6h (max 60 mg/kg/day)', band: 'Term / Infant' };
+  }
+  return null;
+}
+

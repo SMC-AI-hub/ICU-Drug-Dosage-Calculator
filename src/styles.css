@@ -185,15 +185,28 @@ input[type=checkbox]{width:auto;accent-color:var(--brand)}
 .wbox{margin-top:10px}
 
 /* ---------------------------------------------------------------- chips */
-.chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-top:1px solid var(--line2);background:var(--panel2)}
+.chips{
+  display:flex;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding:8px 14px;
+  border-top:1px solid var(--line2);background:var(--panel2);scrollbar-width:thin;
+}
+.chips::-webkit-scrollbar{height:4px}
+.chips::-webkit-scrollbar-thumb{background:var(--line3);border-radius:2px}
+.chips-box{border-top:1px solid var(--line2);background:var(--panel2)}
+.chip-lbl{display:flex;align-items:center;padding:7px 14px 2px;font-size:10px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:0.5px}
+.chips.nurse-chips{padding:4px 14px 6px;border-top:none}
+.chips.sys-chips{padding:4px 14px 8px;border-top:1px dashed var(--line2)}
 .chip{
+  flex:0 0 auto;white-space:nowrap;
   display:inline-flex;align-items:center;gap:5px;
   background:var(--raised);border:1px solid var(--line3);color:var(--ink2);
-  padding:6px 11px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:600;
+  padding:5px 11px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:650;
   transition:all .13s ease;
 }
 .chip:hover{border-color:var(--brand3);color:var(--brand);background:var(--brand-soft)}
 .chip[aria-pressed="true"],.chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.chip.np-chip{border-color:var(--neu-line, #c7d2fe);background:var(--raised)}
+.chip.np-chip:hover{border-color:var(--neu, #6366f1);color:var(--neu, #6366f1);background:var(--neu-soft, #ede9fe)}
+.chip.np-chip[aria-pressed="true"]{background:var(--neu, #6366f1);border-color:var(--neu, #6366f1);color:#fff}
 .chip.risk,.chip.warn{border-color:var(--warn-line);color:var(--warn);background:var(--warn-soft)}
 .chip.risk[aria-pressed="true"]{background:var(--crit);border-color:var(--crit);color:#fff}
 .chip.goto{background:var(--raised);border-color:var(--line3);color:var(--ink2);width:100%;justify-content:flex-start}
@@ -287,7 +300,13 @@ input[type=checkbox]{width:auto;accent-color:var(--brand)}
 .card.openCard{box-shadow:var(--sh-3);border-color:var(--brand-line)}
 .card.pinned{border-left-style:double;border-left-width:6px}
 
-.ch{display:flex;gap:9px;align-items:flex-start;padding:11px 13px 8px}
+.ch{
+  display:flex;gap:8px;align-items:flex-start;padding:11px 13px 8px;
+  cursor:pointer;user-select:none;transition:background .13s ease;
+  border-radius:var(--r-md) var(--r-md) 0 0;
+}
+.ch:hover{background:var(--panel2)}
+.ch:focus-visible{outline:2px solid var(--brand);outline-offset:-2px}
 .chead{min-width:0;flex:1}
 .nm{font-size:var(--fs-5);font-weight:730;letter-spacing:-.15px;line-height:1.25;color:var(--ink)}
 .ind{font-size:var(--fs-2);color:var(--ink3);margin-top:2px;line-height:1.35}
@@ -306,12 +325,29 @@ input[type=checkbox]{width:auto;accent-color:var(--brand)}
 .b-route.sc{background:var(--warn-soft);color:var(--warn);border-color:var(--warn-line)}
 .b-route.pr{background:var(--neu-soft);color:var(--neu);border-color:var(--neu-line)}
 .b-same{background:var(--panel2);color:var(--ink3);border-color:var(--line)}
+.b-purpose{background:var(--neu-soft, #ede9fe);color:var(--neu, #6366f1);border-color:var(--neu-line, #c7d2fe);font-weight:750}
 .star{
   flex:0 0 auto;background:transparent;border:1px solid transparent;color:var(--ink4);
   font-size:17px;line-height:1;padding:5px 7px;border-radius:var(--r-sm);transition:all .13s ease;
 }
 .star:hover{background:var(--warn-soft);color:var(--risk3);border-color:var(--warn-line)}
 .star.on{color:var(--risk3);border-color:var(--warn-line);background:var(--warn-soft)}
+
+.card-toggle{
+  flex:0 0 auto;display:inline-flex;align-items:center;gap:3px;
+  background:var(--panel2);border:1px solid var(--line2);color:var(--ink3);
+  font-size:var(--fs-1);font-weight:700;padding:4px 8px;border-radius:var(--r-pill);
+  cursor:pointer;transition:all .13s ease;line-height:1;
+}
+.card-toggle:hover{background:var(--brand-soft);color:var(--brand);border-color:var(--brand-line)}
+.card-toggle .ctog-icon{font-size:12px;line-height:1;display:inline-block;transition:transform .15s ease}
+.card-toggle .ctog-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.3px}
+
+.card.is-expanded{border-color:var(--brand-line);box-shadow:var(--sh-2)}
+.card.is-expanded .card-toggle{background:var(--brand-soft);color:var(--brand);border-color:var(--brand-line)}
+.card.is-expanded.risk5{border-color:var(--crit-line)}
+.card.is-expanded.risk5 .card-toggle{background:var(--crit-soft);color:var(--crit);border-color:var(--crit-line)}
+
 
 /* the answer block: dose + the one-line volume, visually fused */
 .answer{margin:0 13px 10px;border:1px solid var(--brand-line);background:var(--brand-soft);border-radius:var(--r-sm)}
@@ -616,3 +652,234 @@ body.dark .vol{color:var(--brand2)}
 .hi{scroll-margin-top:170px}
 .hl{background:var(--ok-soft)}
 .pinned{}
+
+/* ============================ CARE-PATHWAY COMMAND BAR ====================
+   Replaces hunting through 20 organ-system chips. Four pathways, each showing
+   its live count, sitting above the drug list so the whole app is one tap from
+   the patient bed. Dense by design: 34px tall, no wasted whitespace.        */
+.catbar{
+  display:flex;gap:6px;flex-wrap:wrap;
+  padding:9px 14px;border-top:1px solid var(--line2);background:var(--panel2);
+}
+.cat{
+  display:inline-flex;align-items:center;gap:7px;
+  min-height:34px;padding:0 12px;
+  background:var(--raised);border:1px solid var(--line3);color:var(--ink2);
+  border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:700;
+  letter-spacing:.2px;transition:all .13s ease;cursor:pointer;
+}
+.cat .ct{white-space:nowrap}
+.cat .cn{
+  font-variant-numeric:tabular-nums;
+  min-width:20px;padding:1px 5px;border-radius:99px;
+  background:var(--panel);border:1px solid var(--line2);
+  font-size:var(--fs-1);font-weight:700;color:var(--ink3);text-align:center;
+}
+.cat:hover{border-color:var(--brand3);color:var(--brand);background:var(--brand-soft)}
+.cat:hover .cn{border-color:var(--brand3);color:var(--brand)}
+.cat[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.cat[aria-pressed="true"] .cn{background:rgba(255,255,255,.2);border-color:transparent;color:#fff}
+/* the two cardiac pathways are the ones a CICU reaches for first */
+.cat-chd{border-color:var(--crit-line);color:var(--crit);background:var(--raised)}
+.cat-chd[aria-pressed="true"]{background:var(--crit);border-color:var(--crit);color:#fff}
+.cathint{
+  margin:0;padding:0 14px 9px;background:var(--panel2);
+  font-size:var(--fs-1);color:var(--ink3);line-height:1.4;
+  border-bottom:1px solid var(--line2);
+}
+@media print{.catbar,.cathint{display:none!important}}
+
+/* ==================== VERIFICATION TAGS & SAFETY STATES ==================
+   The tags sit under the dose on every card. They are live assertions, not
+   decoration: a tag turns amber when the weight is estimated or a ceiling was
+   applied, and red when a limit is breached or a dilution fails to reconcile.
+   The card border/background transitions rather than snapping, so the eye is
+   drawn to the change instead of being ambushed by it.                    */
+.verif{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.vt{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:var(--fs-1);font-weight:700;letter-spacing:.2px;
+  padding:2px 8px;border-radius:var(--r-pill);
+  border:1px solid var(--line3);background:var(--panel2);color:var(--ink3);
+  white-space:nowrap;
+}
+.vt::before{font-size:9px;line-height:1}
+.vt.v-y{border-color:var(--ok-line);background:var(--ok-soft);color:var(--ok)}
+.vt.v-y::before{content:"\2713"}
+.vt.v-w{border-color:var(--warn-line);background:var(--warn-soft);color:var(--warn)}
+.vt.v-w::before{content:"\26A0"}
+.vt.v-c{border-color:var(--crit-line);background:var(--crit-soft);color:var(--crit)}
+.vt.v-c::before{content:"\2715"}
+.vt.v-n{opacity:.75}
+.vt.v-n::before{content:"\2014"}
+
+/* the answer block carries the alert state for the whole calculation */
+.answer{transition:border-color .28s ease,background-color .28s ease,box-shadow .28s ease}
+.answer.ans-warn{
+  border-color:var(--warn-line);background:var(--warn-soft);
+  box-shadow:inset 3px 0 0 var(--warn);
+}
+
+/* amber/red treatment on the infusion (pump) output */
+.notebox.amber{border-color:var(--warn-line);background:var(--warn-soft);color:var(--warn)}
+.notebox.crit{border-color:var(--crit-line);background:var(--crit-soft);color:var(--crit)}
+.notebox.crit b,.notebox.amber b{color:inherit}
+
+.mxwrap{border:1px solid transparent;border-radius:var(--r-sm);
+  transition:border-color .28s ease,background-color .28s ease,box-shadow .28s ease}
+.mxwrap.mx-ok{border-color:var(--ok-line);background:var(--ok-soft)}
+.mxwrap.mx-warn{border-color:var(--warn-line);background:var(--warn-soft);box-shadow:inset 3px 0 0 var(--warn)}
+.mxwrap.mx-crit{border-color:var(--crit-line);background:var(--crit-soft);box-shadow:inset 3px 0 0 var(--crit)}
+.mxwrap.mx-ok .rate-hero,.mxwrap.mx-warn .rate-hero,.mxwrap.mx-crit .rate-hero{
+  background:transparent;border-color:transparent;
+}
+/* The headline rate must not stay green while the block is amber or red —
+   green reads as "all clear" and would contradict the warning next to it. */
+.mxwrap.mx-warn .rate-hero{border-color:var(--warn-line)}
+.mxwrap.mx-warn .rate-hero .rh,.mxwrap.mx-warn .rate-hero .rv{color:var(--warn)}
+.mxwrap.mx-crit .rate-hero{border-color:var(--crit-line)}
+.mxwrap.mx-crit .rate-hero .rh,.mxwrap.mx-crit .rate-hero .rv{color:var(--crit)}
+
+@media print{
+  .vt{border-color:#999;background:#fff;color:#000}
+  .answer.ans-warn,.mxwrap.mx-warn,.mxwrap.mx-crit{background:#fff;border-color:#000}
+}
+
+/* =========================================================================
+   TASK-FIRST HOME DASHBOARD & JUNIOR-FOCUSED CLINICAL UX
+   ========================================================================= */
+
+/* Hero Action Cards */
+.home-hero{padding:14px;background:var(--panel2);border-bottom:1px solid var(--line2)}
+.home-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:10px}
+.home-card{
+  display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:var(--r-lg);
+  border:1px solid var(--line2);background:var(--raised);box-shadow:var(--sh-1);
+  text-align:left;cursor:pointer;transition:all .15s ease;
+}
+.home-card:hover{transform:translateY(-2px);box-shadow:var(--sh-2);border-color:var(--brand-line)}
+.home-card.emerg{
+  background:linear-gradient(135deg,var(--crit-soft) 0,var(--raised) 100%);
+  border-color:var(--crit-line);grid-column:1/-1;
+}
+.home-card.emerg:hover{border-color:var(--crit);box-shadow:0 4px 12px rgba(197,34,31,.18)}
+.home-card .hc-icon{font-size:24px;line-height:1}
+.home-card .hc-title{font-size:var(--fs-5);font-weight:800;color:var(--ink);letter-spacing:-.2px}
+.home-card.emerg .hc-title{color:var(--crit)}
+.home-card .hc-desc{font-size:var(--fs-2);color:var(--ink2);line-height:1.4}
+.home-card .hc-badge{
+  align-self:flex-start;margin-top:4px;font-size:10px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.3px;padding:2px 7px;border-radius:var(--r-pill);
+  background:var(--panel);border:1px solid var(--line2);color:var(--ink3);
+}
+
+/* Sticky Patient Banner Enhancement */
+.pt-banner-active{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:10px 14px;background:var(--brand-soft);border-bottom:1px solid var(--brand-line);
+}
+.pt-badge-flag{
+  font-size:10px;font-weight:850;letter-spacing:.4px;padding:2px 8px;border-radius:var(--r-pill);
+  text-transform:uppercase;
+}
+.pt-flag-measured{background:var(--ok-soft);color:var(--ok);border:1px solid var(--ok-line)}
+.pt-flag-estimated{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line)}
+
+/* 9-Part Dose Card Refinements */
+.vol-hero-box{
+  margin:10px 0 6px;padding:12px;border-radius:var(--r-sm);
+  background:linear-gradient(180deg,rgba(11,83,148,.08) 0,rgba(11,83,148,.03) 100%);
+  border:1px solid var(--brand-line);
+}
+.vol-callout{
+  font-size:var(--fs-5);font-weight:800;color:var(--brand2);letter-spacing:-.2px;line-height:1.3;
+}
+body.dark .vol-callout{color:var(--brand2)}
+.subml-box{
+  margin:8px 0;padding:9px 11px;border-radius:var(--r-sm);
+  background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--warn);
+  font-size:var(--fs-2);line-height:1.45;
+}
+.subml-box b{color:inherit;font-weight:750}
+
+.double-check-box{
+  margin:10px 0;padding:11px 13px;border-radius:var(--r-sm);
+  background:var(--crit-soft);border:1px solid var(--crit-line);
+}
+.dc-title{font-size:var(--fs-2);font-weight:800;color:var(--crit);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px}
+.dc-list{display:flex;flex-direction:column;gap:5px;font-size:var(--fs-2);color:var(--ink)}
+.dc-item{display:flex;align-items:center;gap:7px;cursor:pointer}
+.dc-item input{width:16px;height:16px;accent-color:var(--crit);cursor:pointer}
+
+.formula-det{margin-top:8px;border:1px dashed var(--line3);border-radius:var(--r-sm);background:var(--panel2)}
+.formula-det>summary{cursor:pointer;list-style:none;padding:6px 10px;font-size:var(--fs-1);font-weight:700;color:var(--ink3)}
+.formula-det>summary::-webkit-details-marker{display:none}
+.formula-det>summary::before{content:"▸ ";color:var(--ink4)}
+.formula-det[open]>summary::before{content:"▾ "}
+.formula-body{padding:6px 10px 10px;font-size:var(--fs-1);color:var(--ink2);line-height:1.5;font-family:var(--mono)}
+
+.card-actions-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:8px;border-top:1px solid var(--line2)}
+.btn-copy{
+  display:inline-flex;align-items:center;gap:4px;background:var(--panel2);border:1px solid var(--line3);
+  color:var(--ink2);font-size:var(--fs-1);font-weight:700;padding:4px 9px;border-radius:var(--r-pill);
+  cursor:pointer;transition:all .13s ease;
+}
+.btn-copy:hover{background:var(--brand-soft);color:var(--brand);border-color:var(--brand-line)}
+
+/* Guided Patient Wizard Modal */
+.wiz-modal-bd{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;
+  align-items:center;justify-content:center;padding:12px;
+}
+.wiz-modal-bd.open{display:flex}
+.wiz-card{
+  background:var(--panel);border:1px solid var(--line2);border-radius:var(--r-lg);
+  box-shadow:var(--sh-3);max-width:560px;width:100%;max-height:90vh;overflow-y:auto;
+}
+.wiz-head{
+  display:flex;align-items:center;justify-content:space-between;padding:14px 18px;
+  border-bottom:1px solid var(--line2);background:var(--panel2);
+}
+.wiz-head h2{margin:0;font-size:var(--fs-5);font-weight:800;color:var(--ink)}
+.wiz-body{padding:18px}
+.wiz-group-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.wiz-group-btn{
+  display:flex;flex-direction:column;gap:4px;padding:14px;text-align:left;
+  border:2px solid var(--line3);border-radius:var(--r-md);background:var(--raised);
+  cursor:pointer;transition:all .15s ease;
+}
+.wiz-group-btn:hover{border-color:var(--brand);background:var(--brand-soft)}
+.wiz-group-btn.selected{border-color:var(--brand);background:var(--brand-soft);box-shadow:var(--sh-1)}
+.wiz-group-btn b{font-size:var(--fs-3);color:var(--ink)}
+.wiz-group-btn span{font-size:var(--fs-1);color:var(--ink3)}
+.wiz-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line2)}
+
+/* Emergency Resuscitation Mode */
+.resus-hero{padding:14px;background:linear-gradient(180deg,var(--crit-soft) 0,var(--panel) 100%);border-bottom:1px solid var(--crit-line)}
+.resus-timer-box{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;
+  background:var(--raised);border:1px solid var(--crit-line);border-radius:var(--r-md);
+  margin-top:10px;
+}
+.timer-disp{font-family:var(--mono);font-size:26px;font-weight:850;color:var(--crit);letter-spacing:1px}
+.timer-btn{
+  padding:7px 14px;border-radius:var(--r-pill);font-size:var(--fs-2);font-weight:750;
+  border:1px solid transparent;cursor:pointer;transition:all .13s ease;
+}
+.timer-btn.t-start{background:var(--crit);color:#fff}
+.timer-btn.t-reset{background:var(--panel2);border-color:var(--line2);color:var(--ink2)}
+
+.defib-card{
+  margin-top:12px;padding:12px 14px;border-radius:var(--r-md);
+  background:var(--raised);border:1px solid var(--line);
+}
+.defib-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:8px}
+.defib-pill{padding:8px 10px;border-radius:var(--r-sm);background:var(--panel2);border:1px solid var(--line2)}
+.defib-pill .dp-l{font-size:var(--fs-1);font-weight:750;color:var(--ink3);text-transform:uppercase}
+.defib-pill .dp-v{font-size:var(--fs-5);font-weight:850;color:var(--crit);margin-top:2px}
+
+/* Junior Walkthrough & Glossary */
+.walk-card{padding:16px;border-radius:var(--r-md);background:var(--raised);border:1px solid var(--line2);margin-bottom:10px}
+.walk-card h4{margin:0 0 6px;font-size:var(--fs-3);font-weight:800;color:var(--ink)}
+.walk-card p{margin:0;font-size:var(--fs-2);color:var(--ink2);line-height:1.45}
+

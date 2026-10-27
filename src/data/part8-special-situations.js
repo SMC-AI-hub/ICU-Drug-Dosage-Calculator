@@ -222,7 +222,7 @@ R({ id:'caffeine-apnoea', n:'Caffeine citrate', sys:'neonatal', cls:'Methylxanth
   warn:['CITRATE vs BASE CONFUSION is a classic neonatal medication error — always prescribe and check in terms of the CITRATE.','Tachycardia (>180/min), feeding intolerance, hyperglycaemia, jitteriness, diuresis, hypokalaemia.','Reduce or hold if the heart rate exceeds 180–200/min or if significant reflux/feeding intolerance develops.','Caffeine is superior to aminophylline/theophylline (fewer side effects, no level monitoring, once-daily dosing) — it is the drug of choice for apnoea of prematurity.','Monitor for necrotising enterocolitis (no clear increased risk) and ROP (no increased risk).'],
   ref:['CAP-TRIAL','NRP2025','IAP-NICU','BNFC','EURO-RDS','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY','NELSON','GHAI10','PG-TB-PED','IAP-STG'] });
 
-R({ id:'pge1-ductus', n:'Alprostadil (Prostaglandin E1)', sys:'neonatal', cls:'Vasodilator prostaglandin — maintains ductal patency',
+R({ id:'pge1-ductus', chd:'cyanotic', n:'Alprostadil (Prostaglandin E1)', sys:'neonatal', cls:'Vasodilator prostaglandin — maintains ductal patency',
   ind:'Duct-dependent congenital heart disease (duct-dependent systemic or pulmonary circulation) until surgical/interventional correction; transposition of the great arteries, coarctation/aortic interruption, pulmonary atresia, critical PS, HLHS', pop:'neo', maxAge:0.2, risk:5, inf:true,
   d:{t:'mcgkgmin', lo:0.01, hi:0.1},
   diln:[{l:'500 mcg in 50 mL D5W → 10 mcg/mL (0.05 mcg/kg/min in a 3-kg neonate = 0.9 mL/h)', amt:500, in:50, u:'mcg', bag:'50 mL 5% dextrose'},
@@ -257,7 +257,7 @@ R({ id:'neonatal-sepsis', n:'Neonatal sepsis — empirical antibiotics', sys:'ne
   ref:['IAP-NEO-SEPSIS','WHO-NEO','NRP2025','NICE-NG195','SANFORD','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY','NELSON','GHAI10','PG-TB-PED','IAP-STG'] });
 
 /* ================= PAEDIATRIC PROGRAMMES ================= */
-R({ id:'ibuprofen-pda', n:'Ibuprofen — patent ductus arteriosus (PDA)', sys:'neonatal', cls:'Non-selective COX inhibitor (prostaglandin synthesis blocker)',
+R({ id:'ibuprofen-pda', chd:'acyanotic', n:'Ibuprofen — patent ductus arteriosus (PDA)', sys:'neonatal', cls:'Non-selective COX inhibitor (prostaglandin synthesis blocker)',
   ind:'Haemodynamically significant patent ductus arteriosus in preterm infants (first-line medical closure); also used in term infants awaiting intervention', pop:'neo', risk:4, inf:false,
   d:{t:'mgkg', lo:5, hi:10, cap:20, rep:'STANDARD course: 10 mg/kg, then 5 mg/kg at 24 h and 5 mg/kg at 48 h (three doses). If treatment starts AFTER 72 h of life, units using the HIGHER course give 20 mg/kg, then 10 mg/kg at 24 h and 10 mg/kg at 48 h. A second course may be given if the duct remains significant.'},
   fx:[{s:'5 mg/mL ibuprofen (Pedea, IV)', c:5, u:'mg', p:'2 mL ampoule (10 mg)', b:'Pedea (Orphan Europe); generic ibuprofen IV where licensed', r:'IV', hl:1},
@@ -270,7 +270,7 @@ R({ id:'ibuprofen-pda', n:'Ibuprofen — patent ductus arteriosus (PDA)', sys:'n
         'Do not run concurrently with other prostaglandin inhibitors (indomethacin/paracetamol courses) without a definite plan.'],
   notes:['Roughly 70–80 % of ducts close after one course. The dose is the same by the IV and oral routes, but the oral route is only for babies tolerating enteral feeds.'],
   ref:['HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY','IAP-STG','NELSON']});
-R({ id:'indomethacin-pda', n:'Indomethacin — patent ductus arteriosus (PDA)', sys:'neonatal', cls:'Non-selective COX inhibitor (prostaglandin synthesis blocker)',
+R({ id:'indomethacin-pda', chd:'acyanotic', n:'Indomethacin — patent ductus arteriosus (PDA)', sys:'neonatal', cls:'Non-selective COX inhibitor (prostaglandin synthesis blocker)',
   ind:'Haemodynamically significant PDA where ibuprofen is unavailable, contraindicated or has failed', pop:'neo', risk:4,
   d:{t:'mgkg', lo:0.1, hi:0.2, rep:'INITIAL dose 0.2 mg/kg IV over 30 min, then TWO further doses at 12–24 h intervals. Maintenance dose by postnatal age: <48 h old or weight <1 kg = 0.1 mg/kg; 2–7 days old = 0.2 mg/kg; >7 days old = 0.25 mg/kg.'},
   fx:[{s:'1 mg lyophilised powder (indomethacin sodium trihydrate)', c:1, u:'mg', p:'1 mg vial — reconstitute with 1 mL of the supplied diluent or WFI → 1 mg/mL', b:'Indocid (imported/restricted supply); indomethacin injection IP where stocked', r:'IV', hl:1}],

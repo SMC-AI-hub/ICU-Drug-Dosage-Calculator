@@ -111,7 +111,7 @@ R({ id:'steroid-asthma-pd', n:'Hydrocortisone / Prednisolone — paediatric asth
   warn:['Give steroids EARLY (within 1 h of presentation) in every acute asthma attack — this reduces admissions and relapse.','Check the oral solution concentration: 1 mg/mL and 5 mg/mL presentations are both available in India and a mix-up causes a 5-fold error.','Short courses (<5 days) do not need tapering.','Hyperglycaemia and behavioural change are common in children.'],
   ref:['GINA2024','IAP-ASTHMA','BTS-ASTHMA','BNFC','NICE-CG25','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY','NELSON','GHAI10','IAP-STG'] });
 
-R({ id:'sildenafil-ph', n:'Sildenafil', sys:'respiratory', cls:'Phosphodiesterase-5 inhibitor (pulmonary vasodilator)',
+R({ id:'sildenafil-ph', chd:'acyanotic', n:'Sildenafil', sys:'respiratory', cls:'Phosphodiesterase-5 inhibitor (pulmonary vasodilator)',
   ind:'Pulmonary arterial hypertension; persistent pulmonary hypertension of the newborn; right ventricular failure; weaning off inhaled NO', pop:'all', risk:4,
   d:{t:'mgkg', lo:0.5, hi:2, cap:80, rep:'every 6–8 h orally (paediatric/PPHN); adult PAH 20 mg TDS'},
   fx:[{s:'20 mg tablet', c:20, u:'mg', p:'strip of 4', b:'Sildenafil 20 mg — Suhagra 20 (Cipla), Revita, Silvitra, Manforce (PAH dosing uses the 20 mg strength)', r:'PO', hl:1},
@@ -169,7 +169,7 @@ R({ id:'furosemide-ad', n:'Furosemide', sys:'renal', cls:'Loop diuretic (NKCC2 i
   warn:['Hypokalaemia, hyponatraemia, hypomagnesaemia, hypocalcaemia, metabolic alkalosis, dehydration, AKI (pre-renal) — check electrolytes daily.','Ototoxicity — risk rises with rapid bolus (>4 mg/min), doses >1–2 g/day, renal failure, and concurrent aminoglycosides.','Sulfa allergy (cross-reactivity is rare but reported).','In oliguric AKI, diuretics do NOT reduce the need for dialysis or mortality — use them only to achieve fluid balance.'],
   ref:['ESC-HF','KDIGO-AKI','BNF','MARINO'] });
 
-R({ id:'furosemide-pd', n:'Furosemide — paediatric', sys:'renal', cls:'Loop diuretic',
+R({ id:'furosemide-pd', chd:'acyanotic', n:'Furosemide — paediatric', sys:'renal', cls:'Loop diuretic',
   ind:'Paediatric volume overload, heart failure, pulmonary oedema, BPD, nephrotic syndrome', pop:'paed', risk:3,
   d:{t:'mgkg', lo:0.5, hi:2, cap:40, rep:'0.5–1 mg/kg IV (max 20 mg/dose) every 6–12 h; infusion 0.05–0.2 mg/kg/h'},
   fx:[{s:'10 mg/mL', c:10, u:'mg', p:'2 mL ampoule (20 mg)', b:'Lasix (Sanofi), Frusemide IP — Neon, Samarth', r:'IV/PO', hl:1},
@@ -200,7 +200,7 @@ R({ id:'bumetanide', n:'Bumetanide', sys:'renal', cls:'Loop diuretic (40× more 
   warn:['A 40-fold potency difference from furosemide — a mg-for-mg substitution causes massive overdose. Always convert explicitly.','More profound hypokalaemia than furosemide.','Myalgia and muscle cramps; rarely rhabdomyolysis.'],
   ref:['ESC-HF','BNF'] });
 
-R({ id:'spironolactone', n:'Spironolactone', sys:'renal', cls:'Mineralocorticoid receptor antagonist (potassium-sparing)',
+R({ id:'spironolactone', chd:'acyanotic', n:'Spironolactone', sys:'renal', cls:'Mineralocorticoid receptor antagonist (potassium-sparing)',
   ind:'Cirrhotic ascites (first-line), heart failure with reduced EF, primary aldosteronism, resistant hypertension', pop:'all', risk:4,
   d:{t:'mg', lo:25, hi:100, cap:400, capDay:400, rep:'heart failure 25–50 mg daily; ascites 100–400 mg daily (with furosemide 40–160 mg)'},
   fx:[{s:'25 mg tablet', c:25, u:'mg', p:'strip of 10', b:'Aldactone (RPG/Sanofi), Lactone, Verospiron', r:'PO', hl:1},

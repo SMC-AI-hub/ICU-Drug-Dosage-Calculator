@@ -350,7 +350,7 @@ R({ id:'digoxin-ad', n:'Digoxin', sys:'arrhythmia', cls:'Cardiac glycoside (Na�
   warn:['Check potassium, magnesium, calcium and renal function BEFORE each dose — hypokalaemia and hypomagnesaemia precipitate toxicity.','Reduce dose by 50% if eGFR <30 mL/min; avoid loading in renal failure.','Toxicity: nausea, yellow-green vision, bradycardia, AV block, bidirectional VT. Antidote: digoxin-specific Fab (very limited in India), KCl, magnesium, atropine, pacing.','Never give IV calcium rapidly with digoxin (stone-heart risk — theoretical).'],
   ref:['AHA2025','BNF','MARINO'] });
 
-R({ id:'digoxin-pd', n:'Digoxin', sys:'arrhythmia', cls:'Cardiac glycoside',
+R({ id:'digoxin-pd', chd:'acyanotic', n:'Digoxin', sys:'arrhythmia', cls:'Cardiac glycoside',
   ind:'Paediatric SVT / rate control in heart failure', pop:'paed', risk:5,
   d:{t:'mcgkg', lo:20, hi:30, capDay:1000},
   fx:[{s:'0.25 mg/mL', c:0.25, u:'mg', p:'2 mL ampoule (0.5 mg)', b:'Lanoxin (GSK), Cardoxin', r:'IV/PO', hl:1},
@@ -413,7 +413,7 @@ R({ id:'dobutamine-inf', n:'Dobutamine', sys:'vasoactive', cls:'Predominant β1 
   warn:['Causes vasodilation → hypotension in hypovolaemic patients; ensure adequate preload first.','Tachycardia, ectopy and increased myocardial oxygen demand; reduce if HR rises >10% of baseline.','Do not mix with sodium bicarbonate or any alkaline solution.','Inactivated with heparin in the same line.'],
   ref:['SSC2021','MARINO','AHA2025-PALS','BNFC','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY'] });
 
-R({ id:'milrinone-inf', n:'Milrinone', sys:'vasoactive', cls:'Phosphodiesterase-3 inhibitor (inodilator)',
+R({ id:'milrinone-inf', chd:'acyanotic', n:'Milrinone', sys:'vasoactive', cls:'Phosphodiesterase-3 inhibitor (inodilator)',
   ind:'Low-output cardiogenic shock, post-cardiac-surgery, pulmonary hypertension/RV failure, β-blocker–refractory failure', pop:'all', risk:5, inf:true,
   d:{t:'mcgkgmin', lo:0.25, hi:0.75},
   diln:[{l:'20 mg in 20 mL NS → 1 mg/mL (1000 mcg/mL) syringe pump', amt:20, in:20, u:'mg', bag:'20 mL 0.9% NaCl'},

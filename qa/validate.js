@@ -67,7 +67,31 @@ REG.forEach(r => {
   if (!r.admin) warn(r.id, 'no administration note');
   if (!r.ref || !r.ref.length) err(r.id, 'no references cited');
   if (!r.warn || !r.warn.length) warn(r.id, 'no safety warnings');
+  /* care-pathway tag (top command bar). Only two legal values — a typo here
+     would silently drop a drug out of the cardiac pathways.               */
+  if (r.chd != null && !['cyanotic','acyanotic'].includes(r.chd))
+    err(r.id, 'invalid chd pathway tag "' + r.chd + '"');
+  /* a drug cannot be both cyanotic and acyanotic, and a cyanotic-CHD drug
+     should be an infusion or a ductal agent, never a random oral.          */
+  if (r.chd === 'cyanotic' && !r.inf) warn(r.id, 'cyanotic-CHD drug that is not an infusion');
 });
+
+/* ---------- 1b. care-pathway buckets must partition the whole list ------- */
+{
+  const catOf = r => r.chd === 'cyanotic' ? 'cyanotic'
+    : r.chd === 'acyanotic' ? 'acyanotic'
+    : r.inf ? 'infusion' : 'icu';
+  const buckets = { cyanotic: 0, acyanotic: 0, infusion: 0, icu: 0 };
+  REG.forEach(r => buckets[catOf(r)]++);
+  const sum = Object.values(buckets).reduce((a, b) => a + b, 0);
+  if (sum !== REG.length)
+    err('CATS', 'pathway buckets sum to ' + sum + ' but there are ' + REG.length + ' regimens');
+  Object.entries(buckets).forEach(([k, v]) => {
+    if (v === 0) err('CATS', 'pathway "' + k + '" is empty — every bucket must hold something');
+  });
+  console.log(' care pathways       cyanotic ' + buckets.cyanotic + ' · acyanotic ' + buckets.acyanotic +
+              ' · infusions ' + buckets.infusion + ' · general ICU ' + buckets.icu);
+}
 
 /* ---------- 2. references ---------- */
 Object.keys(REFS).forEach(k => {

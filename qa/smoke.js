@@ -18,6 +18,8 @@ const cp = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const BUILT = path.resolve(ROOT, 'docs', 'standalone.html');
 
+const vm = require('vm');
+
 /* ---------- gate 0: every source must parse (catches a stray bracket
    that would silently kill the whole <script> block in the browser) --- */
 const SRC = path.join(ROOT, 'src');
@@ -30,8 +32,13 @@ const JS = [
 ];
 let synFail = 0;
 JS.forEach(rel => {
-  const r = cp.spawnSync(process.execPath, ['--check', path.join(SRC, rel)], { encoding: 'utf8' });
-  if (r.status !== 0) { synFail++; console.log('  SYNTAX ERROR in ' + rel + '\n' + r.stderr); }
+  try {
+    const src = fs.readFileSync(path.join(SRC, rel), 'utf8');
+    new vm.Script(src);
+  } catch (e) {
+    synFail++;
+    console.log('  SYNTAX ERROR in ' + rel + '\n' + (e.message || e));
+  }
 });
 if (synFail) { console.log('\nRESULT: FAIL — ' + synFail + ' source file(s) do not parse'); process.exit(1); }
 console.log('syntax      : all ' + JS.length + ' JS sources parse cleanly');
@@ -88,7 +95,14 @@ const txt = el => (el ? el.textContent : '').replace(/\s+/g, ' ').trim();
 
 const PASS = [], FAIL = [];
 const chk = (name, cond, detail) => {
-  (cond ? PASS : FAIL).push(name + (detail != null ? ' :: ' + detail : ''));
+  const line = name + (detail != null ? ' :: ' + detail : '');
+  if (cond) {
+    PASS.push(line);
+    console.log('  PASS ' + line);
+  } else {
+    FAIL.push(line);
+    console.log('  FAIL ' + line);
+  }
 };
 const setVal = (id, v) => {
   const el = $(id);
@@ -101,7 +115,7 @@ const click = (el, label) => {
   if (!el) { FAIL.push('cannot click ' + label + ' (element missing)'); return; }
   el.dispatchEvent(new w.MouseEvent('click', { bubbles: true, cancelable: true, view: w }));
 };
-const tick = (ms) => new Promise(r => setTimeout(r, ms || 350));
+const tick = (ms) => new Promise(r => setTimeout(r, Math.min(ms || 15, 15)));
 const ST_tab_is = t => { try { const st = w.App.state; return ((typeof st === 'function' ? st() : st).tab || '') === t; } catch (e) { return false; } };
 const tabBtn = t => qa('#tabs button, #tabs .tab')
   .find(x => (x.dataset.tab || '').toLowerCase() === t);

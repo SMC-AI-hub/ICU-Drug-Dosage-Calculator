@@ -148,7 +148,7 @@ function run(name, setup, expect, width) {
   const file = harness(body);
   let dom;
   try {
-    dom = execFileSync(CHROME, ['--headless', '--no-sandbox', '--disable-gpu',
+    dom = execFileSync(CHROME, ['--headless', '--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu',
       '--window-size=' + (width || '1440,1200'), '--dump-dom', 'file://' + file],
       /* the rendered DOM of ~170 cards is tens of MB — well past node's
          default 1 MB stdout buffer, which fails as ENOBUFS */

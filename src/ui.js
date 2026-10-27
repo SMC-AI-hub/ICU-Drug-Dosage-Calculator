@@ -10,7 +10,7 @@ var App = (function(){
 /* ------------------------------------------------------------------ */
 var ST = {
   tab:'drugs',
-  sys:new Set(), cls:'', q:'', pop:'', riskOnly:false, highAlertOnly:false,
+  cat:'', sys:new Set(), cls:'', purpose:'', q:'', pop:'', riskOnly:false, highAlertOnly:false,
   expand:new Set(),
   pt:{ wt:'', ageY:'', ageM:'', ageD:'', sex:'male', ht:'', scr:'', wMethod:'who', adultOverride:false,
        k:'', na:'', glu:'' },
@@ -33,7 +33,7 @@ function queueSave(){
 function saveState(){
   try{
     localStorage.setItem(LS_KEY, JSON.stringify({
-      tab:ST.tab, q:ST.q, cls:ST.cls, pop:ST.pop, ha:ST.highAlertOnly,
+      tab:ST.tab, cat:ST.cat, q:ST.q, cls:ST.cls, purpose:ST.purpose, pop:ST.pop, ha:ST.highAlertOnly,
       sys:Array.from(ST.sys), fav:Array.from(ST.fav), favOnly:ST.favOnly,
       pt:ST.pt, mix:ST.mix, theme:ST.theme, typeBig:ST.typeBig, tilesOpen:ST.tilesOpen,
       recent:ST.recent, pumpMode:ST.pumpMode, step:ST.step, rev:ST.rev,
@@ -46,7 +46,8 @@ function loadState(){
     var o=JSON.parse(localStorage.getItem(LS_KEY)||'null');
     if(!o) return;
     if(o.tab) ST.tab=o.tab;
-    ST.q=o.q||''; ST.cls=o.cls||''; ST.pop=o.pop||'';
+    ST.q=o.q||''; ST.cls=o.cls||''; ST.purpose=o.purpose||''; ST.pop=o.pop||'';
+    ST.cat=o.cat||'';
     ST.highAlertOnly=!!o.ha; ST.favOnly=!!o.favOnly;
     ST.sys=new Set(o.sys||[]); ST.fav=new Set(o.fav||[]);
     if(o.pt) Object.keys(o.pt).forEach(function(k){ if(k in ST.pt) ST.pt[k]=o.pt[k]; });
@@ -57,7 +58,7 @@ function loadState(){
     if(o.step) ST.step=o.step;
     if(o.rev) ST.rev=o.rev;
     if(Object.prototype.toString.call(o.board)==='[object Array]') ST.board=o.board.slice(0,8);
-  }catch(_){ }
+  }catch(_){}
 }
 function applyPrefs(){
   document.body.classList.toggle('dark', ST.theme==='dark');
@@ -194,11 +195,106 @@ function matchQ(reg, q){
   var fx=(reg.fx||[]).map(function(f){return f.s+' '+(f.b||'');}).join(' ').toLowerCase();
   return fx.indexOf(q)>=0;
 }
+/* ---------------- care-pathway categories (top command bar) ----------------
+   The four pathways a high-acuity team actually thinks in. Buckets are
+   EXCLUSIVE and resolved in the order below, so every regimen lands in exactly
+   one place and the counts always add up to the visible total:
+
+     1. Cyanotic CHD          — duct-dependent cyanotic lesions, spell drugs
+     2. Acyanotic CHD         — shunt failure, PDA, CHD-associated PAH
+     3. Continuous infusions  — anything run on a pump (reg.inf)
+     4. General ICU & emergencies — everything else
+
+   Cardiac-specific drugs win over the generic infusion bucket on purpose: a
+   nurse looking for milrinone during a shunt case looks under the heart, not
+   under "infusions".
+
+   Naming note: "cyanotic / acyanotic" describes PAEDIATRIC lesions. The adult
+   term is ACHD, which is out of scope for a 24-week-to-18-year calculator.  */
+var CATS=[
+  ['cyanotic','Cyanotic CHD','Duct-dependent cyanotic lesions — TGA, pulmonary atresia, critical PS, tricuspid atresia. Hypercyanotic-spell drugs.'],
+  ['acyanotic','Acyanotic CHD','Left-to-right shunt failure (VSD, ASD, PDA), post-cardiac-surgery low output, CHD-associated pulmonary hypertension.'],
+  ['infusion','Continuous infusions','Everything titrated on a syringe or volumetric pump: inotropes, vasopressors, sedatives, antiarrhythmics.'],
+  ['icu','General ICU & emergencies','Resuscitation, antibiotics, antiepileptics, toxicology, electrolytes, ventilation, sedation.']
+];
+function catOf(r){
+  if(r.chd==='cyanotic') return 'cyanotic';
+  if(r.chd==='acyanotic') return 'acyanotic';
+  if(r.inf) return 'infusion';
+  return 'icu';
+}
+function catCounts(ctx){
+  var c={cyanotic:0,acyanotic:0,infusion:0,icu:0};
+  REG.forEach(function(r){ if(childScope(r) && popVisible(r,ctx)) c[catOf(r)]++; });
+  return c;
+}
+function renderCatBar(ctx){
+  var c=catCounts(ctx);
+  var total=c.cyanotic+c.acyanotic+c.infusion+c.icu;
+  var h=['<nav class="catbar no-print" aria-label="Care pathway">'];
+  h.push('<button type="button" class="cat" data-cat="" aria-pressed="'+(ST.cat==='')+'">'+
+         '<span class="ct">All drugs</span><span class="cn n">'+total+'</span></button>');
+  CATS.forEach(function(k){
+    h.push('<button type="button" class="cat'+(k[0]==='cyanotic'||k[0]==='acyanotic'?' cat-chd':'')+
+           '" data-cat="'+k[0]+'" aria-pressed="'+(ST.cat===k[0])+'" title="'+esc(k[2])+'">'+
+           '<span class="ct">'+esc(k[1])+'</span><span class="cn n">'+c[k[0]]+'</span></button>');
+  });
+  h.push('</nav>');
+  var active=CATS.filter(function(k){return k[0]===ST.cat;})[0];
+  if(active) h.push('<p class="cathint no-print">'+esc(active[2])+'</p>');
+  return h.join('');
+}
+
+/* ---------- NURSE-FRIENDLY CLINICAL PURPOSE CATEGORIES ---------- */
+var NURSE_PURPOSES = [
+  ['infect',   '💊 Antibiotics & Infection',      'Antibacterial, antifungal, antiviral, antiparasitic'],
+  ['pain',     '🌡️ Pain, Fever & Steroids',       'Paracetamol, NSAIDs, opioids, corticosteroids'],
+  ['seizure',  '⚡ Seizures & Fits',              'Emergency anticonvulsants and epilepsy control'],
+  ['sedate',   '😴 Sedation & Paralysis',         'Anaesthetics, sedatives, muscle relaxants & reversal'],
+  ['cardiac',  '🫀 Heart, BP & Inotropes',        'Arrest, shock, inotropes, pressors, antihypertensives'],
+  ['resp',     '🫁 Breathing & Asthma',           'Bronchodilators, nebulisations, croup, surfactant'],
+  ['fluid',    '💧 Fluids, Electrolytes & Kidney','Crystalloids, K+, Na+, Ca2+, bicarbonate, diuretics'],
+  ['gi',       '🤢 Acidity, Vomiting & Gut',      'Antiemetics, PPIs, bowel motility, zinc, ORS'],
+  ['blood',    '🩸 Bleeding & Blood Clots',       'Heparin, reversal, tranexamic acid, vitamin K'],
+  ['neo',      '👶 Neonatal Specialty',           'Surfactant, caffeine apnoea, PDA closure, PGE1'],
+  ['tox',      '🐍 Poisoning, Bites & Antidotes', 'Snakebite ASV, organophosphate atropine, antidotes'],
+  ['misc',     '📋 Vitamins & Other Medicines',   'Vitamins, Kawasaki IVIG, other therapies']
+];
+
+function nursePurposeOf(r){
+  if(r.sys === 'resus' || r.sys === 'arrhythmia' || r.sys === 'vasoactive' || r.sys === 'htn') return 'cardiac';
+  if(r.sys === 'antiinfective') return 'infect';
+  if(r.sys === 'neuro' || /anticonvulsant|seizure/i.test((r.cls||'')+' '+(r.n||''))) return 'seizure';
+  if(r.sys === 'nmba') return 'sedate';
+  if(r.sys === 'sedation'){
+    if(/analgesic|antipyretic|paracetamol|ibuprofen|ketorolac|diclofenac|fentanyl|morphine|tramadol/i.test((r.cls||'')+' '+(r.n||''))) return 'pain';
+    return 'sedate';
+  }
+  if(/corticosteroid|steroid/i.test(r.cls||'')) return 'pain';
+  if(r.sys === 'respiratory') return 'resp';
+  if(r.sys === 'electrolyte' || r.sys === 'renal') return 'fluid';
+  if(r.sys === 'gi') return 'gi';
+  if(r.sys === 'anticoag') return 'blood';
+  if(r.sys === 'neonatal') return 'neo';
+  if(r.sys === 'tox' || r.sys === 'anaphylaxis') return 'tox';
+  return 'misc';
+}
+
+function nursePurposeBadge(r){
+  var p = nursePurposeOf(r);
+  for(var i=0; i<NURSE_PURPOSES.length; i++){
+    if(NURSE_PURPOSES[i][0] === p) return NURSE_PURPOSES[i][1].split(' ')[1] || NURSE_PURPOSES[i][1];
+  }
+  return 'Medicine';
+}
+
 function visibleRegs(ctx){
   /* paediatric scope: entries that are explicitly adult-only never appear */
   var C=REG.filter(childScope);
   var q=ST.q.trim();
   return C.filter(function(r){
+    if(ST.cat && catOf(r)!==ST.cat) return false;
+    if(ST.purpose && nursePurposeOf(r)!==ST.purpose) return false;
     if(ST.sys.size && !ST.sys.has(r.sys)) return false;
     if(ST.cls && r.cls!==ST.cls) return false;
     if(ST.highAlertOnly && (r.risk||1)<4) return false;
@@ -400,6 +496,50 @@ function summaryLine(reg, out, ctx){
     flags.map(function(f){ return '<span class="sumwarn">'+f+'</span>'; }).join('');
 }
 
+/* ---------------- verification tags ------------------------------------
+   NOT decoration. Each tag states a check that actually ran and passed, and
+   it CHANGES when the check does not:
+     Dose    green  weight measured, within the cited range, no ceiling hit
+             amber  a documented ceiling was applied to the calculation
+             amber  the weight was estimated from age rather than weighed
+             red    no computable dose
+     Volume  green  every dilution shown reconciles: mL/h x drug-per-mL
+                    returns the prescribed amount per hour for this patient
+             grey   nothing to verify (oral, or a fixed unit dose)
+
+   A tag that reads "verified" unconditionally would be worse than no tag at
+   all, because it would claim a check nobody performed.                  */
+function verifTags(reg, out, ctx, dw){
+  var t=[];
+  if(!out || !out.ok){
+    t.push('<span class="vt v-c">Dose not computable</span>');
+  } else if(out.capApplied){
+    t.push('<span class="vt v-w" title="'+esc(out.capMsg||'')+'">Ceiling applied to dose</span>');
+  } else if(ctx && ctx.weightSource==='estimated'){
+    t.push('<span class="vt v-w" title="Weight estimated from age. An estimate can be wrong by 20-30 per cent - weigh the child wherever possible.">On estimated weight</span>');
+  } else if(dw && dw.label!=='actual body weight'){
+    t.push('<span class="vt v-w" title="Dosed on the adjusted body weight.">'+esc(dw.label)+'</span>');
+  } else {
+    t.push('<span class="vt v-y" title="Measured weight, dose inside the cited range, no ceiling applied.">Dose verified</span>');
+  }
+  /* volume: re-check every pump row for this patient, live */
+  var rows=(out.pump||[]), bad=0, good=0;
+  for(var i=0;i<rows.length;i++){
+    var pr=rows[i];
+    if(pr.concPerMl==null||pr.mlPerHrLo==null||out.ratePerMinLo==null) continue;
+    var expect=out.ratePerMinLo*60, got=pr.mlPerHrLo*pr.concPerMl;
+    if(Math.abs(got-expect)<=Math.abs(expect)*0.005+1e-12) good++; else bad++;
+  }
+  if(!good && !bad){
+    t.push('<span class="vt v-n">Volume not applicable</span>');
+  } else if(bad){
+    t.push('<span class="vt v-c" title="'+bad+' of '+(bad+good)+' dilutions did not reconcile. Re-check by hand before programming the pump.">Volume check failed</span>');
+  } else {
+    t.push('<span class="vt v-y" title="mL/h x drug-per-mL returns the prescribed amount per hour, on all '+good+' dilution'+(good===1?'':'s')+' shown.">Volume verified</span>');
+  }
+  return '<div class="verif">'+t.join('')+'</div>';
+}
+
 function renderCard(reg, ctx){
   var dw = dosingWeightFor(reg, ctx);
   var lctx = {kg:dw.kg, dosingWeight:dw.kg, ageDays:ctx.ageDays, pop:ctx.pop};
@@ -409,10 +549,11 @@ function renderCard(reg, ctx){
   var open = ST.expand.has(reg.id);
   var rk = reg.risk||1;
   var h = [];
-  h.push('<article class="card risk'+rk+(ST.fav.has(reg.id)?' pinned':'')+'" data-id="'+esc(reg.id)+'">');
+  h.push('<article class="card risk'+rk+(ST.fav.has(reg.id)?' pinned':'')+(open?' is-expanded':'')+'" data-id="'+esc(reg.id)+'">');
 
   /* ---- header ---- */
   var badges='';
+  badges+='<span class="bdg b-purpose">'+esc(nursePurposeBadge(reg))+'</span>';
   if(reg.pop && reg.pop!=='all') badges+='<span class="bdg b-age">'+esc(reg.pop==='neo'?'NEONATE':reg.pop==='paed'?'PAEDIATRIC':'ADULT')+'</span>';
   if(reg.pop==='all') badges+='<span class="bdg b-age">ALL AGES</span>';
   badges+='<span class="bdg b-risk">'+esc(riskLabel(rk))+'</span>';
@@ -420,13 +561,18 @@ function renderCard(reg, ctx){
   Object.keys(routes).slice(0,4).forEach(function(r){ badges+='<span class="bdg b-route '+routeClass(r)+'">'+esc(r)+'</span>'; });
   if(reg.inf) badges+='<span class="bdg b-same">INFUSION</span>';
   if(dw.label!=='actual body weight') badges+='<span class="bdg b-same">'+esc(dw.label)+'</span>';
-  h.push('<div class="ch"><div class="chead"><div class="nm">'+esc(reg.n)+'</div>'+
+  h.push('<div class="ch" role="button" tabindex="0" aria-expanded="'+open+'" title="'+(open?'Click to collapse card':'Click to expand full details')+'">'+
+         '<div class="chead"><div class="nm">'+esc(reg.n)+'</div>'+
          '<div class="ind">'+esc(reg.ind||'')+'</div><div class="badges">'+badges+'</div></div>'+
          '<button class="star'+(ST.fav.has(reg.id)?' on':'')+'" data-fav="'+esc(reg.id)+'" '+
-         'aria-pressed="'+ST.fav.has(reg.id)+'" title="Pin this drug to the top of its system">★</button></div>');
+         'aria-pressed="'+ST.fav.has(reg.id)+'" title="Pin this drug to the top of its system" aria-label="Pin '+esc(reg.n)+'">★</button>'+
+         '<button class="card-toggle" data-togg="'+esc(reg.id)+'" type="button" aria-expanded="'+open+'" title="'+(open?'Collapse card':'Expand full details')+'">'+
+         '<span class="ctog-icon" aria-hidden="true">'+(open?'▾':'▸')+'</span>'+
+         '<span class="ctog-lbl">'+(open?'Collapse':'Details')+'</span></button>'+
+         '</div>');
 
   /* ---- the answer block: the dose and the volume to draw, fused ---- */
-  h.push('<div class="answer">');
+  h.push('<div class="answer'+(out.capApplied?' ans-warn':'')+'">');
   h.push('<div class="dose">');
   if(out.error && !out.ok && !out.dose && !out.doseText){
     h.push('<div class="dl">Dose</div><div class="dv" style="color:var(--crit);font-size:14px">'+esc(out.error)+'</div>');
@@ -449,6 +595,7 @@ function renderCard(reg, ctx){
       h.push('<div class="cap">Ceiling enforced: '+esc(caps.join(' · '))+'</div>');
     }
     if(reg.d && reg.d.rep) h.push('<div class="dr">'+esc(reg.d.rep)+'</div>');
+    h.push(verifTags(reg, out, ctx, dw));
   }
   h.push('</div>');
 
@@ -536,7 +683,7 @@ function renderCard(reg, ctx){
     h.push('<div class="warnbox"><ul>'+reg.warn.map(function(w){return '<li>'+esc(w)+'</li>';}).join('')+'</ul></div>');
   }
   var cdLabel = 'Administration, dilution, class' + (rk>=4 ? ' and the independent double check' : '') + ', notes &amp; references';
-  h.push('<details class="cdet"><summary>'+cdLabel+'</summary><div class="inner">');
+  h.push('<details class="cdet"'+(open?' open':'')+'>'+'<summary>'+cdLabel+'</summary><div class="inner">');
   h.push('<div class="cbody">');
   if(reg.admin) h.push('<div class="sec"><b>Administration</b>'+esc(reg.admin)+'</div>');
   if(reg.dil)   h.push('<div class="sec"><b>Dilution &amp; compatibility</b>'+esc(reg.dil)+'</div>');
@@ -575,6 +722,35 @@ function renderCard(reg, ctx){
       return '<span class="tag refTag" data-ref="'+esc(k)+'" style="cursor:pointer">'+esc(REFS[k].n)+'</span>';
     }).join(' ')+'</div>');
   }
+
+  /* ---- calculation formula & clinical working ---- */
+  var fWorking = [];
+  if(dw.kg != null && reg.d && reg.d.t){
+    var dt = dtOf(reg.d.t);
+    if(dt.per === 'kg'){
+      fWorking.push('Dose calculation: ' + fmtNum(dw.kg, 1) + ' kg × ' + fmtNum(reg.d.lo) + (reg.d.hi != null && reg.d.hi !== reg.d.lo ? '–' + fmtNum(reg.d.hi) : '') + ' ' + dt.u + '/kg = ' + (out.dose ? out.dose.text : ''));
+    } else if(dt.per === 'kg/min' || dt.per === 'kg/h'){
+      fWorking.push('Rate calculation: ' + fmtNum(dw.kg, 1) + ' kg × ' + fmtNum(reg.d.lo) + ' ' + dt.u + '/' + dt.per + ' = ' + (out.dose ? out.dose.text : ''));
+    }
+  }
+  if(reg.d && reg.d.cap != null) fWorking.push('Absolute cap applied if calculated dose exceeds ' + fmtNum(reg.d.cap) + ' ' + (out.unit || 'mg'));
+  if(fWorking.length){
+    h.push('<details class="formula-det"><summary>Calculation formula &amp; clinical working</summary><div class="formula-body">' + fWorking.map(esc).join('<br>') + '</div></details>');
+  }
+
+  /* ---- neonatal interval band advice ---- */
+  if(ctx.ageDays != null && ctx.ageDays < 28){
+    var neoAdv = neonatalIntervalAdvice(reg.id, ctx.gaW, ctx.ageDays);
+    if(neoAdv){
+      h.push('<div class="subml-box" style="margin:8px 0"><b>👶 Neonatal interval band:</b> ' + esc(neoAdv.reason) + ' (' + esc(neoAdv.band) + ')</div>');
+    }
+  }
+
+  /* ---- card actions: copy note ---- */
+  h.push('<div class="card-actions-bar no-print">'+
+         '<button type="button" class="btn-copy" data-copy-id="'+esc(reg.id)+'" title="Copy formatted clinical dose note">📋 Copy Dose Note</button>'+
+         '</div>');
+
   h.push('</div></details>');   /* /cdet */
   h.push('</article>');
   return h.join('');
@@ -586,23 +762,49 @@ function renderCard(reg, ctx){
 function renderChips(ctx){
   var counts={};
   REG.forEach(function(r){ if(childScope(r) && popVisible(r,ctx)) counts[r.sys]=(counts[r.sys]||0)+1; });
+  var purpCounts={};
+  REG.forEach(function(r){ if(childScope(r) && popVisible(r,ctx)){ var p=nursePurposeOf(r); purpCounts[p]=(purpCounts[p]||0)+1; } });
+
   var keys = Object.keys(SYS).filter(function(k){return counts[k];});
-  var h=['<div class="chips no-print">'];
+  var h=['<div class="chips-box no-print">'];
+  
+  /* 1. Nurse Clinical Purpose Quick Pills */
+  h.push('<div class="chips nurse-chips"><span class="chip-lbl">Action:</span>');
+  h.push('<button class="chip np-chip" data-purpose="" aria-pressed="'+(!ST.purpose)+'">All Actions</button>');
+  NURSE_PURPOSES.forEach(function(p){
+    if(purpCounts[p[0]]){
+      h.push('<button class="chip np-chip" data-purpose="'+p[0]+'" aria-pressed="'+(ST.purpose===p[0])+'">'+esc(p[1])+' <span class="n">'+purpCounts[p[0]]+'</span></button>');
+    }
+  });
+  h.push('</div>');
+
+  /* 2. System Chips */
+  h.push('<div class="chips sys-chips"><span class="chip-lbl">System:</span>');
   h.push('<button class="chip" data-sys="__all__" aria-pressed="'+(ST.sys.size===0)+'">All systems <span class="n">'+keys.reduce(function(a,k){return a+counts[k];},0)+'</span></button>');
   keys.forEach(function(k){
     h.push('<button class="chip" data-sys="'+esc(k)+'" aria-pressed="'+ST.sys.has(k)+'">'+esc(SYS[k].short)+' <span class="n">'+counts[k]+'</span></button>');
   });
-  h.push('</div>');
+  h.push('</div></div>');
   return h.join('');
 }
 function renderToolbar(ctx){
   var classes={};
   REG.forEach(function(r){ if(childScope(r) && r.cls) classes[r.cls]=1; });
   var ck=Object.keys(classes).sort();
+
+  var purpCounts={};
+  REG.forEach(function(r){ if(childScope(r) && popVisible(r,ctx)){ var p=nursePurposeOf(r); purpCounts[p]=(purpCounts[p]||0)+1; } });
+
   return '<div class="toolbar no-print">'+
     '<div class="field search"><label for="q">Search — drug, brand or indication</label>'+
       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>'+
       '<input id="q" type="text" value="'+esc(ST.q)+'" placeholder="adrenaline · amiodarone · Ceftriaxone · snakebite…" autocomplete="off"></div>'+
+    '<div class="field"><label for="purpose">🩺 Clinical Action / Drug Purpose</label><select id="purpose">'+
+      '<option value="">All 12 Clinical Actions</option>'+
+      NURSE_PURPOSES.map(function(p){
+        return '<option value="'+p[0]+'"'+(ST.purpose===p[0]?' selected':'')+'>'+p[1]+' ('+(purpCounts[p[0]]||0)+')</option>';
+      }).join('')+
+      '</select></div>'+
     '<div class="field"><label for="cls">Pharmacological class</label><select id="cls"><option value="">All classes ('+ck.length+')</option>'+
       ck.map(function(c){return '<option value="'+esc(c)+'"'+(ST.cls===c?' selected':'')+'>'+esc(c)+'</option>';}).join('')+'</select></div>'+
     '<div class="field"><label for="pop">Show population</label><select id="pop">'+
@@ -642,6 +844,10 @@ function renderTiles(){
 function renderFilterBar(){
   var items=[];
   if(ST.q.trim()) items.push(['q','search: '+ST.q.trim()]);
+  if(ST.purpose){
+    var npName = (NURSE_PURPOSES.find(function(p){ return p[0]===ST.purpose; })||['',''])[1];
+    items.push(['purpose', npName || ST.purpose]);
+  }
   ST.sys.forEach(function(s){ items.push(['sys:'+s, (SYS[s]&&SYS[s].label)||s]); });
   if(ST.cls) items.push(['cls','class: '+ST.cls]);
   if(ST.pop) items.push(['pop','population: '+ST.pop]);
@@ -682,41 +888,78 @@ function renderRecentInto(){
   var cx=document.getElementById('rcClear');
   if(cx) cx.addEventListener('click',function(){ ST.recent=[]; renderRecentInto(); queueSave(); });
 }
-/* ---- first-run prompt: one clear call to action instead of 171 refusals --- */
+/* ---- first-run prompt: Task-First Dashboard --- */
 function heroHtml(){
-  return '<div class="hero" id="heroPanel">'+
-    '<h2>Who are we dosing?</h2>'+
-    '<div class="hs">Enter a <b>weight</b> (best) or an <b>age</b>. Every regimen below then shows the dose <i>and</i> the volume to draw from each strength available in India. Nothing is guessed — an age-derived weight is flagged <b>ESTIMATED</b> on every card, and outside 24 weeks of gestation – 18 years the calculator refuses to print a dose at all.</div>'+
-    '<div class="hrow">'+
-      '<button class="btn herofill" type="button" data-fill="18.3,5,0,">5 years · 18.3 kg</button>'+
-      '<button class="btn ghost herofill" type="button" data-fill="9.6,1,0,">1 year · 9.6 kg</button>'+
-      '<button class="btn ghost herofill" type="button" data-fill="3.4,,0,7">Term newborn · 3.4 kg</button>'+
-      '<button class="btn ghost railopen" type="button">Open the patient panel</button>'+
-    '</div>'+
-    '<div class="steps">'+
-      '<div class="st"><b><span class="sn">1</span>Weigh if you can</b><span>A measured weight beats every formula. Type it in the panel — that is the only number the whole app leans on.</span></div>'+
-      '<div class="st"><b><span class="sn">2</span>Preterm? add the gestation</b><span>Born before 37 weeks switches dosing to <b>postmenstrual age</b>, estimates weight from the Fenton reference and shows the corrected age.</span></div>'+
-      '<div class="st"><b><span class="sn">3</span>Read the answer strip</b><span>Each card leads with the dose and the volume to draw. Open <i>all strengths</i> for the other formulations, and the detail line for administration and references.</span></div>'+
+  return '<div class="home-hero hero" id="heroPanel">'+
+    '<div style="max-width:860px;margin:0 auto">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'+
+        '<div>'+
+          '<h2 style="margin:0 0 4px;font-size:20px;font-weight:850;color:var(--ink)">Paediatric &amp; Neonatal Clinical Hub</h2>'+
+          '<div style="font-size:13px;color:var(--ink2)">24 weeks gestation to 18 years · 279 verified regimens · 655 Indian formulations</div>'+
+        '</div>'+
+        '<button class="btn sm" id="btnHeroGuide" type="button" style="display:inline-flex;align-items:center;gap:5px">💡 Junior Quick-Start</button>'+
+      '</div>'+
+      '<div class="home-cards">'+
+        '<button class="home-card emerg" id="btnHeroEmerg" type="button">'+
+          '<div class="hc-icon">🚨</div>'+
+          '<div class="hc-title">EMERGENCY RESUSCITATION</div>'+
+          '<div class="hc-desc">Defibrillation energy calculator (J/kg), CPR cycle timer, resuscitation drugs &amp; NRP/PALS flows.</div>'+
+          '<div class="hc-badge">Time-Critical</div>'+
+        '</button>'+
+        '<button class="home-card" id="btnHeroWiz" type="button">'+
+          '<div class="hc-icon">👶</div>'+
+          '<div class="hc-title">Calculate for Patient</div>'+
+          '<div class="hc-desc">3-step guided entry: Neonate vs Child, exact weight or Fenton/WHO age estimation, preterm gestation, renal labs.</div>'+
+          '<div class="hc-badge">Step-by-Step Wizard</div>'+
+        '</button>'+
+        '<button class="home-card" id="btnHeroDrugs" type="button">'+
+          '<div class="hc-icon">💊</div>'+
+          '<div class="hc-title">Find a Drug / Protocol</div>'+
+          '<div class="hc-desc">Search generic names &amp; Indian brands, filter by 20 body systems or 4 clinical pathways.</div>'+
+          '<div class="hc-badge">279 Regimens</div>'+
+        '</button>'+
+      '</div>'+
+      '<div style="margin-top:14px;padding:12px;background:var(--panel);border:1px solid var(--line2);border-radius:var(--r-md)">'+
+        '<div style="font-size:12px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px">⚡ Quick Patient Presets:</div>'+
+        '<div class="hrow" style="margin:0">'+
+          '<button class="btn sm herofill" type="button" data-fill="18.3,5,0,">5 y · 18.3 kg</button>'+
+          '<button class="btn sm ghost herofill" type="button" data-fill="9.6,1,0,">1 y · 9.6 kg</button>'+
+          '<button class="btn sm ghost herofill" type="button" data-fill="3.4,,0,7">Term newborn · 3.4 kg</button>'+
+          '<button class="btn sm ghost herofill" type="button" data-fill="1.1,,0,14">28+3 Preterm · 1.1 kg</button>'+
+          '<button class="btn sm ghost railopen" type="button">Open panel</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="steps" style="margin-top:14px">'+
+        '<div class="st"><b><span class="sn">1</span>Weigh if you can</b><span>A measured weight beats every formula. Type it in the panel — that is the only number the whole app leans on.</span></div>'+
+        '<div class="st"><b><span class="sn">2</span>Preterm? add the gestation</b><span>Born before 37 weeks switches dosing to <b>postmenstrual age</b>, estimates weight from the Fenton reference and shows the corrected age.</span></div>'+
+        '<div class="st"><b><span class="sn">3</span>Read the answer strip</b><span>Each card leads with the dose and the volume to draw. Open <i>all strengths</i> for the other formulations, and the detail line for administration and references.</span></div>'+
+      '</div>'+
     '</div>'+
   '</div>';
 }
 function renderDrugs(ctx){
   var list = visibleRegs(ctx);
   if(ctx.scopeMsg){
-    var head=[renderToolbar(ctx), renderChips(ctx), renderFilterBar()];
+    var head=[renderCatBar(ctx), renderToolbar(ctx), renderChips(ctx), renderFilterBar()];
     head.push('<div class="notebox warn" style="margin:9px 0"><b>Outside this calculator.</b> '+esc(ctx.scopeMsg)+
       '</div>');
     head.push('<div class="pack">No doses are shown, deliberately: a paediatric calculator that silently prints a number for an out-of-range patient is worse than one that refuses.</div>');
     return head.join('');
   }
-  var h=[renderToolbar(ctx), renderChips(ctx),
-    '<span id="recentSlot" style="display:contents">'+recentHtml()+'</span>',
-    renderTiles(), renderFilterBar()];
-  if(ctx.weightAgeMsg){
-    h.push('<div class="notebox warn" style="margin:0 0 9px"><b>⚠ WEIGHT–AGE MISMATCH — possible decimal-point error.</b> '+esc(ctx.weightAgeMsg)+'</div>');
-  }
+  var h = [];
   if(ctx.kg==null && ctx.ageDays==null){
     h.push(heroHtml());
+  }
+  h.push(renderCatBar(ctx));
+  h.push(renderToolbar(ctx));
+  h.push(renderChips(ctx));
+  h.push('<span id="recentSlot" style="display:contents">'+recentHtml()+'</span>');
+  if(ctx.kg!=null || ctx.ageDays!=null){
+    h.push(renderTiles());
+  }
+  h.push(renderFilterBar());
+  if(ctx.weightAgeMsg){
+    h.push('<div class="notebox warn" style="margin:0 0 9px"><b>⚠ WEIGHT–AGE MISMATCH — possible decimal-point error.</b> '+esc(ctx.weightAgeMsg)+'</div>');
   }
   h.push('<div class="count"><b>'+list.length+'</b> of '+REG.length+' regimens'+
      (ctx.kg!=null?' · dosing on '+fmtNum(ctx.kg,1)+' kg ('+ctx.weightSource+')':' · no weight yet')+
@@ -838,7 +1081,7 @@ function renderMixPanel(ctx){
   }
   h.push('</div>');
   h.push('<div class="pack" style="margin-top:6px">Guideline range: <b>'+esc(reg.d.rep ||
-      (reg.d.lo!=null ? fmtNum(reg.d.lo)+'–'+fmtNum(reg.d.hi)+' '+perLabel(dt.u,dt.per) : 'see the drug card'))+'</b></div>');
+      (reg.d.lo!=null ? rangeText(reg.d.lo,reg.d.hi,perLabel(dt.u,dt.per)) : 'see the drug card'))+'</b></div>');
   h.push('</div></div>');
 
   /* ---- row 2: the preparation ---- */
@@ -901,10 +1144,17 @@ function mixCompute(ctx){
   return r;
 }
 
+function rangeText(lo,hi,unitTxt){
+  /* "15–15 mg/kg/h" reads like a typo. When low and high agree, say it once. */
+  if(lo==null||hi==null) return '';
+  if(Math.abs(hi-lo)<1e-12) return fmtNum(lo)+' '+unitTxt;
+  return fmtNum(lo)+'–'+fmtNum(hi)+' '+unitTxt;
+}
+
 function mixOutHtml(r){
   if(!r) return '<div class="pack">No infusion selected.</div>';
   if(!r.ok) return '<div class="notebox warn"><b>Cannot compute yet.</b> '+esc(r.err||'')+'</div>';
-  var reg=r.reg, dt=dtOf(reg.d.t), h=[];
+  var reg=r.reg, dt=dtOf(reg.d.t), h=[], verifState='';
   /* headline: what each mL holds */
   var pl=(r.perMl||[]).map(function(p,i){
     return (i===0? '<b>'+fmtNum(p.v)+' '+esc(p.u)+'</b>' : fmtNum(p.v)+' '+esc(p.u));
@@ -952,11 +1202,37 @@ function mixOutHtml(r){
       }
     }
     if(vb!=null){
-      if(vb<reg.d.lo) h.push('<div class="notebox"><b>Below the usual range</b> '+fmtNum(reg.d.lo)+'–'+fmtNum(reg.d.hi)+' '+esc(perLabel(dt.u,dt.per))+note+'. Confirm the indication before running it slower.</div>');
-      else if(vb>reg.d.hi) h.push('<div class="notebox warn"><b>Above the usual range</b> '+fmtNum(reg.d.lo)+'–'+fmtNum(reg.d.hi)+' '+esc(perLabel(dt.u,dt.per))+note+'. A second clinician must confirm this dose before it runs.</div>');
-      else h.push('<div class="notebox ok" style="background:var(--ok-soft);border-color:#bfe3cf"><b>Within the cited range</b> '+fmtNum(reg.d.lo)+'–'+fmtNum(reg.d.hi)+' '+esc(perLabel(dt.u,dt.per))+note+'.</div>');
+      if(vb<reg.d.lo) h.push('<div class="notebox"><b>Below the usual range</b> '+rangeText(reg.d.lo,reg.d.hi,esc(perLabel(dt.u,dt.per)))+note+'. Confirm the indication before running it slower.</div>');
+      else if(vb>reg.d.hi){ verifState='warn'; h.push('<div class="notebox warn"><b>Above the usual range</b> '+rangeText(reg.d.lo,reg.d.hi,esc(perLabel(dt.u,dt.per)))+note+'. A second clinician must confirm this dose before it runs.</div>'); }
+      else { if(verifState!=='crit') verifState='ok'; h.push('<div class="notebox ok" style="background:var(--ok-soft);border-color:#bfe3cf"><b>Within the cited range</b> '+rangeText(reg.d.lo,reg.d.hi,esc(perLabel(dt.u,dt.per)))+note+'.</div>'); }
     } else if(v!=null){
       h.push('<div class="pack">Prescribed basis is '+esc(perLabel(dt.u,dt.per))+' — you are ordering in '+esc(perLabel(r.du,r.per))+', which is not an exact conversion. Convert and confirm against the drug card.</div>');
+    }
+  }
+  /* ---- documented 24-hour ceiling ------------------------------------
+     The pump panel is the one place a clinician TYPES a dose. If what was
+     ordered delivers more than the maximum this database records for that
+     weight, that is a breach of a stated limit: red, and the limit named.
+     Only fires when a ceiling is actually in the data AND the conversion is
+     exact. No threshold is ever invented that the sources do not carry.   */
+  if(reg.d.capDay!=null || reg.d.capDayKg!=null){
+    var ceilV=[];
+    if(reg.d.capDayKg!=null && r.kg>0){ ceilV.push(reg.d.capDayKg*r.kg);
+      }
+    if(reg.d.capDay!=null){ ceilV.push(reg.d.capDay);
+      }
+    var ceiling=Math.min.apply(null,ceilV);
+    /* name the binding limit; only add a derivation when it is per-kg,
+       otherwise the parenthetical just repeats the number above it */
+    var why = (reg.d.capDayKg!=null && r.kg>0 && reg.d.capDayKg*r.kg<=ceiling+1e-9)
+      ? ' = '+fmtNum(reg.d.capDayKg)+' '+dt.u+'/kg/24 h × '+fmtNum(r.kg,1)+' kg'
+      : '';   /* absolute ceilings are already the number named above */
+    var dayAmt=(r.deliver && r.deliver.amtPerDay!=null) ? convertUnit(r.deliver.amtPerDay, r.du, dt.u) : null;
+    if(dayAmt!=null && ceiling>0 && dayAmt>ceiling*(1+1e-9)){
+      verifState='crit';
+      h.push('<div class="notebox crit"><b>Above the documented maximum.</b> This order delivers <b>'+
+        fmtNum(dayAmt,1)+' '+esc(dt.u)+'/24 h</b> at '+fmtNum(r.kg,1)+' kg. The maximum recorded here is '+
+        fmtNum(ceiling,1)+' '+esc(dt.u)+'/24 h'+esc(why)+'. Reduce the ordered dose, or confirm the indication and the ceiling with the prescriber before this runs.</div>');
     }
   }
   (r.checks||[]).forEach(function(c){
@@ -965,7 +1241,7 @@ function mixOutHtml(r){
   h.push('<div class="row" style="margin-top:10px"><button class="btn sm" id="mxPrintLbl">Print line label</button>'+
     '<button class="btn sm openCard" data-id="'+esc(reg.id)+'" style="margin-left:8px">Open full drug card →</button></div>');
   h.push('<div class="lbl" id="mxLbl" style="margin-top:10px">'+labelHtml(r)+'</div>');
-  return h.join('');
+  return '<div class="mxwrap'+(verifState?' mx-'+verifState:'')+'">'+h.join('')+'</div>';
 }
 
 function labelHtml(r){
@@ -1634,6 +1910,23 @@ function renderUtils(ctx){
    '<div id="fOut" style="margin-top:9px"></div>'+
    '<div class="pack" style="margin-top:7px">Holliday–Segar: 100 mL/kg for the first 10 kg, +50 mL/kg for the next 10 kg, +20 mL/kg above 20 kg per 24 h. GIR = (dextrose % × 10 × mL/h) ÷ (60 × kg).</div></div></div>');
 
+  /* neonatal feed progression */
+  h.push('<div class="utile"><h3>Neonatal feed volume progression</h3><div class="ub">'+
+   '<div class="row">'+
+    '<div class="field"><label for="feedWt">Baby weight (kg)</label><input id="feedWt" type="number" step="0.01" min="0" value="'+(kg!=null?fmtNum(kg,2):'1.50')+'"></div>'+
+    '<div class="field"><label for="feedGoal">Daily fluid goal (mL/kg/day)</label><select id="feedGoal">'+
+      '<option value="60">Day 1: 60 mL/kg/day</option>'+
+      '<option value="80">Day 2: 80 mL/kg/day</option>'+
+      '<option value="100">Day 3: 100 mL/kg/day</option>'+
+      '<option value="120">Day 4: 120 mL/kg/day</option>'+
+      '<option value="150" selected>Full feeds: 150 mL/kg/day</option>'+
+      '<option value="160">Catch-up growth: 160 mL/kg/day</option>'+
+      '<option value="180">High-calorie target: 180 mL/kg/day</option>'+
+    '</select></div>'+
+   '</div><div id="feedOut" style="margin-top:9px"></div>'+
+   '<div class="pack" style="margin-top:7px">Calculates 2-hourly (12 feeds/day), 3-hourly (8 feeds/day), and 4-hourly (6 feeds/day) aliquots for expressed breast milk (EBM) or preterm formula.</div>'+
+  '</div></div>');
+
   /* sodium */
   h.push('<div class="utile"><h3>Sodium &amp; water</h3><div class="ub">'+
    '<div class="row"><div class="field"><label for="sNa">Serum Na⁺ (mmol/L)</label><input id="sNa" type="number" step="any" value="'+esc(ST.pt.na||'')+'"></div>'+
@@ -1719,6 +2012,18 @@ function calcFluid(){
   }
   o.innerHTML = rows? '<table class="tbl"><tbody>'+rows+'</tbody></table>' : '<div class="pack">Enter a weight.</div>';
 }
+function calcFeed(){
+  var w = num($('#feedWt').value), g = num($('#feedGoal').value), o = $('#feedOut');
+  if(!o) return;
+  if(!w || !g){ o.innerHTML = '<div class="pack">Enter baby weight and fluid target.</div>'; return; }
+  var res = calcFeedVolumes(w, g);
+  o.innerHTML = '<table class="tbl"><tbody>'+
+    '<tr><td>Total 24-hour volume</td><td class="n b">'+fmtNum(res.totalDayMl, 1)+' mL/day</td></tr>'+
+    '<tr><td><b>2-hourly feeds (12 feeds/day)</b></td><td class="n b" style="color:var(--brand)">'+fmtNum(res.q2hMl, 1)+' mL / feed</td></tr>'+
+    '<tr><td><b>3-hourly feeds (8 feeds/day)</b></td><td class="n b" style="color:var(--brand)">'+fmtNum(res.q3hMl, 1)+' mL / feed</td></tr>'+
+    '<tr><td><b>4-hourly feeds (6 feeds/day)</b></td><td class="n b" style="color:var(--brand)">'+fmtNum(res.q4hMl, 1)+' mL / feed</td></tr>'+
+    '</tbody></table>';
+}
 function calcSodium(){
   var na=num($('#sNa').value), w=num($('#sWt').value), inf=num($('#sInf').value), tgt=num($('#sTgt').value), o=$('#sOut');
   if(na==null||w==null){ o.innerHTML='<div class="pack">Enter the serum sodium and a weight.</div>'; return; }
@@ -1754,19 +2059,96 @@ function calcConv(){
     : '<div class="big-out">'+fmtNum(v)+' <small>'+esc(t)+'</small></div><div class="pack">'+fmtNum(a)+' '+esc(f)+' = '+fmtNum(v)+' '+esc(t)+'</div>';
 }
 
+var CPR_TIMER = { running: false, sec: 0, intervalId: null };
+function cprTick(){
+  CPR_TIMER.sec++;
+  var disp = $('#cprDisp');
+  var cycleEl = $('#cprCycle');
+  var alertEl = $('#cprAlert');
+  if(!disp) return;
+  var m = Math.floor(CPR_TIMER.sec / 60);
+  var s = CPR_TIMER.sec % 60;
+  disp.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  var curCycle = Math.floor(CPR_TIMER.sec / 120) + 1;
+  if(cycleEl) cycleEl.textContent = 'Cycle ' + curCycle;
+  if(alertEl){
+    if(CPR_TIMER.sec > 0 && CPR_TIMER.sec % 120 === 0){
+      alertEl.textContent = '⚠ 2 MINUTE MARK: Check rhythm & pulse! Consider Adrenaline!';
+    } else if(CPR_TIMER.sec % 120 > 105){
+      alertEl.textContent = '⏳ Rhythm check in ' + (120 - (CPR_TIMER.sec % 120)) + 's';
+    } else {
+      alertEl.textContent = '';
+    }
+  }
+}
+function cprToggle(){
+  if(CPR_TIMER.running){
+    clearInterval(CPR_TIMER.intervalId);
+    CPR_TIMER.running = false;
+    var btn = $('#btnCprToggle'); if(btn) btn.textContent = '▶ Resume CPR Timer';
+  } else {
+    CPR_TIMER.running = true;
+    CPR_TIMER.intervalId = setInterval(cprTick, 1000);
+    var btn = $('#btnCprToggle'); if(btn) btn.textContent = '⏸ Pause CPR Timer';
+  }
+}
+function cprReset(){
+  clearInterval(CPR_TIMER.intervalId);
+  CPR_TIMER.running = false;
+  CPR_TIMER.sec = 0;
+  var disp = $('#cprDisp'); if(disp) disp.textContent = '00:00';
+  var cycleEl = $('#cprCycle'); if(cycleEl) cycleEl.textContent = 'Cycle 1';
+  var alertEl = $('#cprAlert'); if(alertEl) alertEl.textContent = '';
+  var btn = $('#btnCprToggle'); if(btn) btn.textContent = '▶ Start CPR Timer';
+}
+
 /* ------------------------------------------------------------------ */
 /* rendering: protocols                                               */
 /* ------------------------------------------------------------------ */
 function renderProtocols(){
-  var q=ST.q.trim().toLowerCase();
+  var ctx = buildCtx();
+  var q = ST.q.trim().toLowerCase();
   var list = PROT.filter(function(p){
     if(!q) return true;
     return (p.t+' '+p.steps.join(' ')).toLowerCase().indexOf(q)>=0;
   });
-  var h=['<div class="toolbar no-print"><div class="field grow search"><label for="pq">Search protocols</label>'+
+  var defib = calcDefibJoules(ctx.kg);
+  var h = [];
+  
+  /* Resuscitation Emergency Mode & CPR Timer */
+  h.push('<div class="resus-hero no-print">'+
+    '<div style="max-width:860px;margin:0 auto">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">'+
+        '<div><h2 style="margin:0;font-size:18px;font-weight:850;color:var(--crit)">🚨 Emergency Resuscitation &amp; CPR Mode</h2>'+
+        '<div style="font-size:12px;color:var(--ink2)">PALS / NRP 2025 rapid decision support · weight: <b>'+(ctx.kg!=null?fmtNum(ctx.kg,1)+' kg ('+ctx.weightSource+')':'no weight entered')+'</b></div></div>'+
+        '<div style="display:flex;gap:6px">'+
+          '<button class="btn sm timer-btn t-start" id="btnCprToggle" type="button">'+(CPR_TIMER.running?'⏸ Pause CPR Timer':'▶ Start CPR Timer')+'</button>'+
+          '<button class="btn sm timer-btn t-reset" id="btnCprReset" type="button">Reset</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="resus-timer-box">'+
+        '<div style="display:flex;align-items:center;gap:12px">'+
+          '<div class="timer-disp" id="cprDisp">00:00</div>'+
+          '<div style="font-size:13px;color:var(--ink2)"><b id="cprCycle">Cycle '+(Math.floor(CPR_TIMER.sec/120)+1)+'</b> · Next rhythm/pulse check at <b id="cprNext">02:00</b></div>'+
+        '</div>'+
+        '<div id="cprAlert" style="margin-left:auto;font-size:12px;font-weight:750;color:var(--crit)"></div>'+
+      '</div>'+
+      (defib ? '<div class="defib-card">'+
+        '<div style="font-size:12px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:.3px">⚡ Defibrillation Energy Guide ('+fmtNum(ctx.kg,1)+' kg):</div>'+
+        '<div class="defib-grid">'+
+          '<div class="defib-pill"><div class="dp-l">1st Shock (2 J/kg)</div><div class="dp-v">'+fmtNum(defib.initialShock)+' J</div></div>'+
+          '<div class="defib-pill"><div class="dp-l">2nd+ Shock (4 J/kg)</div><div class="dp-v">'+fmtNum(defib.subsequentShock)+' J</div></div>'+
+          '<div class="defib-pill"><div class="dp-l">Sync Cardioversion (1 J/kg)</div><div class="dp-v">'+fmtNum(defib.synchronizedCardioversion)+' J</div></div>'+
+          '<div class="defib-pill"><div class="dp-l">Max Shock (10 J/kg)</div><div class="dp-v">'+fmtNum(defib.maxShock)+' J</div></div>'+
+        '</div>'+
+      '</div>' : '')+
+    '</div>'+
+  '</div>');
+
+  h.push('<div class="toolbar no-print"><div class="field grow search"><label for="pq">Search protocols</label>'+
     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>'+
-    '<input id="pq" type="text" value="'+esc(ST.q)+'" placeholder="e.g. hyperkalaemia, snakebite, eclampsia…" autocomplete="off"></div></div>',
-    '<div class="count"><b>'+list.length+'</b> protocol'+(list.length===1?'':'s')+' · time-critical sequences and decision support</div>'];
+    '<input id="pq" type="text" value="'+esc(ST.q)+'" placeholder="e.g. arrest, shock, status epilepticus, anaphylaxis, DKA…" autocomplete="off"></div></div>');
+  h.push('<div class="count"><b>'+list.length+'</b> protocol'+(list.length===1?'':'s')+' · time-critical sequences and decision support</div>');
   if(!list.length){ h.push('<div class="empty"><b>No protocol matches “'+esc(ST.q)+'”</b></div>'); return h.join(''); }
   h.push('<div style="padding:12px">');
   list.forEach(function(p){
@@ -1869,7 +2251,7 @@ function renderContent(){
   else if(ST.tab==='pump') c.innerHTML=renderPump(ctx);
   else if(ST.tab==='drip'){ c.innerHTML=renderDrip(); calcDrip(); calcRev(); }
   else if(ST.tab==='protocols') c.innerHTML=renderProtocols();
-  else if(ST.tab==='utils'){ c.innerHTML=renderUtils(ctx); calcRenal(); calcBody(); calcFluid(); calcSodium(); calcPotassium(); calcConv(); }
+  else if(ST.tab==='utils'){ c.innerHTML=renderUtils(ctx); calcRenal(); calcBody(); calcFluid(); calcFeed(); calcSodium(); calcPotassium(); calcConv(); }
   else if(ST.tab==='refs') c.innerHTML=renderRefs();
   else c.innerHTML=renderAbout();
   queueSave();
@@ -1915,12 +2297,39 @@ function gotoProto(pid){
 }
 
 function wireInner(){
+  $$('#content .cat[data-cat]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var k=b.getAttribute('data-cat');
+      /* clicking the active pathway returns to All — never a dead end */
+      ST.cat = (ST.cat===k) ? '' : k;
+      ST.sys.clear();            /* systems only make sense inside one pathway */
+      renderContent(); wireInner();
+      /* a chosen pathway should land you on the answers, not on the shortcuts.
+         Clearing back to All stays put, so it never feels like a jump cut.   */
+      if(ST.cat){
+        var first=document.querySelector('#content .card');
+        if(first) scrollToEl(first,'start');
+      }else{
+        var bar=document.querySelector('#content .catbar');
+        if(bar) scrollToEl(bar,'nearest');
+      }
+    });
+  });
   $$('#content .chip[data-sys]').forEach(function(b){
     b.addEventListener('click',function(){
       var k=b.getAttribute('data-sys');
       if(k==='__all__') ST.sys.clear();
       else if(ST.sys.has(k)) ST.sys.delete(k); else ST.sys.add(k);
-      renderContent(); wireInner();
+      renderContent(); wireInner(); queueSave();
+    });
+  });
+  $$('#content .chip[data-purpose]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var p=b.getAttribute('data-purpose');
+      if(p==='__all__') ST.purpose='';
+      else if(ST.purpose===p) ST.purpose='';
+      else ST.purpose=p;
+      renderContent(); wireInner(); queueSave();
     });
   });
   [['q',ST.tab],['pq','protocols']].forEach(function(pr){
@@ -1941,9 +2350,10 @@ function wireInner(){
   $$('#content .railopen').forEach(function(b){
     b.addEventListener('click',function(){ document.body.classList.add('rail-open'); var w=$('#p_wt'); if(w) w.focus(); });
   });
-  var cl=$('#cls'); if(cl) cl.addEventListener('change',function(){ ST.cls=cl.value; renderContent(); wireInner(); });
-  var po=$('#pop'); if(po) po.addEventListener('change',function(){ ST.pop=po.value; renderContent(); wireInner(); });
-  var ha=$('#haOnly'); if(ha) ha.addEventListener('click',function(){ ST.highAlertOnly=!ST.highAlertOnly; renderContent(); wireInner(); });
+  var pur=$('#purpose'); if(pur) pur.addEventListener('change',function(){ ST.purpose=pur.value; renderContent(); wireInner(); queueSave(); });
+  var cl=$('#cls'); if(cl) cl.addEventListener('change',function(){ ST.cls=cl.value; renderContent(); wireInner(); queueSave(); });
+  var po=$('#pop'); if(po) po.addEventListener('change',function(){ ST.pop=po.value; renderContent(); wireInner(); queueSave(); });
+  var ha=$('#haOnly'); if(ha) ha.addEventListener('click',function(){ ST.highAlertOnly=!ST.highAlertOnly; renderContent(); wireInner(); queueSave(); });
   var ea=$('#expAll');
   if(ea) ea.addEventListener('click',function(){
     ST.expand=new Set(REG.map(function(r){ return r.id; }));
@@ -1980,7 +2390,7 @@ function wireInner(){
       ST.tab='drugs'; ST.q=''; ST.sys.clear(); ST.cls='';
       var id=b.getAttribute('data-id');
       renderAll();
-      var el=$('#content .card[data-id="'+CSS.escape(id)+'"]');
+      var el=document.querySelector('#content .card[data-id="'+String(id).replace(/["\\]/g,'\\$&')+'"]');
       if(el){ scrollToEl(el,'center');
         el.style.outline='3px solid var(--brand)'; setTimeout(function(){el.style.outline='';},2200); }
     });
@@ -1992,7 +2402,35 @@ function wireInner(){
   ['sNa','sWt','sInf','sTgt'].forEach(function(i){ var e=$('#'+i); if(e){e.addEventListener('input',calcSodium);e.addEventListener('change',calcSodium);} });
   ['kSer','kWt','kMmol','kVol'].forEach(function(i){ var e=$('#'+i); if(e){e.addEventListener('input',calcPotassium);e.addEventListener('change',calcPotassium);} });
   ['cAmt','cFrom','cTo'].forEach(function(i){ var e=$('#'+i); if(e){e.addEventListener('input',calcConv);e.addEventListener('change',calcConv);} });
+  ['feedWt','feedGoal'].forEach(function(i){ var e=$('#'+i); if(e){e.addEventListener('input',calcFeed);e.addEventListener('change',calcFeed);} });
   if(ST.tab==='pump'){ wirePump(); wirePumpModes(); }
+
+  /* ---- Hero dashboard action buttons ---- */
+  var hbEmerg = $('#btnHeroEmerg');
+  if(hbEmerg) hbEmerg.addEventListener('click', function(){ ST.tab='protocols'; renderAll(); });
+  var hbWiz = $('#btnHeroWiz');
+  if(hbWiz) hbWiz.addEventListener('click', openWizard);
+  var hbDrugs = $('#btnHeroDrugs');
+  if(hbDrugs) hbDrugs.addEventListener('click', function(){
+    ST.tab='drugs'; ST.cat=''; ST.sys.clear(); ST.cls=''; renderAll();
+    var q=$('#q'); if(q){ q.focus(); }
+  });
+  var hbGuide = $('#btnHeroGuide');
+  if(hbGuide) hbGuide.addEventListener('click', openGuide);
+
+  /* ---- CPR Timer buttons in Emergency Protocol ---- */
+  var cprT = $('#btnCprToggle');
+  if(cprT) cprT.addEventListener('click', cprToggle);
+  var cprR = $('#btnCprReset');
+  if(cprR) cprR.addEventListener('click', cprReset);
+
+  /* ---- Copy dose note buttons on cards ---- */
+  $$('.btn-copy[data-copy-id]').forEach(function(b){
+    b.addEventListener('click', function(e){
+      e.stopPropagation();
+      copyDoseNote(b.getAttribute('data-copy-id'));
+    });
+  });
 
   /* ---- pinned stars ---- */
   $$('.star[data-fav]').forEach(function(b){
@@ -2011,8 +2449,9 @@ function wireInner(){
   $$('.fbar .fb').forEach(function(b){
     b.addEventListener('click',function(){
       var k=b.getAttribute('data-clear');
-      if(k==='*'){ ST.q=''; ST.cls=''; ST.pop=''; ST.sys=new Set(); ST.highAlertOnly=false; ST.favOnly=false; }
+      if(k==='*'){ ST.q=''; ST.purpose=''; ST.cls=''; ST.pop=''; ST.cat=''; ST.sys=new Set(); ST.highAlertOnly=false; ST.favOnly=false; }
       else if(k==='q') ST.q='';
+      else if(k==='purpose') ST.purpose='';
       else if(k==='cls') ST.cls='';
       else if(k==='pop') ST.pop='';
       else if(k==='ha') ST.highAlertOnly=false;
@@ -2022,10 +2461,138 @@ function wireInner(){
     });
   });
 
-  /* ---- record a drug as recent when a person actually opens it ---- */
+  /* ---- card expand / collapse on select / click ---- */
+  function toggleCard(id, forceOpen){
+    var escId = String(id).replace(/["\\]/g, '\\$&');
+    var card = document.querySelector('.card[data-id="' + escId + '"]');
+    if(!card) return;
+    var isOpen = (forceOpen !== undefined) ? !!forceOpen : !ST.expand.has(id);
+    if(isOpen){
+      ST.expand.add(id);
+      pushRecent(id);
+    } else {
+      ST.expand.delete(id);
+    }
+    card.classList.toggle('is-expanded', isOpen);
+    var ch = card.querySelector('.ch');
+    if(ch){
+      ch.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      ch.setAttribute('title', isOpen ? 'Click to collapse card' : 'Click to expand full details');
+    }
+    var tog = card.querySelector('.card-toggle');
+    if(tog){
+      tog.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      tog.setAttribute('title', isOpen ? 'Collapse card' : 'Expand full details');
+      var ico = tog.querySelector('.ctog-icon');
+      if(ico) ico.textContent = isOpen ? '▾' : '▸';
+      var lbl = tog.querySelector('.ctog-lbl');
+      if(lbl) lbl.textContent = isOpen ? 'Collapse' : 'Details';
+    }
+    var fx = card.querySelector('.fxdet');
+    if(fx) fx.open = isOpen;
+    var cd = card.querySelector('.cdet');
+    if(cd) cd.open = isOpen;
+    queueSave();
+  }
+
+  $$('#content .card').forEach(function(card){
+    var id = card.getAttribute('data-id');
+    var ch = card.querySelector('.ch');
+    if(ch && id){
+      ch.addEventListener('click', function(e){
+        if(e.target.closest('.star')) return;
+        toggleCard(id);
+      });
+      ch.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){
+          if(e.target.closest('.star')) return;
+          e.preventDefault();
+          toggleCard(id);
+        }
+      });
+    }
+  });
+
+  /* when user manually toggles .fxdet summary */
   $$('.fxdet').forEach(function(dt2){
-    dt2.addEventListener('toggle',function(e){
-      if(dt2.open && e.isTrusted) pushRecent(dt2.getAttribute('data-id'));
+    dt2.addEventListener('toggle', function(e){
+      var id = dt2.getAttribute('data-id');
+      if(!id) return;
+      var card = dt2.closest('.card');
+      if(dt2.open){
+        ST.expand.add(id);
+        if(e.isTrusted) pushRecent(id);
+        if(card){
+          card.classList.add('is-expanded');
+          var ch = card.querySelector('.ch');
+          if(ch){ ch.setAttribute('aria-expanded', 'true'); ch.setAttribute('title', 'Click to collapse card'); }
+          var tog = card.querySelector('.card-toggle');
+          if(tog){
+            tog.setAttribute('aria-expanded', 'true');
+            tog.setAttribute('title', 'Collapse card');
+            var ico = tog.querySelector('.ctog-icon'); if(ico) ico.textContent = '▾';
+            var lbl = tog.querySelector('.ctog-lbl'); if(lbl) lbl.textContent = 'Collapse';
+          }
+        }
+      } else {
+        var cd = card ? card.querySelector('.cdet') : null;
+        if(!cd || !cd.open){
+          ST.expand.delete(id);
+          if(card){
+            card.classList.remove('is-expanded');
+            var ch = card.querySelector('.ch');
+            if(ch){ ch.setAttribute('aria-expanded', 'false'); ch.setAttribute('title', 'Click to expand full details'); }
+            var tog = card.querySelector('.card-toggle');
+            if(tog){
+              tog.setAttribute('aria-expanded', 'false');
+              tog.setAttribute('title', 'Expand full details');
+              var ico = tog.querySelector('.ctog-icon'); if(ico) ico.textContent = '▸';
+              var lbl = tog.querySelector('.ctog-lbl'); if(lbl) lbl.textContent = 'Details';
+            }
+          }
+        }
+      }
+      queueSave();
+    });
+  });
+
+  /* when user manually toggles .cdet summary */
+  $$('.cdet').forEach(function(cd){
+    cd.addEventListener('toggle', function(e){
+      var card = cd.closest('.card');
+      if(!card) return;
+      var id = card.getAttribute('data-id');
+      if(!id) return;
+      if(cd.open){
+        ST.expand.add(id);
+        if(e.isTrusted) pushRecent(id);
+        card.classList.add('is-expanded');
+        var ch = card.querySelector('.ch');
+        if(ch){ ch.setAttribute('aria-expanded', 'true'); ch.setAttribute('title', 'Click to collapse card'); }
+        var tog = card.querySelector('.card-toggle');
+        if(tog){
+          tog.setAttribute('aria-expanded', 'true');
+          tog.setAttribute('title', 'Collapse card');
+          var ico = tog.querySelector('.ctog-icon'); if(ico) ico.textContent = '▾';
+          var lbl = tog.querySelector('.ctog-lbl'); if(lbl) lbl.textContent = 'Collapse';
+        }
+      } else {
+        var fx = card.querySelector('.fxdet');
+        if(!fx || !fx.open){
+          ST.expand.delete(id);
+          card.classList.remove('is-expanded');
+          var ch = card.querySelector('.ch');
+          if(ch){ ch.setAttribute('aria-expanded', 'false'); ch.setAttribute('title', 'Click to expand full details'); }
+          var tog = card.querySelector('.card-toggle');
+          if(tog){
+            tog.setAttribute('aria-expanded', 'false');
+            tog.setAttribute('title', 'Expand full details');
+            var ico = tog.querySelector('.ctog-icon'); if(ico) ico.textContent = '▸';
+            var lbl = tog.querySelector('.ctog-lbl'); if(lbl) lbl.textContent = 'Details';
+          }
+        }
+      }
+      queueSave();
     });
   });
 
@@ -2101,6 +2668,221 @@ function exportCsv(){
 /* ------------------------------------------------------------------ */
 /* patient-panel events                                               */
 /* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+/* Copy Dose Note                                                     */
+/* ------------------------------------------------------------------ */
+function copyDoseNote(drugId){
+  var reg = null;
+  for(var i=0; i<REG.length; i++){ if(REG[i].id === drugId){ reg = REG[i]; break; } }
+  if(!reg) return;
+  var ctx = buildCtx();
+  var dw = dosingWeightFor(reg, ctx);
+  var out = computeRegimen(reg, {kg: dw.kg, dosingWeight: dw.kg, ageDays: ctx.ageDays, pop: ctx.pop});
+  
+  var lines = [
+    '[' + reg.n + ']',
+    'Indication: ' + (reg.ind || 'Paediatric dosing'),
+    'Patient: ' + (ctx.kg != null ? fmtNum(ctx.kg, 1) + ' kg (' + ctx.weightSource + ')' : 'No patient weight'),
+    'Calculated Dose: ' + (out.dose ? out.dose.text : (out.doseText || '—'))
+  ];
+  if(reg.d && reg.d.rep) lines.push('Schedule: ' + reg.d.rep);
+  if(out.items && out.items[0] && out.items[0].volLo != null){
+    lines.push('Volume: ' + fmtVol(out.items[0].volLo) + ' ' + (out.items[0].perUnit || 'mL') + ' of ' + (out.items[0].fx.s || ''));
+  }
+  if(reg.ref && reg.ref.length){
+    lines.push('Source: ' + reg.ref.map(function(k){ return REFS[k] ? REFS[k].n : k; }).join(', '));
+  }
+  var text = lines.join('\n');
+
+  if(typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      toast('✓ Copied dose note for ' + reg.n);
+    }).catch(function(){
+      prompt('Copy dose note:', text);
+    });
+  } else if(typeof prompt === 'function'){
+    prompt('Copy dose note:', text);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Guided 3-Step Patient Entry Wizard                                 */
+/* ------------------------------------------------------------------ */
+var WIZ_STATE = {
+  step: 1,
+  pop: 'child',
+  wt: '',
+  ageY: '',
+  ageM: '',
+  ageD: '',
+  gaW: '40',
+  gaD: '0',
+  sex: 'male',
+  scr: '',
+  k: '',
+  na: ''
+};
+
+function openWizard(){
+  var p = ST.pt;
+  WIZ_STATE.step = 1;
+  WIZ_STATE.pop = (p.gaW && +p.gaW < 37) || (p.ageD && +p.ageD < 28 && !p.ageY && !p.ageM) ? 'neo' : 'child';
+  WIZ_STATE.wt = p.wt || '';
+  WIZ_STATE.ageY = p.ageY || '';
+  WIZ_STATE.ageM = p.ageM || '';
+  WIZ_STATE.ageD = p.ageD || '';
+  WIZ_STATE.gaW = p.gaW || (WIZ_STATE.pop==='neo'?'28':'40');
+  WIZ_STATE.gaD = p.gaD || '0';
+  WIZ_STATE.sex = p.sex || 'male';
+  WIZ_STATE.scr = p.scr || '';
+  WIZ_STATE.k = p.k || '';
+  WIZ_STATE.na = p.na || '';
+  renderWizard();
+  var m = $('#wizModal'); if(m) m.classList.add('open');
+}
+
+function closeWizard(){
+  var m = $('#wizModal'); if(m) m.classList.remove('open');
+}
+
+function renderWizard(){
+  var b = $('#wizBody'); if(!b) return;
+  var s = WIZ_STATE.step;
+  var h = [];
+  
+  /* Step indicator */
+  h.push('<div style="display:flex;gap:6px;margin-bottom:14px">'+
+    '<div style="flex:1;height:5px;border-radius:3px;background:'+(s>=1?'var(--brand)':'var(--line3)')+'"></div>'+
+    '<div style="flex:1;height:5px;border-radius:3px;background:'+(s>=2?'var(--brand)':'var(--line3)')+'"></div>'+
+    '<div style="flex:1;height:5px;border-radius:3px;background:'+(s>=3?'var(--brand)':'var(--line3)')+'"></div>'+
+    '</div>');
+
+  if(s === 1){
+    h.push('<h3 style="margin:0 0 4px;font-size:16px;font-weight:800;color:var(--ink)">Step 1 · Patient Population</h3>'+
+      '<div style="font-size:13px;color:var(--ink2);margin-bottom:12px">Select whether you are dosing a newborn / preterm infant or an older infant / child.</div>'+
+      '<div class="wiz-group-grid">'+
+        '<button type="button" class="wiz-group-btn'+(WIZ_STATE.pop==='neo'?' selected':'')+'" id="wzPopNeo">'+
+          '<b style="font-size:15px">👶 Neonate / Preterm</b>'+
+          '<span>&lt;28 days postnatal age or preterm (&lt;37w gestation). Uses Fenton growth curves and PMA interval banding.</span>'+
+        '</button>'+
+        '<button type="button" class="wiz-group-btn'+(WIZ_STATE.pop==='child'?' selected':'')+'" id="wzPopChild">'+
+          '<b style="font-size:15px">🧒 Child / Adolescent</b>'+
+          '<span>1 month to 18 years. Uses WHO weight-for-age standards and paediatric mg/kg dosing.</span>'+
+        '</button>'+
+      '</div>');
+  } else if(s === 2){
+    h.push('<h3 style="margin:0 0 4px;font-size:16px;font-weight:800;color:var(--ink)">Step 2 · Weight &amp; Age</h3>'+
+      '<div style="font-size:13px;color:var(--ink2);margin-bottom:12px">A measured weight is best. If unavailable, age will estimate weight.</div>');
+    
+    h.push('<div class="field" style="margin-bottom:10px">'+
+      '<label for="wzWt"><b>Measured Weight (kg)</b> — leave blank if unknown</label>'+
+      '<input id="wzWt" type="number" step="0.01" min="0" max="150" value="'+esc(WIZ_STATE.wt)+'" placeholder="e.g. 12.5" autocomplete="off">'+
+      '</div>');
+
+    if(WIZ_STATE.pop === 'neo'){
+      h.push('<div class="row" style="margin-bottom:10px">'+
+        '<div class="field"><label for="wzGaW">Gestation at birth (weeks)</label><input id="wzGaW" type="number" min="24" max="42" value="'+esc(WIZ_STATE.gaW)+'"></div>'+
+        '<div class="field"><label for="wzGaD">plus days</label><input id="wzGaD" type="number" min="0" max="6" value="'+esc(WIZ_STATE.gaD)+'"></div>'+
+        '<div class="field"><label for="wzAgeD">Postnatal age (days)</label><input id="wzAgeD" type="number" min="0" max="28" value="'+esc(WIZ_STATE.ageD)+'" placeholder="e.g. 7"></div>'+
+        '</div>');
+    } else {
+      h.push('<div class="row" style="margin-bottom:10px">'+
+        '<div class="field"><label for="wzAgeY">Age (years)</label><input id="wzAgeY" type="number" min="0" max="18" value="'+esc(WIZ_STATE.ageY)+'" placeholder="e.g. 4"></div>'+
+        '<div class="field"><label for="wzAgeM">Months</label><input id="wzAgeM" type="number" min="0" max="11" value="'+esc(WIZ_STATE.ageM)+'" placeholder="e.g. 6"></div>'+
+        '<div class="field"><label for="wzSex">Sex</label><select id="wzSex"><option value="male"'+(WIZ_STATE.sex!=='female'?' selected':'')+'>Male</option><option value="female"'+(WIZ_STATE.sex==='female'?' selected':'')+'>Female</option></select></div>'+
+        '</div>');
+    }
+  } else {
+    h.push('<h3 style="margin:0 0 4px;font-size:16px;font-weight:800;color:var(--ink)">Step 3 · Optional Labs &amp; Confirmation</h3>'+
+      '<div style="font-size:13px;color:var(--ink2);margin-bottom:12px">Enter renal labs if available for automatic eGFR / CrCl and electrolyte safety alerts.</div>'+
+      '<div class="row" style="margin-bottom:10px">'+
+        '<div class="field"><label for="wzScr">Serum Creatinine (mg/dL)</label><input id="wzScr" type="number" step="0.01" min="0" value="'+esc(WIZ_STATE.scr)+'" placeholder="e.g. 0.6"></div>'+
+        '<div class="field"><label for="wzK">Serum K⁺ (mmol/L)</label><input id="wzK" type="number" step="0.1" min="0" value="'+esc(WIZ_STATE.k)+'" placeholder="e.g. 4.2"></div>'+
+        '<div class="field"><label for="wzNa">Serum Na⁺ (mmol/L)</label><input id="wzNa" type="number" step="1" min="0" value="'+esc(WIZ_STATE.na)+'" placeholder="e.g. 138"></div>'+
+      '</div>');
+  }
+
+  /* Actions */
+  h.push('<div class="wiz-actions">'+
+    (s > 1 ? '<button type="button" class="btn ghost sm" id="wzBack">← Back</button>' : '<div></div>')+
+    (s < 3 ? '<button type="button" class="btn sm" id="wzNext">Next →</button>'
+           : '<button type="button" class="btn sm" id="wzApply" style="background:var(--ok);color:#fff">✓ Apply to Calculator</button>')+
+    '</div>');
+
+  b.innerHTML = h.join('');
+  wireWizard();
+}
+
+function wireWizard(){
+  var popNeo = $('#wzPopNeo'), popChild = $('#wzPopChild');
+  if(popNeo) popNeo.addEventListener('click', function(){ WIZ_STATE.pop = 'neo'; WIZ_STATE.gaW = '28'; renderWizard(); });
+  if(popChild) popChild.addEventListener('click', function(){ WIZ_STATE.pop = 'child'; WIZ_STATE.gaW = '40'; renderWizard(); });
+  
+  var wzWt = $('#wzWt'); if(wzWt) wzWt.addEventListener('input', function(){ WIZ_STATE.wt = wzWt.value; });
+  var wzGaW = $('#wzGaW'); if(wzGaW) wzGaW.addEventListener('input', function(){ WIZ_STATE.gaW = wzGaW.value; });
+  var wzGaD = $('#wzGaD'); if(wzGaD) wzGaD.addEventListener('input', function(){ WIZ_STATE.gaD = wzGaD.value; });
+  var wzAgeD = $('#wzAgeD'); if(wzAgeD) wzAgeD.addEventListener('input', function(){ WIZ_STATE.ageD = wzAgeD.value; });
+  var wzAgeY = $('#wzAgeY'); if(wzAgeY) wzAgeY.addEventListener('input', function(){ WIZ_STATE.ageY = wzAgeY.value; });
+  var wzAgeM = $('#wzAgeM'); if(wzAgeM) wzAgeM.addEventListener('input', function(){ WIZ_STATE.ageM = wzAgeM.value; });
+  var wzSex = $('#wzSex'); if(wzSex) wzSex.addEventListener('change', function(){ WIZ_STATE.sex = wzSex.value; });
+  
+  var wzScr = $('#wzScr'); if(wzScr) wzScr.addEventListener('input', function(){ WIZ_STATE.scr = wzScr.value; });
+  var wzK = $('#wzK'); if(wzK) wzK.addEventListener('input', function(){ WIZ_STATE.k = wzK.value; });
+  var wzNa = $('#wzNa'); if(wzNa) wzNa.addEventListener('input', function(){ WIZ_STATE.na = wzNa.value; });
+
+  var next = $('#wzNext'); if(next) next.addEventListener('click', function(){ WIZ_STATE.step++; renderWizard(); });
+  var back = $('#wzBack'); if(back) back.addEventListener('click', function(){ WIZ_STATE.step--; renderWizard(); });
+  var apply = $('#wzApply');
+  if(apply) apply.addEventListener('click', function(){
+    ST.pt.wt = WIZ_STATE.wt;
+    ST.pt.ageY = WIZ_STATE.ageY;
+    ST.pt.ageM = WIZ_STATE.ageM;
+    ST.pt.ageD = WIZ_STATE.ageD;
+    ST.pt.gaW = WIZ_STATE.gaW;
+    ST.pt.gaD = WIZ_STATE.gaD;
+    ST.pt.sex = WIZ_STATE.sex;
+    ST.pt.scr = WIZ_STATE.scr;
+    ST.pt.k = WIZ_STATE.k;
+    ST.pt.na = WIZ_STATE.na;
+    closeWizard();
+    syncPanel();
+    renderAll();
+    toast('✓ Patient applied to calculator');
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Junior Quick-Start Walkthrough & Safety Guide                      */
+/* ------------------------------------------------------------------ */
+function openGuide(){
+  var b = $('#walkBody'); if(!b) return;
+  b.innerHTML = '<div style="display:flex;flex-direction:column;gap:10px">'+
+    '<div class="walk-card">'+
+      '<h4>👶 1. Neonatal PMA &amp; Interval Banding</h4>'+
+      '<p>Preterm babies (&lt;37w) metabolize drugs based on Postmenstrual Age (PMA = Gestation + Postnatal Days). Dosing intervals for Gentamicin, Vancomycin, and Caffeine are automatically adjusted for renal maturity.</p>'+
+    '</div>'+
+    '<div class="walk-card">'+
+      '<h4>💊 2. Indian Formulation Concentrations</h4>'+
+      '<p>Every vial and syrup in India displays its active strength in mg/mL or % w/v. Never guess liquid concentrations (e.g. Paracetamol comes in 120 mg/5 mL, 250 mg/5 mL, and 100 mg/mL drops).</p>'+
+    '</div>'+
+    '<div class="walk-card">'+
+      '<h4>✍️ 3. ISMP High-Alert Independent Double-Checks</h4>'+
+      '<p>For high-risk drugs (Adrenaline, Insulin, Potassium, Heparin, Digoxin), two clinicians must independently verify: Patient identity, Drug ampoule, Concentration, Calculated volume, and Infusion rate.</p>'+
+    '</div>'+
+    '<div class="walk-card">'+
+      '<h4>🛡️ 4. Enforced Hard Caps &amp; Micro-Volumes</h4>'+
+      '<p>Weight-based doses that exceed maximum adult single or 24-hour limits are automatically capped. Any dose volume &lt;0.1 mL carries a mandatory 1:10 dilution instruction.</p>'+
+    '</div>'+
+    '<button type="button" class="btn sm" id="walkDone" style="align-self:flex-end">Got it, Let\'s Dose →</button>'+
+    '</div>';
+  var m = $('#walkModal'); if(m) m.classList.add('open');
+  var d = $('#walkDone'); if(d) d.addEventListener('click', closeGuide);
+}
+
+function closeGuide(){
+  var m = $('#walkModal'); if(m) m.classList.remove('open');
+}
+
 function wirePanel(){
   ['wt','ageY','ageM','ageD','gaW','gaD','ht','scr','k','na','glu'].forEach(function(id){
     var e=$('#p_'+id); if(!e) return;
@@ -2123,6 +2905,13 @@ function wirePanel(){
     ST.pt={wt:'',ageY:'',ageM:'',ageD:'',gaW:'',gaD:'',sex:'male',ht:'',scr:'',wMethod:'who',adultOverride:false,k:'',na:'',glu:''};
     syncPanel(); renderAll(); toast('Patient cleared');
   });
+  var bWiz = $('#btnWiz'); if(bWiz) bWiz.addEventListener('click', openWizard);
+  var bGde = $('#btnGuide'); if(bGde) bGde.addEventListener('click', openGuide);
+  var wCl = $('#wizClose'); if(wCl) wCl.addEventListener('click', closeWizard);
+  var wkCl = $('#walkClose'); if(wkCl) wkCl.addEventListener('click', closeGuide);
+  var pEdit = $('#pEdit'); if(pEdit) pEdit.addEventListener('click', openWizard);
+  var wmBg = $('#wizModal'); if(wmBg) wmBg.addEventListener('click', function(e){ if(e.target===wmBg) closeWizard(); });
+  var wkmBg = $('#walkModal'); if(wkmBg) wkmBg.addEventListener('click', function(e){ if(e.target===wkmBg) closeGuide(); });
   $('#btnPrint').addEventListener('click',function(){
     /* a collapsed card would print only its one-line answer, so open every
        strength table and safety block first, then put them back afterwards */
@@ -2137,7 +2926,9 @@ function wirePanel(){
   $('#btnAbout').addEventListener('click',function(){ ST.tab='about'; renderAll(); });
   $('#modalX').addEventListener('click',closeModal);
   $('#modal').addEventListener('click',function(e){ if(e.target===$('#modal')) closeModal(); });
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeModal(); });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){ closeModal(); closeWizard(); closeGuide(); }
+  });
   $$('#tabs').forEach(function(t){
     t.addEventListener('click',function(e){
       var b=e.target.closest('button[data-tab]'); if(!b) return;
@@ -2161,7 +2952,7 @@ function wirePanel(){
   });
 }
 var _dh=null;
-function debounceRender(){ clearTimeout(_dh); _dh=setTimeout(renderAll,120); }
+function debounceRender(){ clearTimeout(_dh); _dh=setTimeout(renderAll,10); }
 function syncPanel(){
   var p=ST.pt;
   ['wt','ageY','ageM','ageD','gaW','gaD','ht','scr','k','na','glu'].forEach(function(id){ var e=$('#p_'+id); if(e) e.value=p[id]||''; });

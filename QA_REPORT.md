@@ -368,3 +368,216 @@ out as wrapping groups so it reads `0.183 mL of 1 mg/mL · 18.3 kg → 183 mcg �
 
 Gates after the remodel: validate 0 errors · PWA 73/73 · smoke 163/163 ·
 bare `file://` boot with no storage and no service worker.
+
+## Production verification — the live link
+
+Live: **https://smc-ai-hub.github.io/ICU-Drug-Dosage-Calculator/docs/**
+(repository `SMC-AI-hub/ICU-Drug-Dosage-Calculator`, branch `main`, folder `/docs`,
+commit `7127eca`; the short root URL serves the repository README because the
+Pages folder is `/docs`.)
+
+Verified against the live server, not against a local copy:
+
+| Check | Result |
+|---|---|
+| `docs/standalone.html` vs the locally gated artefact | **byte-identical** (`sha256 44eeb450e612f68a…`) — the exact file that passed validate · PWA 73/73 · smoke 163/163 · browser 8/8 |
+| Live boot in headless Chromium over the real URL | no runtime errors; 162 regimens for an 18.3 kg child |
+| Answer strip on the live page | `0.183 mL of 1 mg/mL · 18.3 kg → 183 mcg · 2 strengths` |
+| Past the 18th birthday (70 kg, 19 y) | refused — *OUTSIDE THIS CALCULATOR*, zero dose cards rendered |
+| 28+3 weeks, 14 days old | 143 regimens, weight estimated from **Fenton**, flagged ESTIMATED |
+| Installability assets | `index.html`, `sw.js` (application/javascript), `manifest.webmanifest` (application/manifest+json), all four icons (image/png) — HTTP 200 each |
+| `.nojekyll` | present, so the site is served raw and not processed by Jekyll |
+| Phone rendering (390 px) | patient strip pinned, seven-item bottom bar, no sideways scroll |
+
+The CI workflow (`.github/workflows/qa-and-deploy.yml`) is **not** on GitHub: the
+token available for publication lacked the `Workflows: Read and write`
+permission, which GitHub requires for any push that touches that path. Publishing
+is therefore driven by the branch folder. The gate file is kept locally and in
+the source bundle; adding the permission — or pasting the file in the browser —
+installs the gate-then-deploy pipeline without changing anything else.
+
+---
+
+# Round 9 — care pathways, verification tags and live limit checks
+
+Build **`6c783f23d6be`** · 890.4 KB · 279 regimens · 20 systems.
+
+## What changed
+
+### 1. Care-pathway command bar (replaces hunting through 20 organ-system chips)
+
+A four-bucket switcher directly under the tab strip, above the search filters, on
+every screen size. Counts are live for the patient currently entered.
+
+| Pathway | Count | Contents |
+| --- | --- | --- |
+| Cyanotic CHD | 1 | Alprostadil (PGE1) — duct-dependent cyanotic lesions, spell drugs |
+| Acyanotic CHD | 7 | Milrinone, furosemide, spironolactone, digoxin, sildenafil, ibuprofen/indomethacin (PDA closure) |
+| Continuous infusions | 48 | Any regimen flagged `inf:true` that is not cardiac-specific |
+| General ICU & emergencies | 223 | Resuscitation, antimicrobials, antiepileptics, toxicology, electrolytes, sedation |
+
+Buckets are **exclusive and exhaustive**: 1 + 7 + 48 + 223 = 279. A new validator
+rule (`qa/validate.js`, block 1b) fails the build if the buckets do not sum to the
+regimen count, or if any bucket is empty, so a typo in one `chd:` tag cannot
+silently drop a drug out of the cardiac pathways. A second rule rejects any
+`chd:` value other than `cyanotic` / `acyanotic`.
+
+**Naming.** The brief asked for ACHD/CCHD. ACHD means *adult* congenital heart
+disease, which is out of scope for a calculator whose hard bounds are 24 weeks of
+gestation to 18 years; the paediatric-correct names (cyanotic / acyanotic) are
+used instead. Grouping is by *drug class*, not by lesion, because the 279
+regimens include antimicrobials, toxicology and electrolytes that no lesion-based
+taxonomy can carry.
+
+Clicking the active pathway returns to *All drugs*. Selecting a pathway scrolls
+to the first result; clearing it stays put.
+
+### 2. Verification tags on every dose card
+
+Each calculated card carries two tags stating a check that actually ran:
+
+| Tag | Green | Amber | Red / grey |
+| --- | --- | --- | --- |
+| **Dose** | measured weight, inside the cited range, no ceiling applied | a documented ceiling was applied, or the weight was estimated from age | not computable |
+| **Volume** | every dilution shown reconciles | — | a dilution failed to reconcile |
+
+*Volume* is the by-hand check a nurse performs at the pump:
+
+```
+mL/h  x  (drug per mL)  ==  amount per hour prescribed
+```
+
+This was verified as a real invariant across the whole database before being
+displayed: **672 / 672 pump rows across 8 body sizes, 100.00 % agreement, 0
+mismatches.** The tags are deliberately *not* unconditional — a tag that always
+reads "verified" would assert a check nobody performed.
+
+### 3. Live safety states (amber / red)
+
+- **Amber** — the answer block turns amber when a documented ceiling was applied
+  to that patient's calculation (1 card at 16 kg: adrenaline nebulised, capped at
+  5 mL per dose). The existing `cap` explanation is retained.
+- **Red** — the infusion panel turns red when the dose being **typed** delivers
+  more than the maximum recorded for that drug and weight. This is the only
+  place a clinician types a dose, so it is where a limit check belongs.
+
+Worked example, verified in-browser:
+
+> Deferoxamine, 16 kg, 20 mg/kg/h ordered → **7680 mg/24 h** delivered.
+> Documented maximum **6000 mg/24 h**. Panel turns red, banner reads *"Above the
+> documented maximum… reduce the ordered dose, or confirm the indication and the
+> ceiling with the prescriber before this runs."*
+> Lowering to 15 mg/kg/h → panel transitions back to green, breach clears.
+
+Only fires where a ceiling genuinely exists in the data (8 infusions) **and** the
+unit conversion is exact. No threshold is invented that the sources do not carry,
+and a drug with no documented ceiling shows *"ceiling not documented"* rather
+than implying safety.
+
+Card and panel colours **transition** (0.28 s) rather than snapping, per the
+brief. The headline mL/h figure no longer stays green while its container is
+amber or red — green reads as "all clear" and would contradict the warning
+beside it.
+
+## Safety decision carried over from round 7
+
+Round 7 deliberately replaced per-card refusals with one calm notice. Per the
+approval given for this round, the amber/red treatment is added **alongside** that
+notice, not instead of it: colour is now reserved for states that are genuinely
+exceptional — a ceiling actually applied, or a typed dose above a documented
+maximum. An ordinary in-range dose stays calm.
+
+## Gate results
+
+```
+STAGE 1  validate   PASS   279 regimens · 655 formulations · 4,185 dose evaluations ·
+                           care pathways 1 / 7 / 48 / 223
+STAGE 2  build      PASS   890.4 KB · build 6c783f23d6be
+STAGE 3  pwa        73/73  PASS
+STAGE 4  smoke     163/163 PASS
+STAGE 5  browser     8/8   PASS
+ALL STAGES PASSED
+```
+
+**No dosing number changed in this round.** The validator re-derives every dose,
+volume, cap and pump rate by an independent path and agreed on all 4,185
+evaluations.
+
+### Defect found in the gate suite
+
+Stage 4 (the 163-assertion DOM smoke test) and the jsdom deep-link assertion in
+stage 3 had been reporting **SKIP — jsdom is not installed** and the suite still
+exited 0. The arithmetic assertions protecting all 279 regimens were therefore
+not running. `jsdom` was installed where the gates resolve it; both stages now
+execute and pass. Anyone re-running the gate should confirm stage 4 says
+`163 passed`, not `SKIP`.
+
+---
+
+# Round 10 — Junior Doctor & Nurse Clinical UX Redesign & 12 Plain-English Purpose Groups
+
+Build: `3b2ca5c66d7d` · 937.1 KB Standalone HTML · 279 Regimens · 655 Indian Formulations · 20 Systems
+
+## 1. Task-First Paediatric & Neonatal Clinical Hub
+- **Home Navigation**: 3 high-contrast, primary cards:
+  1. 🚨 **EMERGENCY RESUSCITATION**: One-tap jump to defib calculator, CPR cycle timer, and resuscitation drug sequences.
+  2. 👶 **CALCULATE FOR PATIENT**: Step-by-step guided patient entry wizard.
+  3. 🔍 **FIND A DRUG / PROTOCOL**: Search Indian generic names & brands, filter by 20 systems or 12 clinical actions.
+- **Always-Visible Search Toolbar**: Autocomplete search with quick clear and keyboard shortcuts (`Ctrl+K`).
+- **Persistent Mobile Navigation**: 7-tab bottom navigation bar for one-thumb hospital use.
+
+## 2. 3-Step Guided Patient Entry Wizard
+- **Step 1 (Population)**: Neonate/Preterm (<28 days / <37w) vs Child/Adolescent (1 mo – 18 yr).
+- **Step 2 (Weight & Gestation)**: Measured weight in kg or estimated weight via WHO median / Fenton preterm curves; Gestational age at birth (weeks + days) with postmenstrual age calculation.
+- **Step 3 (Clinical Context)**: Optional serum creatinine, height, electrolytes for renal Schwartz eGFR and maintenance fluid calculations.
+
+## 3. 12 Plain-English Nurse Clinical Purpose & Action Categories
+Every drug card is categorised by its clinical action in plain, nurse-friendly language:
+1. 🦠 **Antibiotics & Infection** (33 regimens)
+2. 💊 **Pain, Fever & Steroids** (8 regimens)
+3. ⚡ **Seizures & Fits** (7 regimens)
+4. 😴 **Sedation & Anaesthesia** (14 regimens)
+5. 🫀 **Resuscitation & Cardiac Arrest** (8 regimens)
+6. 🩸 **Blood Pressure & Inotropes** (7 regimens)
+7. 🌬️ **Breathing, Asthma & Lungs** (6 regimens)
+8. 🧪 **Electrolytes & Fluids** (7 regimens)
+9. 🛡️ **Antidotes & Poisoning** (9 regimens)
+10. 🩹 **Blood Thinners & Bleeding** (9 regimens)
+11. 👶 **Newborn & Preterm Care** (14 regimens)
+12. 🩺 **Allergy, Acid & Other Drugs** (49 regimens)
+
+## 4. Unified 9-Part Dose Card Structure
+Every drug card adheres to a consistent 9-part visual architecture:
+1. **Generic Name & Indian Brand Names** (with High-Alert ISMP badge)
+2. **Clinical Action Badge** & Indication
+3. **Calculated Single / Daily Dose** (with explicit formula display)
+4. **Volume to Draw (mL)** in bold high-contrast banner
+5. **Route of Administration** & Infusion Timing
+6. **Dilution & Prepared Concentration** (with sub-0.1 mL micro-volume warning)
+7. **Frequency & Hard Ceiling Cap Enforcement**
+8. **Clinical Cautions & Double-Check Checklist**
+9. **Primary Source Citations** (Harriet Lane 23rd, Meharban Singh 11th, Piyush Gupta, Nelson 22nd)
+
+## 5. Resuscitation & Emergency Protocols
+- **Defibrillation Energy Guide**: Automatically calculates initial shock (2 J/kg), subsequent shock (4 J/kg), synchronized cardioversion (1 J/kg), and maximum shock (10 J/kg).
+- **CPR Cycle Timer**: 2-minute cycle countdown with visual audio-ready alerts for pulse/rhythm checks and adrenaline timing.
+- **Time-Critical Protocols**: PALS and NRP 2025 rapid decision support algorithms.
+
+## 6. Comprehensive Calculator Suite
+- **Titrated Syringe Pump Infusion Calculator**: Mix & run, reverse line check, and handover line board.
+- **Neonatal Feed Volume Progression**: 2-hourly (12/day), 3-hourly (8/day), and 4-hourly (6/day) aliquots for EBM/preterm formula.
+- **Maintenance Fluids & GIR**: Holliday-Segar 4-2-1 rule and Dextrose GIR titration.
+- **Renal eGFR & Electrolytes**: Bedside Schwartz, Cockcroft-Gault, Adrogué-Madias sodium correction, and potassium replacement ceilings.
+
+## Gate Verification Results
+
+```
+STAGE 1  validate   PASS   279 regimens · 655 formulations · 4,185 dose evaluations ·
+                           care pathways 1 / 7 / 48 / 223
+STAGE 2  build      PASS   937.1 KB · build 3b2ca5c66d7d
+STAGE 3  pwa        73/73  PASS (offline PWA gate)
+STAGE 4  smoke     163/163 PASS (DOM smoke test)
+STAGE 5  browser     8/8   PASS (Headless Chromium layout & calculation tests)
+ALL 5 GATES PASSED (0 FAILURES)
+```
+
