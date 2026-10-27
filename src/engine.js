@@ -346,6 +346,91 @@ function dtOf(t){
   return {u:u, per:per, kind:kind, raw:k};
 }
 
+/* ---------------- maintenance dose computation ---------------- */
+function computeMaintDose(maintDef, ctx, reg){
+  if(!maintDef) return null;
+  var kg = ctx && (ctx.dosingWeight!=null ? ctx.dosingWeight : (ctx.kg||null));
+  var dt = dtOf(maintDef.t);
+  if(!dt) return { text: maintDef.rep || maintDef.text || '', rep: maintDef.rep, start: maintDef.start };
+
+  if(maintDef.text && !maintDef.lo && !maintDef.v){
+    return { text: maintDef.text, rep: maintDef.rep, start: maintDef.start };
+  }
+
+  var lo = maintDef.lo!=null ? maintDef.lo : (maintDef.v!=null ? maintDef.v : null);
+  var hi = maintDef.hi!=null ? maintDef.hi : (maintDef.v!=null ? maintDef.v : null);
+  if(lo==null && hi==null){
+    return { text: maintDef.rep || maintDef.text || '', rep: maintDef.rep, start: maintDef.start };
+  }
+
+  if(dt.per && dt.per.indexOf('kg')>=0 && (!kg || kg<=0)){
+    return { text: maintDef.rep || '', rep: maintDef.rep, start: maintDef.start };
+  }
+
+  function scale(v){
+    if(!dt.per || dt.per.indexOf('kg')<0) return v;
+    return v * kg;
+  }
+
+  var aLo = scale(lo), aHi = scale(hi);
+
+  /* Apply cap if specified */
+  var capped = false, capMsg = null;
+  if(maintDef.cap!=null && aHi > maintDef.cap){
+    aHi = maintDef.cap;
+    if(aLo > maintDef.cap) aLo = maintDef.cap;
+    capped = true;
+    capMsg = 'Capped at maximum ' + fmtNum(maintDef.cap) + ' ' + dt.u;
+  }
+  if(maintDef.capDay!=null && aHi > maintDef.capDay){
+    aHi = maintDef.capDay;
+    if(aLo > maintDef.capDay) aLo = maintDef.capDay;
+    capped = true;
+    capMsg = 'Capped at daily ceiling ' + fmtNum(maintDef.capDay) + ' ' + dt.u + '/24 h';
+  }
+
+  var doseText = fmtNum(aLo) + (aHi!=null && Math.abs(aHi-aLo)>1e-9 ? '–' + fmtNum(aHi) : '') + ' ' + dt.u;
+  var prescribedText = fmtNum(lo) + (hi!=null && Math.abs(hi-lo)>1e-9 ? '–' + fmtNum(hi) : '') + ' ' + dt.u + (dt.per ? '/' + dt.per : '');
+
+  /* Compute formulation volumes for maintenance dose if applicable */
+  var fxVols = [];
+  var fxList = (reg && reg.fx) || [];
+  for(var i=0; i<fxList.length; i++){
+    var f = fxList[i];
+    if(f.c != null && f.c > 0 && (dt.kind==='bolus' || dt.kind==='daily')){
+      var cAmt = convertUnit(f.c, canonUnit(f.u), dt.u);
+      if(cAmt != null && cAmt > 0){
+        var vLo = aLo / cAmt;
+        var vHi = aHi / cAmt;
+        fxVols.push({
+          s: f.s,
+          b: f.b,
+          r: f.r,
+          volLo: vLo,
+          volHi: vHi,
+          perUnit: (f.form==='solid'||f.p==='tablet'||f.p==='capsule') ? 'tab' : 'mL'
+        });
+      }
+    }
+  }
+
+  return {
+    lo: aLo,
+    hi: aHi,
+    unit: dt.u,
+    per: dt.per,
+    kind: dt.kind,
+    doseText: doseText,
+    prescribedText: prescribedText,
+    rep: maintDef.rep,
+    start: maintDef.start,
+    freq: maintDef.freq,
+    capped: capped,
+    capMsg: capMsg,
+    fxVols: fxVols
+  };
+}
+
 /* ---------------- the dose engine ----------------
    ctx: {kg, ageDays, pop, heightCm, crCl, ibw, dosingWeight, dosingWeightLabel}
    returns a fully computed object or {error:'...'}                        */
@@ -512,6 +597,7 @@ function computeRegimen(reg, ctx){
       ? 'Program the pump from the DILUTION table below (mL/h). The ampoule rows show the drug quantity per hour, NOT the pump rate.'
       : 'No standard dilution is defined for this infusion - use the ampoule quantity per hour and calculate the bag rate manually, then have it independently checked.';
   }
+  out.maint = computeMaintDose(reg.maint || (reg.d && reg.d.maint), ctx, reg);
   tenFoldCheck(reg, out, ctx);
   return out;
 }

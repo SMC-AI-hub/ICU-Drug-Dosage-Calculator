@@ -579,7 +579,8 @@ function renderCard(reg, ctx){
   } else if(out.kind==='text'){
     h.push('<div class="dl">Dose / regimen</div><div class="dv" style="font-size:13.5px;line-height:1.4">'+esc(out.doseText)+'</div>');
   } else {
-    h.push('<div class="dl">Calculated dose '+(dw.kg!=null&&out.prescribed&&out.prescribed.indexOf('kg')>=0?'for '+fmtNum(dw.kg,1)+' kg':'')+'</div>');
+    var doseHeading = (out.maint ? '⚡ Calculated Loading / Initial Dose ' : 'Calculated dose ') + (dw.kg!=null&&out.prescribed&&out.prescribed.indexOf('kg')>=0?'for '+fmtNum(dw.kg,1)+' kg':'');
+    h.push('<div class="dl">'+doseHeading+'</div>');
     h.push('<div class="dv">'+esc(out.dose.text)+(out.kind==='rate'?' <small>as prescribed; see pump rates below for mL/h</small>':'')+'</div>');
     if(out.prescribed && out.prescribed!==out.unit){
       h.push('<div class="dr">prescribed as <b>'+esc(out.dose.prescribedText||'')+'</b></div>');
@@ -596,6 +597,29 @@ function renderCard(reg, ctx){
     }
     if(reg.d && reg.d.rep) h.push('<div class="dr">'+esc(reg.d.rep)+'</div>');
     h.push(verifTags(reg, out, ctx, dw));
+  }
+
+  /* ---- dedicated maintenance dose block ---- */
+  if(out.maint){
+    h.push('<div class="maint-box">'+
+      '<div class="maint-hdr">'+
+        '<span class="maint-icon">🔄</span>'+
+        '<span class="maint-title">MAINTENANCE DOSE</span>'+
+        (out.maint.start ? '<span class="maint-start">('+esc(out.maint.start)+')</span>' : '')+
+      '</div>'+
+      '<div class="maint-body">'+
+        (out.maint.doseText ? '<div class="maint-val">'+esc(out.maint.doseText)+(dw.kg!=null&&out.maint.prescribedText&&out.maint.prescribedText.indexOf('kg')>=0?' <small class="maint-kg">for '+fmtNum(dw.kg,1)+' kg</small>':'')+'</div>' : '')+
+        (out.maint.prescribedText ? '<div class="maint-presc">prescribed as <b>'+esc(out.maint.prescribedText)+'</b></div>' : '')+
+        (out.maint.rep ? '<div class="maint-rep">'+esc(out.maint.rep)+'</div>' : '')+
+        (out.maint.capMsg ? '<div class="maint-cap">⚠ '+esc(out.maint.capMsg)+'</div>' : '')+
+        (out.maint.fxVols && out.maint.fxVols.length ? 
+          '<div class="maint-vols">'+
+            out.maint.fxVols.slice(0,2).map(function(fv){
+              return '<span class="maint-vol-pill"><b>'+esc(fv.s)+':</b> '+fmtVol(fv.volLo)+(fv.volHi!=null&&Math.abs(fv.volHi-fv.volLo)>1e-9?'–'+fmtVol(fv.volHi):'')+' '+esc(fv.perUnit)+'</span>';
+            }).join(' ')+
+          '</div>' : '')+
+      '</div>'+
+    '</div>');
   }
   h.push('</div>');
 

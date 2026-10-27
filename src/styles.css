@@ -362,6 +362,20 @@ input[type=checkbox]{width:auto;accent-color:var(--brand)}
 .cap{font-size:var(--fs-2);color:var(--warn);margin-top:6px;font-weight:600}
 .cap.hit{color:var(--crit);font-weight:700}
 
+/* ---- maintenance dose callout box inside dose card ---- */
+.maint-box{margin-top:10px;padding:9px 11px;background:var(--panel);border:1.5px solid var(--brand-line);border-radius:var(--r-sm);box-shadow:0 1px 3px rgba(0,0,0,0.03)}
+.maint-hdr{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--brand)}
+.maint-start{font-size:10px;font-weight:600;color:var(--ink3);text-transform:none;margin-left:auto}
+.maint-val{font-size:var(--fs-5);font-weight:800;color:var(--ink);letter-spacing:-.3px;margin-top:3px;line-height:1.25}
+.maint-kg{font-size:var(--fs-1);font-weight:600;color:var(--ink3)}
+.maint-presc{font-size:var(--fs-1);color:var(--ink2);margin-top:2px}
+.maint-presc b{color:var(--ink)}
+.maint-rep{font-size:var(--fs-1);color:var(--ink2);margin-top:3px;line-height:1.35}
+.maint-cap{font-size:var(--fs-1);color:var(--warn);font-weight:700;margin-top:3px}
+.maint-vols{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.maint-vol-pill{background:var(--panel2);border:1px solid var(--line2);padding:2px 7px;border-radius:var(--r-pill);font-size:10.5px;color:var(--ink2)}
+.maint-vol-pill b{color:var(--brand)}
+
 /* strength table disclosure */
 .fxdet{border:0;border-top:1px dashed var(--brand-line);background:transparent}
 .card.risk5 .fxdet{border-top-color:var(--crit-line)}

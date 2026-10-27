@@ -371,6 +371,20 @@ input[type=checkbox]{width:auto;accent-color:var(--brand)}
 .cap{font-size:var(--fs-2);color:var(--warn);margin-top:6px;font-weight:600}
 .cap.hit{color:var(--crit);font-weight:700}
 
+/* ---- maintenance dose callout box inside dose card ---- */
+.maint-box{margin-top:10px;padding:9px 11px;background:var(--panel);border:1.5px solid var(--brand-line);border-radius:var(--r-sm);box-shadow:0 1px 3px rgba(0,0,0,0.03)}
+.maint-hdr{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--brand)}
+.maint-start{font-size:10px;font-weight:600;color:var(--ink3);text-transform:none;margin-left:auto}
+.maint-val{font-size:var(--fs-5);font-weight:800;color:var(--ink);letter-spacing:-.3px;margin-top:3px;line-height:1.25}
+.maint-kg{font-size:var(--fs-1);font-weight:600;color:var(--ink3)}
+.maint-presc{font-size:var(--fs-1);color:var(--ink2);margin-top:2px}
+.maint-presc b{color:var(--ink)}
+.maint-rep{font-size:var(--fs-1);color:var(--ink2);margin-top:3px;line-height:1.35}
+.maint-cap{font-size:var(--fs-1);color:var(--warn);font-weight:700;margin-top:3px}
+.maint-vols{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.maint-vol-pill{background:var(--panel2);border:1px solid var(--line2);padding:2px 7px;border-radius:var(--r-pill);font-size:10.5px;color:var(--ink2)}
+.maint-vol-pill b{color:var(--brand)}
+
 /* strength table disclosure */
 .fxdet{border:0;border-top:1px dashed var(--brand-line);background:transparent}
 .card.risk5 .fxdet{border-top-color:var(--crit-line)}
@@ -912,7 +926,7 @@ body.dark .vol-callout{color:var(--brand2)}
   <div class="spacer"></div>
   <div class="meta">
     <div id="metaCtx">No patient entered</div>
-    <div class="mono">build 3b2ca5c66d7d</div>
+    <div class="mono">build 9e00ec770761</div>
   </div>
   <button class="tbtn icon" id="btnWiz" type="button" title="Guided 3-step patient entry wizard" aria-label="Patient wizard"><span aria-hidden="true">👶</span><span class="tlab">Wizard</span></button>
   <button class="tbtn icon" id="btnGuide" type="button" title="Junior staff quick start & safety guide" aria-label="Junior guide"><span aria-hidden="true">💡</span><span class="tlab">Guide</span></button>
@@ -2261,6 +2275,7 @@ R({ id:'suxamethonium-paed', n:'Suxamethonium — paediatric', sys:'nmba', cls:'
 R({ id:'rocuronium', n:'Rocuronium', sys:'nmba', cls:'Aminosteroid non-depolarising neuromuscular blocker',
   ind:'RSI (1.2 mg/kg — onset 45–60 s), maintenance paralysis in ICU and theatre', pop:'all', risk:4,
   d:{t:'mgkg', lo:0.6, hi:1.2, cap:120, rep:'maintenance 0.1–0.2 mg/kg bolus or 0.3–0.6 mg/kg/h infusion'},
+  maint:{t:'mgkgh', lo:0.3, hi:0.6, rep:'0.3–0.6 mg/kg/h continuous IV infusion or 0.1–0.2 mg/kg intermittent boluses', start:'Post-intubation'},
   fx:[{s:'10 mg/mL', c:10, u:'mg', p:'5 mL vial (50 mg), 10 mL vial (100 mg)', b:'Rocuronium Bromide IP — Neon, Rocmus (Intas), Rocuron (Zydus), Esmeron (MSD)', r:'IV', hl:1}],
   admin:'RSI 1.2 mg/kg IV over 5 s (excellent intubating conditions in 45–60 s). Routine intubation 0.6 mg/kg (90 s). Maintenance 10–20 mcg/kg boluses as needed or 0.3–0.6 mg/kg/h; use a nerve stimulator / train-of-four monitoring.',
   dil:'Ready to use; compatible with NS and D5W.',
@@ -2292,6 +2307,7 @@ R({ id:'cisatracurium', n:'Cisatracurium', sys:'nmba', cls:'Benzylisoquinolinium
 R({ id:'vecuronium', n:'Vecuronium', sys:'nmba', cls:'Aminosteroid non-depolarising NMBA',
   ind:'Maintenance paralysis in theatre and ICU; RSI when rocuronium unavailable', pop:'all', risk:4,
   d:{t:'mgkg', lo:0.08, hi:0.12, cap:12, rep:'maintenance 0.01–0.015 mg/kg bolus or 0.8–1.2 mcg/kg/min'},
+  maint:{t:'mcgkgmin', lo:0.8, hi:1.2, rep:'0.8–1.2 mcg/kg/min (0.05–0.07 mg/kg/h) continuous IV infusion or 0.01–0.02 mg/kg boluses', start:'Post-intubation'},
   fx:[{s:'10 mg vial (lyophilised)', c:1, u:'mg', p:'10 mg vial reconstituted with 10 mL WFI → 1 mg/mL', b:'Vecuronium Bromide IP — Neon, Veenuron (Intas), Vecuron (Samarth), Norcuron', r:'IV', hl:1, prep:'Reconstitute 10 mg with 10 mL sterile WFI → 1 mg/mL; use within 8 h'},
       {s:'4 mg vial', c:1, u:'mg', p:'4 mg vial reconstituted with 4 mL WFI → 1 mg/mL', b:'Vecuronium 4 mg', r:'IV', prep:'Reconstitute 4 mg with 4 mL WFI → 1 mg/mL'}],
   admin:'0.08–0.12 mg/kg IV (onset 2–3 min, duration 25–40 min). Maintenance infusion 0.8–1.2 mcg/kg/min.',
@@ -2371,6 +2387,7 @@ R({ id:'se-benzo1-pd', n:'Midazolam / Lorazepam — paediatric status epilepticu
 R({ id:'se-phenytoin-ad', n:'Phenytoin (second-line, adult)', sys:'neuro', cls:'Class Ib-like Na⁺ channel blocker (hydantoin anticonvulsant)',
   ind:'Second-line therapy for established status epilepticus; seizure prophylaxis after TBI/craniotomy (7 days)', pop:'adult', risk:5,
   d:{t:'mgkg', lo:15, hi:20, cap:1500, rep:'single loading dose; additional 5 mg/kg after 10 min if seizures persist'},
+  maint:{t:'mgkg', lo:2, hi:3, capDay:400, rep:'4–6 mg/kg/day (typically 100 mg TDS or 150 mg BD); start 12 h post-load', start:'12 h post-load'},
   fx:[{s:'50 mg/mL', c:50, u:'mg', p:'5 mL ampoule (250 mg) — a 70-kg adult needs 5–6 ampoules', b:'Eptoin (Abbott/Intas), Dilantin (Abbott), Phenytal, Epilantin', r:'IV/IM/PO', hl:1},
       {s:'100 mg tablet (sodium phenytoin)', c:100, u:'mg', p:'strip of 10', b:'Eptoin 100, Dilantin 100, Phenytal 100', r:'PO'},
       {s:'30 mg/mL oral suspension', c:30, u:'mg', p:'150 mL / 300 mL bottle', b:'Eptoin suspension, Dilantin susp', r:'PO'},
@@ -2383,6 +2400,7 @@ R({ id:'se-phenytoin-ad', n:'Phenytoin (second-line, adult)', sys:'neuro', cls:'
 R({ id:'se-phenytoin-pd', n:'Phenytoin (second-line, paediatric)', sys:'neuro', cls:'Hydantoin anticonvulsant',
   ind:'Second-line therapy for paediatric status epilepticus after two benzodiazepine doses', pop:'paed', risk:5,
   d:{t:'mgkg', v:20, cap:1500, rep:'single loading dose over 20–30 min; then 4–8 mg/kg/day divided 2–3 doses from 12 h later'},
+  maint:{t:'mgkg', lo:2.5, hi:4, capDay:300, rep:'4–8 mg/kg/day divided 12-hourly (2.5–4 mg/kg/dose q12h; neonates 4–8 mg/kg/day); start 12 h post-load', start:'12 h post-load'},
   fx:[{s:'50 mg/mL', c:50, u:'mg', p:'5 mL ampoule (250 mg)', b:'Eptoin (Abbott/Intas), Phenytal, Dilantin', r:'IV', hl:1},
       {s:'30 mg/mL oral suspension', c:30, u:'mg', p:'150 mL bottle', b:'Eptoin suspension', r:'PO'},
       {s:'100 mg tablet', c:100, u:'mg', p:'strip', b:'Eptoin 100', r:'PO'}],
@@ -2394,6 +2412,7 @@ R({ id:'se-phenytoin-pd', n:'Phenytoin (second-line, paediatric)', sys:'neuro', 
 R({ id:'se-levetiracetam-ad', n:'Levetiracetam (second-line, adult)', sys:'neuro', cls:'SV2A synaptic vesicle protein ligand',
   ind:'Second-line status epilepticus; first-line seizure prophylaxis after TBI/SAH/craniotomy (favoured over phenytoin)', pop:'adult', risk:3,
   d:{t:'mgkg', lo:20, hi:60, cap:4500, rep:'single loading dose over 15 min; then 500–1500 mg BD'},
+  maint:{t:'mgkg', lo:10, hi:20, capDay:3000, rep:'500–1500 mg 12-hourly (1000–3000 mg/day); start 12 h post-load', start:'12 h post-load'},
   fx:[{s:'100 mg/mL', c:100, u:'mg', p:'5 mL vial (500 mg) — a 60 mg/kg dose in a 70-kg adult needs 8–9 vials', b:'Levetiracetam IP — Sun, UCB (Keppra IV), Levepsy (Zydus), Levipil (Sun), Levipil IV', r:'IV/PO', hl:1},
       {s:'100 mg/mL oral solution', c:100, u:'mg', p:'150 mL / 300 mL bottle', b:'Keppra oral solution, Levipil syrup', r:'PO'},
       {s:'250 / 500 / 750 / 1000 mg tablets', c:500, u:'mg', p:'strip of 10', b:'Levipil, Levepsy, Keppra, Levace', r:'PO'}],
@@ -2405,6 +2424,7 @@ R({ id:'se-levetiracetam-ad', n:'Levetiracetam (second-line, adult)', sys:'neuro
 R({ id:'se-levetiracetam-pd', n:'Levetiracetam (second-line, paediatric)', sys:'neuro', cls:'SV2A ligand',
   ind:'Second-line paediatric status epilepticus; post-traumatic seizure prophylaxis', pop:'paed', risk:3,
   d:{t:'mgkg', lo:20, hi:60, cap:3000, rep:'single loading dose over 15 min; then 20–30 mg/kg twice daily'},
+  maint:{t:'mgkg', lo:20, hi:30, capDay:3000, rep:'20–30 mg/kg/dose 12-hourly (40–60 mg/kg/day); start 12 h post-load', start:'12 h post-load'},
   fx:[{s:'100 mg/mL', c:100, u:'mg', p:'5 mL vial (500 mg)', b:'Levetiracetam IP — Sun, Keppra IV, Levipil', r:'IV', hl:1},
       {s:'100 mg/mL oral solution', c:100, u:'mg', p:'150 mL bottle', b:'Levipil syrup, Keppra solution', r:'PO'},
       {s:'250 / 500 mg tablets', c:250, u:'mg', p:'strip', b:'Levipil, Levepsy', r:'PO'}],
@@ -2427,6 +2447,7 @@ R({ id:'se-valproate-ad', n:'Sodium valproate IV (second-line, adult)', sys:'neu
 R({ id:'se-valproate-pd', n:'Sodium valproate IV (second-line, paediatric)', sys:'neuro', cls:'Broad-spectrum anticonvulsant',
   ind:'Second-line paediatric status epilepticus; infantile spasms; generalised epilepsy', pop:'paed', risk:4,
   d:{t:'mgkg', lo:20, hi:40, cap:2000, rep:'20–40 mg/kg IV over 10–20 min; then 10–30 mg/kg/day divided'},
+  maint:{t:'mgkg', lo:10, hi:15, capDay:2000, rep:'10–15 mg/kg/dose 8–12-hourly (20–40 mg/kg/day); start 8–12 h post-load', start:'8–12 h post-load'},
   fx:[{s:'100 mg/mL', c:100, u:'mg', p:'4 mL vial (400 mg)', b:'Valproate for Injection — Sun (Valprol IV), Valciv, Encorate IV', r:'IV', hl:1},
       {s:'40 mg/mL syrup', c:40, u:'mg', p:'150 mL bottle', b:'Encorate syrup, Valprol syrup', r:'PO'},
       {s:'200/300 mg CR tablets', c:200, u:'mg', p:'strip', b:'Encorate Chrono', r:'PO'}],
@@ -2438,6 +2459,7 @@ R({ id:'se-valproate-pd', n:'Sodium valproate IV (second-line, paediatric)', sys
 R({ id:'se-phenobarbitone', n:'Phenobarbitone (phenobarbital)', sys:'neuro', cls:'Long-acting barbiturate',
   ind:'NEONATAL SEIZURES — first-line; second/third-line status epilepticus in children and adults', pop:'all', risk:4,
   d:{t:'mgkg', lo:15, hi:20, cap:2000, rep:'20 mg/kg IV over 20–30 min; if seizures persist give a further 10 mg/kg (max cumulative 40 mg/kg)'},
+  maint:{t:'mgkg', lo:3, hi:5, capDay:200, rep:'3–5 mg/kg/day once daily or divided 12-hourly (neonates 3–4 mg/kg/day); start 12–24 h post-load', start:'12–24 h post-load'},
   fx:[{s:'100 mg/mL', c:100, u:'mg', p:'1 mL ampoule (100 mg), 2 mL ampoule (200 mg)', b:'Phenobarbitone Sodium IP — Abbott, Neon, Samarth; Gardenal, Epiphen', r:'IV/IM/PO', hl:1},
       {s:'30 mg / 60 mg tablets', c:60, u:'mg', p:'strip of 10', b:'Gardenal 30/60, Phenobarbitone tabs', r:'PO'},
       {s:'20 mg/5 mL elixir', c:4, u:'mg', p:'100 mL bottle', b:'Gardenal elixir, Phenobarb elixir', r:'PO'}],
@@ -2568,6 +2590,7 @@ R({ id:'salbutamol-neb', n:'Salbutamol (Albuterol) — nebulised', sys:'respirat
 R({ id:'salbutamol-iv', n:'Salbutamol IV infusion', sys:'respiratory', cls:'Short-acting β2 agonist',
   ind:'Severe/refractory asthma unresponsive to nebulisation; also used as a tocolytic (obstetric)', pop:'all', risk:4, inf:true,
   d:{t:'mcgkgmin', lo:0.1, hi:4},
+  maint:{t:'mcgkgmin', lo:0.1, hi:0.5, rep:'0.1–0.5 mcg/kg/min maintenance infusion (titrated up to 5 mcg/kg/min)', start:'Post-bolus maintenance'},
   diln:[{l:'5 mg in 50 mL NS → 100 mcg/mL (paediatric syringe pump)', amt:5, in:50, u:'mg', bag:'50 mL 0.9% NaCl'},
         {l:'25 mg in 50 mL NS → 500 mcg/mL (adult syringe pump)', amt:25, in:50, u:'mg', bag:'50 mL 0.9% NaCl'},
         {l:'5 mg in 500 mL D5W → 10 mcg/mL (gravity)', amt:5, in:500, u:'mg', bag:'500 mL 5% dextrose'}],
@@ -2624,6 +2647,7 @@ R({ id:'mgso4-asthma', n:'Magnesium sulfate IV — severe asthma', sys:'respirat
 R({ id:'aminophylline', n:'Aminophylline (theophylline ethylenediamine)', sys:'respiratory', cls:'Methylxanthine — phosphodiesterase inhibitor / adenosine antagonist',
   ind:'Refractory severe asthma and COPD (third-line, narrow therapeutic index); apnoea of prematurity (caffeine preferred); post-extubation stridor', pop:'all', risk:5, inf:true,
   d:{t:'mgkghr', lo:0.5, hi:0.7},
+  maint:{t:'mgkgh', lo:0.8, hi:1.0, rep:'0.8–1.0 mg/kg/h continuous IV infusion (children 1–9y: 1.0 mg/kg/h; 9–16y: 0.8 mg/kg/h; neonates: 0.1–0.2 mg/kg/h; adults: 0.5–0.7 mg/kg/h)', start:'Continuous infusion'},
   diln:[{l:'500 mg in 500 mL NS/D5W → 1 mg/mL (gravity)', amt:500, in:500, u:'mg', bag:'500 mL 0.9% NaCl or 5% dextrose'},
         {l:'250 mg in 50 mL D5W → 5 mg/mL (syringe pump)', amt:250, in:50, u:'mg', bag:'50 mL 5% dextrose'}],
   fx:[{s:'25 mg/mL', c:25, u:'mg', p:'10 mL ampoule (250 mg)', b:'Aminophylline IP — Neon, Samarth, Intas; Deriphyllin (Abbott), Aminophyllin', r:'IV', hl:1},
@@ -2957,6 +2981,7 @@ R({ id:'vancomycin', n:'Vancomycin', sys:'antiinfective', cls:'Glycopeptide (cel
 R({ id:'teicoplanin', n:'Teicoplanin', sys:'antiinfective', cls:'Glycopeptide (long half-life, once-daily)',
   ind:'MRSA and Gram-positive infection where vancomycin is poorly tolerated, red-man syndrome or difficult venous access; bone/joint infection', pop:'adult', risk:4,
   d:{t:'mgkg', lo:6, hi:12, cap:800, rep:'loading 12 mg/kg IV q12h × 3 doses, then 6–12 mg/kg IV/IM once daily'},
+  maint:{t:'mgkg', lo:6, hi:10, capDay:800, rep:'6–10 mg/kg once daily IV/IM (after 3 loading doses of 10–12 mg/kg q12h)', start:'Post-3 loading doses'},
   fx:[{s:'400 mg vial', c:133, u:'mg', p:'400 mg vial with 3 mL ampoule of WFI → ≈133 mg/mL', b:'Targocid (Sanofi), Teicoplanin (Cipla/Intas/Lupin), Teicomac, T-Plan', r:'IV/IM', hl:1, prep:'Add the 3 mL ampoule of WFI slowly down the vial wall, roll gently (DO NOT shake — foaming causes under-dosing) until fully dissolved; use immediately or dilute in NS'},
       {s:'200 mg vial', c:67, u:'mg', p:'200 mg vial with 3 mL WFI → ≈67 mg/mL', b:'Targocid 200 mg, Teicoplanin 200 mg', r:'IV/IM', prep:'Add 3 mL WFI, roll gently until dissolved'}],
   admin:'Loading 12 mg/kg IV every 12 h for 3 doses, then maintenance 6 mg/kg once daily (12 mg/kg once daily for endocarditis, bone/joint infection, neutropenia, or BMI >40).',
@@ -3152,6 +3177,7 @@ R({ id:'ampb-liposomal', n:'Liposomal amphotericin B', sys:'antiinfective', cls:
 R({ id:'fluconazole', n:'Fluconazole', sys:'antiinfective', cls:'Triazole antifungal (14-α-demethylase inhibitor)',
   ind:'Candidaemia (non-glabrata/krusei), oesophageal and mucocutaneous candidiasis, cryptococcal meningitis consolidation, coccidioidomycosis', pop:'all', risk:3,
   d:{t:'mgkg', lo:6, hi:12, cap:800, capDay:800, rep:'loading 800 mg (12 mg/kg) IV/PO day 1, then 400 mg (6 mg/kg) daily'},
+  maint:{t:'mgkg', lo:6, hi:6, capDay:400, rep:'6 mg/kg/day once daily IV/PO (adult 200–400 mg q24h); start on Day 2 post-load', start:'Day 2 onwards'},
   fx:[{s:'2 mg/mL (200 mg/100 mL) ready-to-use infusion', c:2, u:'mg', p:'100 mL bag (200 mg), 200 mL bag (400 mg)', b:'Fluka (Cipla), Forcan (Cipla), Zocon (FDC), Fluconazole IP — Claris/Intas', r:'IV', hl:1},
       {s:'50 / 150 / 200 mg capsules', c:150, u:'mg', p:'strip of 1/4/7', b:'Forcan 150, Zocon 150, Fluka 150, Fluca 150', r:'PO'},
       {s:'50 mg/mL oral suspension', c:50, u:'mg', p:'30 mL bottle', b:'Zocon suspension, Fluconazole suspension', r:'PO'}],
@@ -3163,6 +3189,7 @@ R({ id:'fluconazole', n:'Fluconazole', sys:'antiinfective', cls:'Triazole antifu
 R({ id:'voriconazole', n:'Voriconazole', sys:'antiinfective', cls:'Second-generation triazole (broad-spectrum, mould-active)',
   ind:'INVASIVE ASPERGILLOSIS (first-line), fusariosis, scedosporiosis, fluconazole-resistant candidiasis, chronic pulmonary aspergillosis', pop:'all', risk:5,
   d:{t:'mgkg', lo:4, hi:6, cap:400, capDay:800, rep:'loading 6 mg/kg IV q12h × 2 doses, then 4 mg/kg IV q12h (PO 200 mg q12h if >40 kg)'},
+  maint:{t:'mgkg', lo:4, hi:4, capDay:400, rep:'4 mg/kg IV 12-hourly (or PO 200 mg q12h if >40 kg); start 12 h post-load on Day 2', start:'Day 2 onwards'},
   fx:[{s:'200 mg vial', c:10, u:'mg', p:'200 mg vial reconstituted with 19 mL WFI → 10 mg/mL; dilute to 0.5–5 mg/mL', b:'Vfend (Pfizer), Vorican (Cipla), Voriconazole IP — Intas/Lupin/Aurobindo; Voriz, Vorican', r:'IV/PO', hl:1, prep:'Reconstitute 200 mg with 19 mL sterile WFI or NS (discard 1.9 mL to maintain volume) → 10 mg/mL; then dilute in NS/D5W/RL to a final concentration of 0.5–5 mg/mL and infuse over 1–3 h'},
       {s:'50 mg / 200 mg tablets', c:200, u:'mg', p:'strip of 4/10', b:'Vfend 200, Vorican 200, Voriz 200', r:'PO'},
       {s:'40 mg/mL oral suspension', c:40, u:'mg', p:'75 mL bottle', b:'Vfend suspension (import)', r:'PO'}],
@@ -3174,6 +3201,7 @@ R({ id:'voriconazole', n:'Voriconazole', sys:'antiinfective', cls:'Second-genera
 R({ id:'caspofungin', n:'Caspofungin', sys:'antiinfective', cls:'Echinocandin (β-1,3-glucan synthase inhibitor)',
   ind:'Invasive candidiasis (FIRST-LINE in the ICU), empirical therapy in febrile neutropenia, salvage therapy for aspergillosis', pop:'all', risk:3,
   d:{t:'mg', v:50, cap:70, capDay:70, rep:'70 mg IV day 1, then 50 mg IV once daily'},
+  maint:{t:'mgm2', lo:50, hi:50, capDay:50, rep:'50 mg/m² (max 50 mg, adult 50 mg) once daily; start on Day 2 post-load', start:'Day 2 onwards'},
   fx:[{s:'50 mg vial', c:5, u:'mg', p:'50 mg vial reconstituted with 10.5 mL NS → ≈5 mg/mL; dilute in 250 mL NS', b:'Cancidas (MSD), Caspofungin IP — Cipla, Intas, Fresenius; Caspogard, Candifung', r:'IV', hl:1, prep:'Reconstitute 50 mg with 10.5 mL NS or 0.45% NaCl (final 5 mg/mL), then add to 250 mL NS and infuse over 1 h. Do NOT use dextrose-containing diluents.'},
       {s:'70 mg vial', c:7, u:'mg', p:'70 mg vial reconstituted with 10.5 mL NS → 7 mg/mL', b:'Cancidas 70 mg, Caspofungin 70 mg', r:'IV', prep:'Reconstitute with 10.5 mL NS, then dilute in 250 mL NS'}],
   admin:'70 mg IV loading dose on day 1, then 50 mg IV once daily over 1 hour. Children 70 mg/m²/day (max 70 mg). Increase to 70 mg daily if weight >80 kg or with rifampicin/efavirenz/phenytoin/dexamethasone.',
@@ -3614,6 +3642,7 @@ R({ id:'nac-paracetamol', n:'N-acetylcysteine (NAC)', sys:'tox', cls:'Glutathion
 R({ id:'atropine-op', n:'Atropine — organophosphate & carbamate poisoning', sys:'tox', cls:'Competitive muscarinic antagonist',
   ind:'Cholinergic crisis from organophosphorus or carbamate insecticide poisoning (monocrotophos, chlorpyrifos, quinalphos, malathion, parathion; carbaryl, aldicarb) — THE MOST COMMON FATAL POISONING IN RURAL INDIA', pop:'all', risk:5, inf:true,
   d:{t:'mgkg', lo:0.05, hi:0.05, capDay:500, rep:'2 mg IV (adult) or 0.05 mg/kg IV (child, min 0.1 mg) EVERY 5 MIN until fully atropinised — the dose is DOUBLED every 5 min if there is no response, so there is NO single-dose ceiling; cumulative doses of 20–500 mg over 24 h are common'},
+  maint:{t:'text', rep:'10–20% of total atropinising dose per hour continuous IV infusion (titrated to dry axillae, HR >80, clear chest); taper over 24–48 h', start:'Post-atropinisation'},
   diln:[{l:'40 mg in 40 mL NS → 1 mg/mL (infusion syringe)', amt:40, in:40, u:'mg', bag:'40 mL 0.9% NaCl'},
         {l:'20 mg in 500 mL NS → 40 mcg/mL (gravity drip)', amt:20, in:500, u:'mg', bag:'500 mL 0.9% NaCl'}],
   fx:[{s:'0.6 mg/mL', c:0.6, u:'mg', p:'1 mL ampoule — LARGE QUANTITIES ARE NEEDED: stock 100+ ampoules', b:'Atropine Sulphate IP — Neon, Samarth, Saraca, Vins', r:'IV/IM/SC/ETT', hl:1},
@@ -3626,6 +3655,7 @@ R({ id:'atropine-op', n:'Atropine — organophosphate & carbamate poisoning', sy
 R({ id:'pralidoxime', n:'Pralidoxime (2-PAM)', sys:'tox', cls:'Cholinesterase reactivator (oxime)',
   ind:'Organophosphorus insecticide poisoning — reactivates phosphorylated acetylcholinesterase if given before "ageing" (adjunct to atropine, never a substitute)', pop:'all', risk:4, inf:true,
   d:{t:'mgkg', lo:25, hi:50, cap:2000, rep:'loading 30 mg/kg IV over 15–30 min (max 2 g), then 8 mg/kg/h infusion for 24–48 h'},
+  maint:{t:'mgkgh', lo:8, hi:8, rep:'8 mg/kg/h continuous IV infusion for 24–48 h (or 1 g IV every 4 h in adults)', start:'Continuous infusion'},
   diln:[{l:'2 g in 500 mL NS → 4 mg/mL (infusion)', amt:2, in:500, u:'g', bag:'500 mL 0.9% NaCl'},
         {l:'1 g in 100 mL NS → 10 mg/mL', amt:1, in:100, u:'g', bag:'100 mL 0.9% NaCl'}],
   fx:[{s:'200 mg/mL (1 g/5 mL ampoule)', c:200, u:'mg', p:'5 mL ampoule (1 g)', b:'Pralidoxime Chloride IP — Samarth, Neon; PAM, Obidoxime alternatives; availability in India is LIMITED and should be pre-arranged at district level', r:'IV/IM', hl:1, prep:'Dilute 1 g in 100 mL NS and infuse over 15–30 min'},
@@ -4094,6 +4124,7 @@ R({ id:'surfactant', n:'Pulmonary surfactant', sys:'neonatal', cls:'Exogenous su
 R({ id:'caffeine-apnoea', n:'Caffeine citrate', sys:'neonatal', cls:'Methylxanthine — adenosine-receptor antagonist and respiratory stimulant',
   ind:'Apnoea of prematurity; facilitation of extubation; prevention of BPD', pop:'neo', maxAge:0.5, risk:3,
   d:{t:'mgkg', lo:10, hi:20, capDayKg:20, rep:'LOADING 20 mg/kg of caffeine CITRATE (= 10 mg/kg caffeine base) IV over 30 min, then 5–10 mg/kg/day of the citrate (= 2.5–5 mg/kg/day of the base) once daily'},
+  maint:{t:'mgkg', lo:5, hi:10, rep:'5–10 mg/kg/day IV/PO once daily (start 24 h after loading dose)', start:'24 h post-load'},
   fx:[{s:'20 mg/mL caffeine citrate (= 10 mg/mL caffeine base)', c:20, u:'mg', multi:1, p:'1 mL ampoule (20 mg citrate), 3 mL ampoule', b:'Caffneon (Neon), Caficita (Cipla), Caffeine Citrate IP — Intas/Samarth; Cafcit', r:'IV/PO', hl:1}],
   admin:'Loading 20 mg/kg of the CITRATE (10 mg/kg of the base) IV over 30 min, then maintenance 5–10 mg/kg/day of the citrate once daily, IV or PO. Increase to 10 mg/kg/day of the citrate if apnoea persists. Continue until 32–34 weeks corrected gestation and apnoea-free for 5–7 days.',
   dil:'Ready to use; may be diluted in NS, D5W or sterile water. Do NOT confuse caffeine citrate with caffeine base — the citrate is twice the weight of the base.',
@@ -4138,6 +4169,7 @@ R({ id:'neonatal-sepsis', n:'Neonatal sepsis — empirical antibiotics', sys:'ne
 R({ id:'ibuprofen-pda', chd:'acyanotic', n:'Ibuprofen — patent ductus arteriosus (PDA)', sys:'neonatal', cls:'Non-selective COX inhibitor (prostaglandin synthesis blocker)',
   ind:'Haemodynamically significant patent ductus arteriosus in preterm infants (first-line medical closure); also used in term infants awaiting intervention', pop:'neo', risk:4, inf:false,
   d:{t:'mgkg', lo:5, hi:10, cap:20, rep:'STANDARD course: 10 mg/kg, then 5 mg/kg at 24 h and 5 mg/kg at 48 h (three doses). If treatment starts AFTER 72 h of life, units using the HIGHER course give 20 mg/kg, then 10 mg/kg at 24 h and 10 mg/kg at 48 h. A second course may be given if the duct remains significant.'},
+  maint:{t:'mgkg', lo:5, hi:5, rep:'5 mg/kg IV/PO at 24 h and 5 mg/kg at 48 h (three doses total)', start:'24 h & 48 h post-load'},
   fx:[{s:'5 mg/mL ibuprofen (Pedea, IV)', c:5, u:'mg', p:'2 mL ampoule (10 mg)', b:'Pedea (Orphan Europe); generic ibuprofen IV where licensed', r:'IV', hl:1},
       {s:'100 mg/5 mL oral suspension', c:20, u:'mg', p:'100 mL bottle', b:'Ibugesic Plus drops (Cipla), Brufen syrup (Abbott)', r:'PO'}],
   admin:'IV: give over 15 minutes through a secure line. ORAL: give with feeds (preferred where the baby is on full enteral feeds — enteral ibuprofen closes the duct at least as well as IV). Reassess the duct and the shunt 24–48 h after the third dose.',
@@ -4151,6 +4183,7 @@ R({ id:'ibuprofen-pda', chd:'acyanotic', n:'Ibuprofen — patent ductus arterios
 R({ id:'indomethacin-pda', chd:'acyanotic', n:'Indomethacin — patent ductus arteriosus (PDA)', sys:'neonatal', cls:'Non-selective COX inhibitor (prostaglandin synthesis blocker)',
   ind:'Haemodynamically significant PDA where ibuprofen is unavailable, contraindicated or has failed', pop:'neo', risk:4,
   d:{t:'mgkg', lo:0.1, hi:0.2, rep:'INITIAL dose 0.2 mg/kg IV over 30 min, then TWO further doses at 12–24 h intervals. Maintenance dose by postnatal age: <48 h old or weight <1 kg = 0.1 mg/kg; 2–7 days old = 0.2 mg/kg; >7 days old = 0.25 mg/kg.'},
+  maint:{t:'mgkg', lo:0.1, hi:0.25, rep:'Doses 2 & 3 at 12–24h intervals by PNA: <48h or <1 kg = 0.1 mg/kg; 2–7d = 0.2 mg/kg; >7d = 0.25 mg/kg', start:'12–24 h post-initial dose'},
   fx:[{s:'1 mg lyophilised powder (indomethacin sodium trihydrate)', c:1, u:'mg', p:'1 mg vial — reconstitute with 1 mL of the supplied diluent or WFI → 1 mg/mL', b:'Indocid (imported/restricted supply); indomethacin injection IP where stocked', r:'IV', hl:1}],
   admin:'IV over 30 minutes (never a bolus). The 1 mg vial reconstituted to 1 mL gives 1 mg/mL; for a 1 kg baby the 0.2 mg/kg dose is 0.2 mL — use a 1 mL syringe.',
   dil:'Reconstitute with the diluent supplied (contains no preservative). Discard any unused reconstituted solution. Slight yellow discolouration is normal; discard if the solution is discoloured on standing.',
@@ -5054,6 +5087,91 @@ function dtOf(t){
   return {u:u, per:per, kind:kind, raw:k};
 }
 
+/* ---------------- maintenance dose computation ---------------- */
+function computeMaintDose(maintDef, ctx, reg){
+  if(!maintDef) return null;
+  var kg = ctx && (ctx.dosingWeight!=null ? ctx.dosingWeight : (ctx.kg||null));
+  var dt = dtOf(maintDef.t);
+  if(!dt) return { text: maintDef.rep || maintDef.text || '', rep: maintDef.rep, start: maintDef.start };
+
+  if(maintDef.text && !maintDef.lo && !maintDef.v){
+    return { text: maintDef.text, rep: maintDef.rep, start: maintDef.start };
+  }
+
+  var lo = maintDef.lo!=null ? maintDef.lo : (maintDef.v!=null ? maintDef.v : null);
+  var hi = maintDef.hi!=null ? maintDef.hi : (maintDef.v!=null ? maintDef.v : null);
+  if(lo==null && hi==null){
+    return { text: maintDef.rep || maintDef.text || '', rep: maintDef.rep, start: maintDef.start };
+  }
+
+  if(dt.per && dt.per.indexOf('kg')>=0 && (!kg || kg<=0)){
+    return { text: maintDef.rep || '', rep: maintDef.rep, start: maintDef.start };
+  }
+
+  function scale(v){
+    if(!dt.per || dt.per.indexOf('kg')<0) return v;
+    return v * kg;
+  }
+
+  var aLo = scale(lo), aHi = scale(hi);
+
+  /* Apply cap if specified */
+  var capped = false, capMsg = null;
+  if(maintDef.cap!=null && aHi > maintDef.cap){
+    aHi = maintDef.cap;
+    if(aLo > maintDef.cap) aLo = maintDef.cap;
+    capped = true;
+    capMsg = 'Capped at maximum ' + fmtNum(maintDef.cap) + ' ' + dt.u;
+  }
+  if(maintDef.capDay!=null && aHi > maintDef.capDay){
+    aHi = maintDef.capDay;
+    if(aLo > maintDef.capDay) aLo = maintDef.capDay;
+    capped = true;
+    capMsg = 'Capped at daily ceiling ' + fmtNum(maintDef.capDay) + ' ' + dt.u + '/24 h';
+  }
+
+  var doseText = fmtNum(aLo) + (aHi!=null && Math.abs(aHi-aLo)>1e-9 ? '–' + fmtNum(aHi) : '') + ' ' + dt.u;
+  var prescribedText = fmtNum(lo) + (hi!=null && Math.abs(hi-lo)>1e-9 ? '–' + fmtNum(hi) : '') + ' ' + dt.u + (dt.per ? '/' + dt.per : '');
+
+  /* Compute formulation volumes for maintenance dose if applicable */
+  var fxVols = [];
+  var fxList = (reg && reg.fx) || [];
+  for(var i=0; i<fxList.length; i++){
+    var f = fxList[i];
+    if(f.c != null && f.c > 0 && (dt.kind==='bolus' || dt.kind==='daily')){
+      var cAmt = convertUnit(f.c, canonUnit(f.u), dt.u);
+      if(cAmt != null && cAmt > 0){
+        var vLo = aLo / cAmt;
+        var vHi = aHi / cAmt;
+        fxVols.push({
+          s: f.s,
+          b: f.b,
+          r: f.r,
+          volLo: vLo,
+          volHi: vHi,
+          perUnit: (f.form==='solid'||f.p==='tablet'||f.p==='capsule') ? 'tab' : 'mL'
+        });
+      }
+    }
+  }
+
+  return {
+    lo: aLo,
+    hi: aHi,
+    unit: dt.u,
+    per: dt.per,
+    kind: dt.kind,
+    doseText: doseText,
+    prescribedText: prescribedText,
+    rep: maintDef.rep,
+    start: maintDef.start,
+    freq: maintDef.freq,
+    capped: capped,
+    capMsg: capMsg,
+    fxVols: fxVols
+  };
+}
+
 /* ---------------- the dose engine ----------------
    ctx: {kg, ageDays, pop, heightCm, crCl, ibw, dosingWeight, dosingWeightLabel}
    returns a fully computed object or {error:'...'}                        */
@@ -5220,6 +5338,7 @@ function computeRegimen(reg, ctx){
       ? 'Program the pump from the DILUTION table below (mL/h). The ampoule rows show the drug quantity per hour, NOT the pump rate.'
       : 'No standard dilution is defined for this infusion - use the ampoule quantity per hour and calculate the bag rate manually, then have it independently checked.';
   }
+  out.maint = computeMaintDose(reg.maint || (reg.d && reg.d.maint), ctx, reg);
   tenFoldCheck(reg, out, ctx);
   return out;
 }
@@ -6912,7 +7031,8 @@ function renderCard(reg, ctx){
   } else if(out.kind==='text'){
     h.push('<div class="dl">Dose / regimen</div><div class="dv" style="font-size:13.5px;line-height:1.4">'+esc(out.doseText)+'</div>');
   } else {
-    h.push('<div class="dl">Calculated dose '+(dw.kg!=null&&out.prescribed&&out.prescribed.indexOf('kg')>=0?'for '+fmtNum(dw.kg,1)+' kg':'')+'</div>');
+    var doseHeading = (out.maint ? '⚡ Calculated Loading / Initial Dose ' : 'Calculated dose ') + (dw.kg!=null&&out.prescribed&&out.prescribed.indexOf('kg')>=0?'for '+fmtNum(dw.kg,1)+' kg':'');
+    h.push('<div class="dl">'+doseHeading+'</div>');
     h.push('<div class="dv">'+esc(out.dose.text)+(out.kind==='rate'?' <small>as prescribed; see pump rates below for mL/h</small>':'')+'</div>');
     if(out.prescribed && out.prescribed!==out.unit){
       h.push('<div class="dr">prescribed as <b>'+esc(out.dose.prescribedText||'')+'</b></div>');
@@ -6929,6 +7049,29 @@ function renderCard(reg, ctx){
     }
     if(reg.d && reg.d.rep) h.push('<div class="dr">'+esc(reg.d.rep)+'</div>');
     h.push(verifTags(reg, out, ctx, dw));
+  }
+
+  /* ---- dedicated maintenance dose block ---- */
+  if(out.maint){
+    h.push('<div class="maint-box">'+
+      '<div class="maint-hdr">'+
+        '<span class="maint-icon">🔄</span>'+
+        '<span class="maint-title">MAINTENANCE DOSE</span>'+
+        (out.maint.start ? '<span class="maint-start">('+esc(out.maint.start)+')</span>' : '')+
+      '</div>'+
+      '<div class="maint-body">'+
+        (out.maint.doseText ? '<div class="maint-val">'+esc(out.maint.doseText)+(dw.kg!=null&&out.maint.prescribedText&&out.maint.prescribedText.indexOf('kg')>=0?' <small class="maint-kg">for '+fmtNum(dw.kg,1)+' kg</small>':'')+'</div>' : '')+
+        (out.maint.prescribedText ? '<div class="maint-presc">prescribed as <b>'+esc(out.maint.prescribedText)+'</b></div>' : '')+
+        (out.maint.rep ? '<div class="maint-rep">'+esc(out.maint.rep)+'</div>' : '')+
+        (out.maint.capMsg ? '<div class="maint-cap">⚠ '+esc(out.maint.capMsg)+'</div>' : '')+
+        (out.maint.fxVols && out.maint.fxVols.length ? 
+          '<div class="maint-vols">'+
+            out.maint.fxVols.slice(0,2).map(function(fv){
+              return '<span class="maint-vol-pill"><b>'+esc(fv.s)+':</b> '+fmtVol(fv.volLo)+(fv.volHi!=null&&Math.abs(fv.volHi-fv.volLo)>1e-9?'–'+fmtVol(fv.volHi):'')+' '+esc(fv.perUnit)+'</span>';
+            }).join(' ')+
+          '</div>' : '')+
+      '</div>'+
+    '</div>');
   }
   h.push('</div>');
 
