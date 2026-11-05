@@ -1,0 +1,260 @@
+/* =====================================================================
+   PART 4 — RESPIRATORY (asthma/COPD/croup/nebulisation/pulmonary HTN)
+            RENAL & DIURETICS · FLUID THERAPY
+   ===================================================================== */
+
+/* ================= BRONCHODILATORS & NEBULISATION ================= */
+R({ id:'salbutamol-neb', n:'Salbutamol (Albuterol) — nebulised', sys:'respiratory', cls:'Short-acting β2 agonist (SABA)',
+  ind:'Acute severe asthma, COPD exacerbation, bronchospasm, hyperkalaemia (adjunct)', pop:'all', risk:3,
+  d:{t:'mg', lo:2.5, hi:5, cap:10, rep:'every 20 min × 3 doses in severe attack, then 1–4 hourly; continuous 10–15 mg/h'},
+  fx:[{s:'1 mg/mL (2.5 mg/2.5 mL respule)', c:1, u:'mg', p:'2.5 mL respule (2.5 mg)', b:'Asthalin Respules (Cipla), Levolin (Cipla), Salbutamol nebules (Neon/Intas)', r:'NEB', hl:1},
+      {s:'2 mg/mL (5 mg/2.5 mL respule)', c:2, u:'mg', p:'2.5 mL respule (5 mg)', b:'Asthalin Respules 5 mg, Levolin 5 mg, Salbutamol 5 mg/2.5 mL', r:'NEB'},
+      {s:'5 mg/mL nebuliser solution', c:5, u:'mg', p:'20 mL bottle', b:'Salbutamol nebuliser solution 0.5%', r:'NEB'},
+      {s:'100 mcg/metered inhaler', c:100, u:'mcg', p:'200-dose MDI + spacer', b:'Asthalin HFA (Cipla), Levolin inhaler', r:'INH', own:{a:0.4,u:'mg',l:'MDI 100 mcg/puff: 2–4 puffs (200–400 mcg) through a SPACER every 4–6 h. With a spacer this is as effective as a nebuliser in mild–moderate attacks.'}},
+      {s:'2 mg/5 mL syrup', c:0.4, u:'mg', p:'100 mL bottle', b:'Asthalin syrup, Levolin syrup', r:'PO', own:{lo:2,hi:4,u:'mg',l:'ORAL syrup 2–4 mg PO 6–8 hourly (child 0.1–0.15 mg/kg/dose). Slower onset and more tremor/tachycardia than the inhaled route — not for an acute attack.'}}],
+  admin:'Adult/child >5 yr: 5 mg nebulised in 2.5–4 mL NS driven by OXYGEN at 6–8 L/min. Child <5 yr: 2.5 mg. In life-threatening asthma give 3 back-to-back doses 20 min apart, then continuous nebulisation 10–15 mg/h.',
+  dil:'Drive with oxygen, not air, in hypoxaemic patients. Dilute to a total volume of 2.5–4 mL with NS.',
+  warn:['Tachycardia, tremor, hypokalaemia (drive K⁺ intracellularly — check K⁺ in severe asthma), lactic acidosis with high cumulative doses.','Paradoxical bronchospasm; never delay steroids or magnesium in severe asthma.','Metered-dose inhaler + spacer is as effective as nebulisation in mild–moderate attacks (4–10 puffs, one at a time, 4 breaths each).','For hyperkalaemia: 10–20 mg nebulised lowers K⁺ by 0.5–1.5 mmol/L in 30 min — lasts 2 h and works in only ~40% of patients, so never rely on it alone.'],
+  ref:['GINA2024','GOLD2025','BTS-ASTHMA','IAP-ASTHMA','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY','IAP-STG'] });
+
+R({ id:'salbutamol-iv', n:'Salbutamol IV infusion', sys:'respiratory', cls:'Short-acting β2 agonist',
+  ind:'Severe/refractory asthma unresponsive to nebulisation; also used as a tocolytic (obstetric)', pop:'all', risk:4, inf:true,
+  d:{t:'mcgkgmin', lo:0.1, hi:4},
+  diln:[{l:'5 mg in 50 mL NS → 100 mcg/mL (paediatric syringe pump)', amt:5, in:50, u:'mg', bag:'50 mL 0.9% NaCl'},
+        {l:'25 mg in 50 mL NS → 500 mcg/mL (adult syringe pump)', amt:25, in:50, u:'mg', bag:'50 mL 0.9% NaCl'},
+        {l:'5 mg in 500 mL D5W → 10 mcg/mL (gravity)', amt:5, in:500, u:'mg', bag:'500 mL 5% dextrose'}],
+  fx:[{s:'0.5 mg/mL (500 mcg/mL)', c:500, u:'mcg', p:'5 mL ampoule (2.5 mg), 1 mL ampoule (0.5 mg)', b:'Asthalin Injection (Cipla), Salbutamol IP — Neon, Samarth, Vamcare', r:'IV/IM/SC', hl:1}],
+  admin:'Adult: 5–20 mcg/min titrated (start 4 mcg/min). Paediatric: 1–2 mcg/kg/min over 10 min, then 0.1–0.5 mcg/kg/min maintenance (max 5 mcg/kg/min). Bolus (acute severe): adult 250 mcg IV slowly, paediatric 5–10 mcg/kg (max 250 mcg).',
+  dil:'Dilute in NS or D5W; protect from light.',
+  warn:['Hypokalaemia — check K⁺ every 4–6 h and replace aggressively.','Lactic acidosis (type B) mimics worsening asthma — check lactate and pH, do not escalate the dose for acidosis alone.','Tachycardia, tremor, arrhythmia, myocardial ischaemia.','ECG and continuous SpO₂ monitoring; central line preferred for concentrations >100 mcg/mL.'],
+  ref:['BTS-ASTHMA','GINA2024','BNFC','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY'] });
+
+R({ id:'ipratropium-neb', n:'Ipratropium bromide — nebulised', sys:'respiratory', cls:'Short-acting antimuscarinic (SAMA)',
+  ind:'Acute severe asthma (added to salbutamol for the first 3 doses), COPD exacerbation, bronchorrhoea', pop:'all', risk:2,
+  d:{t:'mcg', lo:250, hi:500, cap:500, rep:'every 6–8 h; in severe asthma combine with salbutamol for the first 3 nebulisations'},
+  fx:[{s:'0.25 mg/mL (250 mcg/mL)', c:250, u:'mcg', p:'2 mL respule (500 mcg), 1 mL ampoule (250 mcg)', b:'Ipravent Respules (Cipla), Ipratropium (Neon/Intas), Duolin Respules (combined)', r:'NEB', hl:1},
+      {s:'0.5 mg/mL', c:500, u:'mcg', p:'1 mL respule (500 mcg)', b:'Ipratropium 0.05% respules', r:'NEB'},
+      {s:'Duolin Respules — ipratropium 0.5 mg + levosalbutamol 1.25 mg per 3 mL', c:167, u:'mcg', p:'3 mL respule', b:'Duolin (Cipla), Duolin LS', r:'NEB', own:{text:'Use ONE 3 mL respule per nebulisation (ipratropium 0.5 mg + levosalbutamol 1.25 mg) every 6–8 h in acute severe asthma/COPD. Do NOT add a separate β-agonist dose — the respule already contains one.'}},
+      {s:'20 mcg/metered inhaler', c:20, u:'mcg', p:'200-dose MDI', b:'Ipravent inhaler (Cipla)', r:'INH', own:{text:'MDI 20 mcg/puff: 2 puffs (40 mcg) via a SPACER every 6 h for COPD maintenance. The MDI is not for acute nebulisation.'}},
+      {s:'Ipratropium + salbutamol MDI (20 + 100 mcg)', c:20, u:'mcg', p:'200-dose MDI', b:'Duolin inhaler (Cipla), Combivent', r:'INH', own:{text:'Combination MDI (ipratropium 20 mcg + salbutamol 100 mcg per puff): 2 puffs via a spacer every 6 h for COPD. Count the salbutamol when you prescribe any other β-agonist.'}}],
+  admin:'Adult/adolescent 500 mcg nebulised 6–8 hourly. Child <12 yr 250 mcg. In acute severe asthma combine with salbutamol for the first three doses (they may be mixed in the same nebuliser chamber).',
+  dil:'Dilute to a total volume of 2.5–4 mL with NS; drive with oxygen.',
+  warn:['Avoid contact with the eyes — precipitates acute angle-closure glaucoma in susceptible patients (use a well-fitting mask or a mouthpiece).','Dry mouth, urinary retention, blurred vision, tachycardia.','Do not use as monotherapy in asthma — it is an ADD to β2-agonists.','Preservative-containing respules should not be used for prolonged continuous nebulisation.'],
+  ref:['GINA2024','GOLD2025','BTS-ASTHMA','BNFC','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY'] });
+
+R({ id:'budesonide-neb', n:'Budesonide — nebulised', sys:'respiratory', cls:'Inhaled corticosteroid',
+  ind:'Asthma/COPD exacerbation when systemic steroids are contraindicated or as an adjunct; croup (2 mg single dose); bronchopulmonary dysplasia', pop:'all', risk:2,
+  d:{t:'mg', lo:0.5, hi:2, cap:4, rep:'twice daily; croup: 2 mg as a single dose'},
+  fx:[{s:'0.25 mg/mL (500 mcg/2 mL respule)', c:0.25, u:'mg', p:'2 mL respule (0.5 mg)', b:'Budecort Respules (Cipla), Pulmicort (AstraZeneca), Budetrol', r:'NEB', hl:1},
+      {s:'0.5 mg/mL (1 mg/2 mL respule)', c:0.5, u:'mg', p:'2 mL respule (1 mg)', b:'Budecort Respules 1 mg, Pulmicort 1 mg', r:'NEB'},
+      {s:'1 mg/mL', c:1, u:'mg', p:'1 mL respule (1 mg)', b:'Budesonide 1 mg/mL respules', r:'NEB'},
+      {s:'Budesonide + formoterol inhaler (160/4.5 mcg, 320/9 mcg)', c:160, u:'mcg', p:'60/120-dose inhaler', b:'Foracort (Cipla), Formonide, Budecort-Formo', r:'INH', own:{text:'Budesonide/formoterol inhaler (160/4.5 or 320/9 mcg per puff) is a COMBINATION maintenance inhaler — 1–2 puffs twice daily. It is not a substitute for nebulised budesonide and it contains formoterol, a long-acting β-agonist.'}}],
+  admin:'Asthma/COPD: 1–2 mg twice daily nebulised. Croup: 2 mg nebulised as a single dose (equivalent to oral dexamethasone 0.15 mg/kg).',
+  dil:'Use undiluted from the respule; may be mixed with salbutamol/ipratropium in the same chamber.',
+  warn:['Rinse the mouth and wash the face after nebulisation — oral candidiasis, dysphonia, perioral rash.','High cumulative doses cause adrenal suppression, reduced growth velocity and easy bruising.','Systemic steroids remain first-line in acute severe asthma — nebulised budesonide is an adjunct, not a substitute.'],
+  ref:['GINA2024','GOLD2025','BTS-CROUP','BNFC','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY'] });
+
+R({ id:'adrenaline-neb-croup', n:'Adrenaline — nebulised (croup)', sys:'respiratory', cls:'Non-selective adrenergic agonist (topical vasoconstriction of subglottic mucosa)',
+  ind:'Moderate–severe croup (laryngotracheobronchitis) with stridor at rest', pop:'paed', risk:4,
+  d:{t:'mlkg', v:0.5, cap:5, rep:'0.5 mL/kg of 1 mg/mL nebulised (max 5 mL); may repeat every 20 min × up to 3 doses'},
+  fx:[{s:'1 mg/mL (1:1000)', c:1, u:'mg', p:'1 mL ampoule; use 2.5–5 mL undiluted in the nebuliser', b:'Adrenaline IP — Neon, Vins, BDH', r:'NEB', hl:1}],
+  admin:'Nebulise 0.5 mL/kg of the 1 mg/mL (1:1000) solution undiluted, max 5 mL, driven by oxygen. Onset within 10–30 min, duration ≈2 h.',
+  dil:'Give undiluted — do not add saline.',
+  warn:['Rebound stridor occurs as the effect wears off (≈2 h) — observe for at least 3–4 h after the last dose and give dexamethasone.','Tachycardia, hypertension, tremor, pallor — monitor heart rate and BP.','Use the SAME ampoule concentration (1:1000) that would be used for IM anaphylaxis — never nebulise the 1:10,000 preparation at this volume.'],
+  notes:['Always give dexamethasone 0.15–0.6 mg/kg (max 10 mg) PO/IV/IM at the same time — it is the definitive treatment.'],
+  ref:['BTS-CROUP','NICE-CG25','APLS','BNFC','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY','NELSON','GHAI10'] });
+
+R({ id:'mgso4-asthma', n:'Magnesium sulfate IV — severe asthma', sys:'respiratory', cls:'Smooth-muscle relaxant / calcium antagonist',
+  ind:'Acute severe or life-threatening asthma not responding to initial bronchodilators (FEV1 <40% / no improvement after 1 h)', pop:'all', risk:3,
+  d:{t:'mgkg', lo:25, hi:50, cap:2000, rep:'single dose over 20 min; may repeat once in refractory cases'},
+  fx:[{s:'500 mg/mL (50%)', c:500, u:'mg', p:'2 mL ampoule (1 g), 10 mL vial (5 g)', b:'Magnesium Sulphate IP — Neon, Samarth, Sisco', r:'IV', hl:1}],
+  admin:'Adult 2 g IV over 20 min. Child 25–50 mg/kg (max 2 g) over 20–60 min. Dilute in 50–100 mL NS (or to ≤100 mg/mL for peripheral use in children).',
+  dil:'Dilute to 100–200 mg/mL for infusion over 20 min.',
+  warn:['Hypotension, flushing, bradycardia — monitor BP and ECG during infusion.','Loss of tendon reflexes is the first sign of toxicity; >5 mmol/L → respiratory muscle weakness.','Have calcium gluconate 10% available as the antidote.','Reduce dose in renal impairment.'],
+  ref:['GINA2024','BTS-ASTHMA','NICE-CG25','BNFC','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY'] });
+
+R({ id:'aminophylline', n:'Aminophylline (theophylline ethylenediamine)', sys:'respiratory', cls:'Methylxanthine — phosphodiesterase inhibitor / adenosine antagonist',
+  ind:'Refractory severe asthma and COPD (third-line, narrow therapeutic index); apnoea of prematurity (caffeine preferred); post-extubation stridor', pop:'all', risk:5, inf:true,
+  d:{t:'mgkghr', lo:0.5, hi:0.7},
+  diln:[{l:'500 mg in 500 mL NS/D5W → 1 mg/mL (gravity)', amt:500, in:500, u:'mg', bag:'500 mL 0.9% NaCl or 5% dextrose'},
+        {l:'250 mg in 50 mL D5W → 5 mg/mL (syringe pump)', amt:250, in:50, u:'mg', bag:'50 mL 5% dextrose'}],
+  fx:[{s:'25 mg/mL', c:25, u:'mg', p:'10 mL ampoule (250 mg)', b:'Aminophylline IP — Neon, Samarth, Intas; Deriphyllin (Abbott), Aminophyllin', r:'IV', hl:1},
+      {s:'24 mg/mL (240 mg/10 mL)', c:24, u:'mg', p:'10 mL ampoule', b:'Aminophylline 24 mg/mL — some Indian brands', r:'IV'},
+      {s:'100 / 200 mg sustained-release tablets', c:200, u:'mg', p:'strip of 10', b:'Deriphyllin Retard, Theophylline SR, Bronchodil', r:'PO', own:{text:'Oral sustained-release theophylline/aminophylline 200 mg PO 12-hourly is for chronic maintenance only — never for an acute attack, and only once a serum theophylline level is known (target 10–20 mg/L).'}},
+      {s:'Theophylline 100 mg/5 mL elixir', c:20, u:'mg', p:'100 mL bottle', b:'Theophylline elixir', r:'PO', own:{text:'This is THEOPHYLLINE, not aminophylline. Aminophylline is 79–86% theophylline by weight, so 250 mg of aminophylline ≈ 200 mg of theophylline. NEVER substitute one for the other milligram-for-milligram.'}}],
+  admin:'Loading 5–6 mg/kg (of anhydrous theophylline) IV over 20–30 min IF no theophylline in the previous 24 h — otherwise check a level first. Maintenance adult 0.5–0.7 mg/kg/h; children 1–9 y 1 mg/kg/h; 9–16 y 0.8 mg/kg/h; neonate 0.1 mg/kg/h. Target serum theophylline 10–20 mg/L (55–110 µmol/L).',
+  dil:'Compatible with NS, D5W and RL. Incompatible with acidic drugs (vitamin C, insulin, many antibiotics) — use a separate line.',
+  warn:['NARROW THERAPEUTIC INDEX. Toxicity >20 mg/L: vomiting, tachyarrhythmia, hypokalaemia, hyperglycaemia, seizures, cardiac arrest. Levels >40 mg/L need charcoal haemoperfusion or haemodialysis.','Reduce the dose by 30–50% in heart failure, hepatic impairment, cor pulmonale, sepsis, fever, the elderly, and with ciprofloxacin, erythromycin, clarithromycin, fluconazole, cimetidine, allopurinol or propranolol.','Increase the dose with rifampicin, phenytoin, carbamazepine, smoking and cannabis.','Check a level 4–6 h after starting the infusion, then daily.','Aminophylline contains 80% theophylline by weight — do not confuse the two.'],
+  ref:['GINA2024','GOLD2025','BNF','BNFC','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY'] });
+
+R({ id:'steroid-asthma-ad', n:'Hydrocortisone / Methylprednisolone — asthma & COPD', sys:'respiratory', cls:'Systemic corticosteroid',
+  ind:'Acute severe asthma, COPD exacerbation, allergic bronchopulmonary aspergillosis, pneumonitis', pop:'adult', risk:3,
+  d:{t:'mg', v:200, cap:200, rep:'hydrocortisone 200 mg IV q6h (or 40 mg methylprednisolone q8–12h) × 5–7 days; then switch to oral prednisolone'},
+  fx:[{s:'100 mg vial hydrocortisone', c:50, u:'mg', p:'reconstitute 100 mg in 2 mL WFI → 50 mg/mL', b:'Hydrocort (Samarth), Solu-Cortef (Pfizer), Efcorlin', r:'IV/IM', hl:1, prep:'Reconstitute 100 mg with 2 mL WFI → 50 mg/mL'},
+      {s:'40 mg vial methylprednisolone', c:40, u:'mg', p:'reconstitute 40 mg in 1 mL WFI → 40 mg/mL', b:'Methylpred (Intas), Solu-Medrol (Pfizer), Depo-Medrol, Methylprednisolone IP', r:'IV/IM', prep:'Reconstitute 40 mg with 1 mL provided diluent → 40 mg/mL', own:{lo:40,hi:60,u:'mg',l:'METHYLPREDNISOLONE 40–60 mg IV daily (an alternative to hydrocortisone)'}},
+      {s:'125 mg / 500 mg / 1000 mg vial methylprednisolone', c:62.5, u:'mg', p:'125 mg in 2 mL diluent; 500 mg in 8 mL', b:'Solu-Medrol, Methylpred', r:'IV/IM', own:{lo:40,hi:60,u:'mg',l:'METHYLPREDNISOLONE 40–60 mg IV daily (125 mg vial reconstituted to 2 mL = 62.5 mg/mL)'}}],
+  admin:'Asthma (adult): hydrocortisone 200 mg IV every 6 h, OR methylprednisolone 40–60 mg IV daily, OR prednisolone 40–50 mg PO daily for 5–7 days. COPD: prednisolone 40 mg PO daily × 5 days (or methylprednisolone 40 mg IV q12 h if unable to take oral).',
+  dil:'Reconstitute as above; may be further diluted in NS/D5W.',
+  warn:['No benefit from higher doses — 40–60 mg of prednisolone equivalent is the ceiling.','Hyperglycaemia, hypokalaemia, psychiatric disturbance, GI bleeding, delayed wound healing, immunosuppression.','In COPD, prolonged courses (>5 days) increase pneumonia risk without benefit.','Always combine with inhaled bronchodilators and treat the trigger (infection, allergen).'],
+  ref:['GINA2024','GOLD2025','BTS-ASTHMA','NICE-CG25'] });
+
+R({ id:'steroid-asthma-pd', n:'Hydrocortisone / Prednisolone — paediatric asthma & croup', sys:'respiratory', cls:'Systemic corticosteroid',
+  ind:'Acute asthma in children; croup; bronchiolitis with wheeze; anaphylaxis adjunct', pop:'paed', risk:3,
+  d:{t:'mgkg', lo:1, hi:4, cap:200, rep:'prednisolone 1–2 mg/kg (max 40 mg) PO daily × 3–5 days OR hydrocortisone 4 mg/kg IV q6h (max 200 mg)'},
+  fx:[{s:'100 mg vial hydrocortisone', c:50, u:'mg', p:'reconstitute → 50 mg/mL', b:'Hydrocort (Samarth), Solu-Cortef', r:'IV/IM', hl:1, own:{kg:4,u:'mg',cap:200,l:'HYDROCORTISONE 4 mg/kg IV q6h (max 200 mg) — use when the child is vomiting or too breathless for oral prednisolone'}},
+      {s:'40 mg vial methylprednisolone', c:40, u:'mg', p:'reconstitute → 40 mg/mL', b:'Methylpred (Intas), Solu-Medrol', r:'IV/IM', own:{kgLo:1,kgHi:2,u:'mg',cap:60,l:'METHYLPREDNISOLONE 1–2 mg/kg IV daily (max 60 mg)'}},
+      {s:'5 mg/mL prednisolone oral solution (5 mg/5 mL)', c:5, u:'mg', p:'60 mL bottle', b:'Prednid (Samarth), Omnacortil (Macleods), Wymesone', r:'PO', own:{kgLo:1,kgHi:2,u:'mg',cap:40,l:'PREDNISOLONE 1–2 mg/kg PO daily (max 40 mg) for 3–5 days'}},
+      {s:'1 mg/mL prednisolone oral solution', c:1, u:'mg', p:'100 mL bottle', b:'Prednisolone oral solution 1 mg/mL', r:'PO', own:{kgLo:1,kgHi:2,u:'mg',cap:40,l:'PREDNISOLONE 1–2 mg/kg PO daily (max 40 mg) — the 1 mg/mL strength avoids large syrup volumes in small children'}},
+      {s:'5 / 10 / 20 / 40 mg prednisolone tablets', c:40, u:'mg', p:'strip of 10', b:'Omnacortil, Prednid, Wymesone 40', r:'PO', own:{kgLo:1,kgHi:2,u:'mg',cap:40,l:'PREDNISOLONE 1–2 mg/kg PO daily (max 40 mg) for 3–5 days. Croup instead: dexamethasone 0.15–0.6 mg/kg (max 10 mg) as a single dose.'}}],
+  admin:'Asthma: prednisolone 1–2 mg/kg PO daily (max 40 mg) for 3–5 days; if vomiting or too breathless, hydrocortisone 4 mg/kg IV (max 200 mg) 6-hourly. Croup: dexamethasone 0.15–0.6 mg/kg (max 10 mg) PO/IV/IM as a single dose, or prednisolone 1 mg/kg, or nebulised budesonide 2 mg.',
+  dil:'Reconstitute vials immediately before use.',
+  warn:['Give steroids EARLY (within 1 h of presentation) in every acute asthma attack — this reduces admissions and relapse.','Check the oral solution concentration: 1 mg/mL and 5 mg/mL presentations are both available in India and a mix-up causes a 5-fold error.','Short courses (<5 days) do not need tapering.','Hyperglycaemia and behavioural change are common in children.'],
+  ref:['GINA2024','IAP-ASTHMA','BTS-ASTHMA','BNFC','NICE-CG25','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY','NELSON','GHAI10','IAP-STG'] });
+
+R({ id:'sildenafil-ph', n:'Sildenafil', sys:'respiratory', cls:'Phosphodiesterase-5 inhibitor (pulmonary vasodilator)',
+  ind:'Pulmonary arterial hypertension; persistent pulmonary hypertension of the newborn; right ventricular failure; weaning off inhaled NO', pop:'all', risk:4,
+  d:{t:'mgkg', lo:0.5, hi:2, cap:80, rep:'every 6–8 h orally (paediatric/PPHN); adult PAH 20 mg TDS'},
+  fx:[{s:'20 mg tablet', c:20, u:'mg', p:'strip of 4', b:'Sildenafil 20 mg — Suhagra 20 (Cipla), Revita, Silvitra, Manforce (PAH dosing uses the 20 mg strength)', r:'PO', hl:1},
+      {s:'25 mg tablet', c:25, u:'mg', p:'strip of 4', b:'Sildenafil 25 mg', r:'PO'},
+      {s:'50 mg tablet', c:50, u:'mg', p:'strip of 4', b:'Suhagra 50, Caverta 50', r:'PO'},
+      {s:'10 mg/mL oral suspension (limited)', c:10, u:'mg', p:'60 mL bottle', b:'Revatio suspension (import), Sildenafil oral suspension', r:'PO'},
+      {s:'0.8 mg/mL injection (limited availability)', c:0.8, u:'mg', p:'20 mL vial (12.5 mg/12.5 mL)', b:'Revatio IV (import); Indian IV sildenafil availability is very limited', r:'IV'}],
+  admin:'PAH (adult): 20 mg PO every 8 h. Paediatric PAH: 0.5–1 mg/kg PO every 8 h (up to 2 mg/kg/dose in refractory cases; max 80 mg/dose). PPHN: 0.25–2 mg/kg/dose PO/NG every 6 h.',
+  dil:'Tablets may be crushed and suspended in water for NG administration; the suspension must be shaken well.',
+  warn:['CONTRAINDICATED with any nitrate or nitric oxide donor — refractory, potentially fatal hypotension.','Avoid with riociguat.','Systemic hypotension, flushing, epistaxis, visual disturbance (NAION), priapism.','Hepatic and severe renal impairment: start at the lower dose.','STARTALK/PAH trials: higher paediatric doses were associated with increased mortality — stay within 0.5–3 mg/kg/day divided.'],
+  ref:['ESC-PH','BNFC','IAP-PPHN','FDA-SILDENAFIL','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY','IAP-STG'] });
+
+R({ id:'cisa-ards', n:'Cisatracurium — early severe ARDS', sys:'respiratory', cls:'Non-depolarising NMBA',
+  ind:'Moderate–severe ARDS (PaO₂/FiO₂ <150) within 48 h of onset, with lung-protective ventilation and deep sedation (ACURASYS protocol)', pop:'adult', risk:5, inf:true,
+  d:{t:'mghr', lo:30, hi:45, capDay:900},
+  diln:[{l:'200 mg in 50 mL NS → 4 mg/mL (37.5 mg/h ≈ 9.4 mL/h)', amt:200, in:50, u:'mg', bag:'50 mL 0.9% NaCl'}],
+  fx:[{s:'2 mg/mL', c:2, u:'mg', p:'5 mL ampoule (10 mg), 30 mL vial (60 mg)', b:'Cisatracurium IP — Intas (Cisatra), Neon; Nimbex (GSK)', r:'IV-inf', hl:1}],
+  admin:'37.5 mg/h fixed infusion for 48 h (≈0.53 mg/kg/h in a 70-kg adult) after adequate sedation ± an initial 0.15–0.2 mg/kg bolus. Ensure a RASS of −4 to −5.',
+  dil:'Dilute in NS or D5W.',
+  warn:['MANDATORY: deep sedation and analgesia first — awareness under paralysis is a never-event. Use TOF monitoring and daily sedation assessment.','The ROSE trial did not confirm a mortality benefit of routine early NMBAs — reserve for genuinely refractory hypoxaemia.','Combine with lung-protective ventilation (VT 6 mL/kg predicted body weight, plateau pressure <30 cmH₂O) and prone positioning ≥16 h/day.','Prolonged weakness/myopathy with concomitant corticosteroids; ICU-acquired weakness.'],
+  ref:['ACURASYS','ROSE-ARDS','ESICM-ARDS','ISCCM-ARDS'] });
+
+R({ id:'dexa-ards', n:'Dexamethasone — moderate–severe ARDS', sys:'respiratory', cls:'Glucocorticoid',
+  ind:'Moderate–severe ARDS within 24 h of onset (DEXA-ARDS protocol) — reduces ventilator days and mortality', pop:'adult', risk:4,
+  d:{t:'mg', v:20, capDay:20, rep:'20 mg IV daily on days 1–5, then 10 mg IV daily on days 6–10, then taper'},
+  fx:[{s:'4 mg/mL', c:4, u:'mg', p:'1 mL ampoule (4 mg), 2 mL ampoule (8 mg)', b:'Dexamethasone IP — Neon, Aristo; Dexona, Decdan', r:'IV', hl:1},
+      {s:'8 mg/mL', c:8, u:'mg', p:'2 mL ampoule (16 mg)', b:'Dexamethasone 8 mg/mL', r:'IV'}],
+  admin:'DEXA-ARDS regimen: 20 mg IV once daily for 5 days, then 10 mg IV once daily for 5 days, then 5 mg/day for 3 days, 2.5 mg/day for 2 days, then stop (total 13 days).',
+  dil:'Ready to use.',
+  warn:['Hyperglycaemia (insulin infusion often required), neuromyopathy, secondary infection.','Start within 24 h of ARDS diagnosis — later initiation was not studied.','Do not use in ARDS due to influenza without antiviral cover (possible harm).','Screen for strongyloides in endemic areas (Tamil Nadu included) before high-dose steroids — hyperinfection syndrome.'],
+  ref:['DEXA-ARDS','ESICM-ARDS','SSC2021','BNF'] });
+
+R({ id:'nac-neb', n:'N-acetylcysteine — nebulised (mucolytic)', sys:'respiratory', cls:'Mucolytic (breaks disulfide bonds in mucoproteins)',
+  ind:'Thick tenacious secretions, atelectasis, bronchiectasis, meconium/contrast aspiration (adjunct to physiotherapy)', pop:'all', risk:2,
+  d:{t:'ml', lo:3, hi:10, cap:10, rep:'10% solution 3–10 mL nebulised every 6–8 h'},
+  fx:[{s:'200 mg/mL (20%)', c:200, u:'mg', p:'4 mL ampoule (800 mg), 10 mL vial (2 g) — dilute to 10% before nebulising', b:'Mucomix (Abbott/Sun), NAC (Samarth), Mucomyst, Mucolite', r:'NEB/PO/IV', hl:1},
+      {s:'100 mg/mL (10%)', c:100, u:'mg', p:'4 mL ampoule (400 mg), 10 mL vial (1 g)', b:'Mucomix 10%, NAC 10%', r:'NEB/PO/IV'},
+      {s:'600 mg effervescent tablet / sachet', c:600, u:'mg', p:'strip/sachet', b:'Mucolite 600, NAC 600, Mucomix oral', r:'PO', use:'fixed', give:'ORAL ONLY - 600 mg dissolved in water 2-3 times daily. The effervescent tablet must NEVER be nebulised.'}],
+  admin:'Nebulise 3–10 mL of the 10% solution every 6–8 h; use the 20% solution diluted 1:1 with sterile water for large-volume nebulisation.',
+  dil:'Dilute the 20% presentation 1:1 with sterile water or NS to 10%. Use a separate nebuliser from bronchodilators (incompatibility).',
+  warn:['Bronchospasm — always have salbutamol available and consider pre-treatment in asthmatics.','Foul (sulphurous) odour; nausea and stomatitis.','Physically incompatible with many antibiotics (penicillins, aminoglycosides, tetracyclines) — do not mix in the same nebuliser; give separately with a 1–2 h interval.','Rinse the nebuliser thoroughly after use.'],
+  ref:['BNF','BNFC','GOLD2025'] });
+
+/* ================= RENAL & DIURETICS ================= */
+R({ id:'furosemide-ad', n:'Furosemide', sys:'renal', cls:'Loop diuretic (NKCC2 inhibitor)',
+  ind:'Pulmonary oedema, volume overload, oliguric AKI (fluid management only — does not improve renal outcome), hypercalcaemia, hyperkalaemia', pop:'adult', risk:3,
+  d:{t:'mgkg', lo:0.5, hi:1, cap:200, capDay:1000, rep:'20–40 mg IV (or 0.5–1 mg/kg, or double the home oral dose) every 6–12 h; infusion 5–20 mg/h'},
+  fx:[{s:'10 mg/mL', c:10, u:'mg', p:'2 mL ampoule (20 mg), 4 mL ampoule (40 mg)', b:'Lasix (Sanofi), Frusemide IP — Neon, Samarth, Claris; Fusid, Lasilix', r:'IV/IM/PO', hl:1},
+      {s:'25 mg/mL (high-dose presentation)', c:25, u:'mg', p:'10 mL ampoule (250 mg)', b:'Lasix high-dose (limited)', r:'IV'},
+      {s:'40 mg tablet', c:40, u:'mg', p:'strip of 10', b:'Lasix 40, Frusemide 40, Urimex', r:'PO'},
+      {s:'20 / 80 mg tablets', c:40, u:'mg', p:'strip', b:'Lasix 20/80 mg', r:'PO'},
+      {s:'10 mg/mL oral solution', c:10, u:'mg', p:'60 mL bottle (limited availability)', b:'Lasix oral solution', r:'PO'}],
+  admin:'IV bolus over 1–2 min (max 4 mg/min). Typical ICU dose 20–80 mg IV every 6–12 h; maximum single dose 200 mg. Continuous infusion 5–20 mg/h (loading 40–80 mg) — equally effective and less ototoxic than large boluses.',
+  dil:'Compatible with NS, D5W and RL; use within 24 h of dilution. Precipitates at pH <5.5 — do not mix with acidic drugs.',
+  warn:['Hypokalaemia, hyponatraemia, hypomagnesaemia, hypocalcaemia, metabolic alkalosis, dehydration, AKI (pre-renal) — check electrolytes daily.','Ototoxicity — risk rises with rapid bolus (>4 mg/min), doses >1–2 g/day, renal failure, and concurrent aminoglycosides.','Sulfa allergy (cross-reactivity is rare but reported).','In oliguric AKI, diuretics do NOT reduce the need for dialysis or mortality — use them only to achieve fluid balance.'],
+  ref:['ESC-HF','KDIGO-AKI','BNF','MARINO'] });
+
+R({ id:'furosemide-pd', n:'Furosemide — paediatric', sys:'renal', cls:'Loop diuretic',
+  ind:'Paediatric volume overload, heart failure, pulmonary oedema, BPD, nephrotic syndrome', pop:'paed', risk:3,
+  d:{t:'mgkg', lo:0.5, hi:2, cap:40, rep:'0.5–1 mg/kg IV (max 20 mg/dose) every 6–12 h; infusion 0.05–0.2 mg/kg/h'},
+  fx:[{s:'10 mg/mL', c:10, u:'mg', p:'2 mL ampoule (20 mg)', b:'Lasix (Sanofi), Frusemide IP — Neon, Samarth', r:'IV/PO', hl:1},
+      {s:'20 mg tablet', c:20, u:'mg', p:'strip', b:'Lasix 20, Frusemide 20', r:'PO'},
+      {s:'10 mg/mL oral solution', c:10, u:'mg', p:'60 mL bottle (limited)', b:'Lasix oral solution', r:'PO'}],
+  admin:'0.5–1 mg/kg IV over 1–2 min, may increase to 2 mg/kg/dose in renal impairment (max 40 mg/dose, max 6 mg/kg/day). Continuous infusion 0.05–0.2 mg/kg/h (neonate 0.05 mg/kg/h).',
+  dil:'Dilute to 1 mg/mL for neonates to improve accuracy.',
+  warn:['Neonates: prolonged half-life (up to 20 h) and risk of nephrocalcinosis, PDA patency, cholelithiasis and ototoxicity — use the lowest effective dose.','Hypokalaemia, hyponatraemia, hypocalcaemia, metabolic alkalosis.','Ototoxicity with concurrent aminoglycosides.','Volume depletion worsens renal perfusion — always assess volume status before dosing.'],
+  ref:['BNFC','NELSON','KDIGO-AKI','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY','GHAI10'] });
+
+R({ id:'torsemide', n:'Torasemide (Torsemide)', sys:'renal', cls:'Loop diuretic (longer-acting, more predictable oral bioavailability)',
+  ind:'Chronic heart failure, diuretic resistance with poor oral absorption, nephrotic syndrome', pop:'adult', risk:3,
+  d:{t:'mg', lo:10, hi:20, cap:200, rep:'10–20 mg IV/PO once daily; may double if inadequate'},
+  fx:[{s:'10 mg/mL', c:10, u:'mg', p:'2 mL ampoule (20 mg) — availability variable', b:'Torget (Glenmark), Diuver, Torasemide IP', r:'IV/PO', hl:1},
+      {s:'10 mg / 20 mg tablets', c:10, u:'mg', p:'strip of 10', b:'Torget 10/20, Torasem 10, Diuver', r:'PO'}],
+  admin:'10–20 mg IV or PO once daily. Torsemide 20 mg ≈ furosemide 40 mg IV ≈ furosemide 80 mg PO (oral bioavailability 80–100% vs 50% for furosemide).',
+  dil:'Ready to use.',
+  warn:['Same electrolyte and ototoxicity profile as furosemide.','Longer duration (12–16 h) — timing matters for nocturia.','Conversion errors between loop diuretics are common; use the equivalence table.'],
+  ref:['ESC-HF','BNF'] });
+
+R({ id:'bumetanide', n:'Bumetanide', sys:'renal', cls:'Loop diuretic (40× more potent than furosemide by weight)',
+  ind:'Diuretic-resistant oedema, heart failure, renal impairment', pop:'adult', risk:4,
+  d:{t:'mg', lo:0.5, hi:2, cap:10, capDay:10, rep:'0.5–2 mg IV/PO once or twice daily'},
+  fx:[{s:'0.5 mg/mL', c:0.5, u:'mg', p:'2 mL ampoule (1 mg) — availability limited in India', b:'Bumetanide IP (limited), Bumex (import)', r:'IV/PO', hl:1},
+      {s:'0.5 mg / 1 mg tablets', c:1, u:'mg', p:'strip', b:'Bumetanide tablets (limited availability)', r:'PO'}],
+  admin:'1 mg bumetanide ≈ 40 mg IV furosemide ≈ 80 mg oral furosemide. Start 0.5–1 mg IV/PO, titrate to 2–5 mg/day.',
+  dil:'Ready to use.',
+  warn:['A 40-fold potency difference from furosemide — a mg-for-mg substitution causes massive overdose. Always convert explicitly.','More profound hypokalaemia than furosemide.','Myalgia and muscle cramps; rarely rhabdomyolysis.'],
+  ref:['ESC-HF','BNF'] });
+
+R({ id:'spironolactone', n:'Spironolactone', sys:'renal', cls:'Mineralocorticoid receptor antagonist (potassium-sparing)',
+  ind:'Cirrhotic ascites (first-line), heart failure with reduced EF, primary aldosteronism, resistant hypertension', pop:'all', risk:4,
+  d:{t:'mg', lo:25, hi:100, cap:400, capDay:400, rep:'heart failure 25–50 mg daily; ascites 100–400 mg daily (with furosemide 40–160 mg)'},
+  fx:[{s:'25 mg tablet', c:25, u:'mg', p:'strip of 10', b:'Aldactone (RPG/Sanofi), Lactone, Verospiron', r:'PO', hl:1},
+      {s:'50 mg tablet', c:50, u:'mg', p:'strip', b:'Aldactone 50', r:'PO'},
+      {s:'100 mg tablet', c:100, u:'mg', p:'strip', b:'Aldactone 100', r:'PO'},
+      {s:'25 mg/5 mL suspension (limited)', c:5, u:'mg', p:'100 mL bottle', b:'Spironolactone suspension (compounded/import)', r:'PO'}],
+  admin:'Ascites: start spironolactone 100 mg + furosemide 40 mg once daily; increase in a 100:40 ratio to a maximum of 400:160 mg/day. Heart failure: 25 mg daily (up to 50 mg).',
+  dil:'No parenteral formulation in India.',
+  warn:['HYPERKALAEMIA — check K⁺ and creatinine at baseline, at 1 week, then monthly; stop if K⁺ >5.5 mmol/L or creatinine rises >30%.','Contraindicated if eGFR <30 mL/min.','Gynaecomastia (10%), menstrual irregularity, impotence.','Onset of diuresis takes 2–3 days — do not escalate prematurely.','Additive hyperkalaemia with ACE inhibitors, ARBs, K⁺ supplements, trimethoprim, heparin and NSAIDs.'],
+  ref:['AASLD-ASCITES','EASL-LIVER','ESC-HF','BNF','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY'] });
+
+R({ id:'acetazolamide', n:'Acetazolamide', sys:'renal', cls:'Carbonic anhydrase inhibitor',
+  ind:'Metabolic alkalosis (esp. diuretic/post-hypercapnic), altitude sickness, idiopathic intracranial hypertension, acute angle-closure glaucoma, central sleep apnoea', pop:'all', risk:3,
+  d:{t:'mgkg', lo:5, hi:10, cap:500, capDay:1000, rep:'5–10 mg/kg IV/PO every 8–12 h (max 1 g/dose)'},
+  fx:[{s:'500 mg vial (IV)', c:500, u:'mg', p:'vial reconstituted with 5 mL WFI → 100 mg/mL', b:'Diamox IV (import); Acetazolamide injection — availability in India is limited', r:'IV', hl:1, prep:'Reconstitute 500 mg with 5 mL sterile WFI → 100 mg/mL; dilute further in 100 mL NS before infusion'},
+      {s:'250 mg tablet', c:250, u:'mg', p:'strip of 10', b:'Diamox 250 (Connaught), Acetazolamide 250 (Intas), Zolamide', r:'PO'},
+      {s:'125 mg tablet / capsule', c:125, u:'mg', p:'strip', b:'Acetazolamide 125 mg', r:'PO'}],
+  admin:'ICU alkalosis: 250–500 mg IV/PO every 8–12 h (5–10 mg/kg/dose in children). IIH: 250 mg PO twice daily, titrated to 1–2 g/day. Altitude sickness: 125–250 mg PO twice daily starting 24 h before ascent.',
+  dil:'Reconstitute the vial with 5 mL WFI; dilute in 100 mL NS and infuse over 30–60 min.',
+  warn:['Causes a HYPERCHLORAEMIC METABOLIC ACIDOSIS and hypokalaemia — this is the therapeutic mechanism in alkalosis but becomes toxicity if overused.','Sulfa derivative — avoid in sulfa allergy.','Paraesthesiae, dysgeusia (carbonated-drink taste), renal stones, ammonia retention.','Contraindicated in severe hepatic impairment (hepatic encephalopathy risk), hypokalaemia, hyponatraemia and hyperchloraemic acidosis.','Reduces the excretion of aspirin — risk of salicylate toxicity at high doses.'],
+  ref:['BNF','MARINO','ESICM-AB','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY'] });
+
+/* ================= FLUID THERAPY ================= */
+R({ id:'fluids-resus', n:'Crystalloid — shock resuscitation', sys:'electrolyte', cls:'Balanced/isotonic crystalloid',
+  ind:'Septic shock, hypovolaemia, DKA, trauma, burns — first 3 hours', pop:'all', risk:3,
+  d:{t:'mlkg', lo:20, hi:30, cap:3000, rep:'sepsis: 30 mL/kg within the first 3 h (or 20 mL/kg in children), reassessed with dynamic indices'},
+  fx:[{s:'Ringer lactate (Hartmann) — Na⁺ 131, K⁺ 5, Ca²⁺ 2.4, Cl⁻ 111, lactate 29 mmol/L; 273 mOsm/L', c:1, u:'ml', p:'500 mL and 1000 mL bags/bottles', b:'RL — Eurolife, Claris, Baxter, Neon, Aculife; Isolyte', r:'IV', hl:1},
+      {s:'0.9% sodium chloride — Na⁺ 154, Cl⁻ 154 mmol/L; 308 mOsm/L', c:1, u:'ml', p:'100 mL, 250 mL, 500 mL, 1000 mL', b:'Normal Saline IP — Eurolife, Claris, Baxter, Neon', r:'IV'},
+      {s:'Plasma-Lyte A / Isolyte P — Na⁺ 140, K⁺ 5, Mg²⁺ 3, Cl⁻ 98, acetate 27, gluconate 23 mmol/L', c:1, u:'ml', p:'500 mL, 1000 mL', b:'Plasmalyte A (Baxter), Isolyte P (Braun), Sterofundin', r:'IV'}],
+  admin:'Give 20–30 mL/kg (adult ≈1500–2000 mL; child 20 mL/kg) rapidly, then REASSESS with dynamic measures (passive leg raise, stroke volume variation, IVC variability, capillary refill, lactate clearance, echocardiography).',
+  dil:'Not applicable — infusion bags.',
+  warn:['Indiscriminate large-volume 0.9% NaCl causes hyperchloraemic metabolic acidosis and AKI (SMART/SPLIT/BaSICS trials) — balanced crystalloids are preferred for most ICU resuscitation.','Ringer lactate contains 5 mmol/L potassium — this is NOT a contraindication in hyperkalaemia (it is actually safer than NS), but avoid in severe hyperkalaemia with AKI.','Lactate in RL is metabolised by the liver — avoid in severe liver failure and in type-B lactic acidosis where lactate is used as a resuscitation endpoint.','Stop the fixed-volume approach once signs of fluid responsiveness are lost — fluid overload is independently associated with mortality.','Avoid colloids/starches in sepsis (increased AKI and mortality).'],
+  ref:['SSC2021','ISCCM-SEP','SMART-TRIAL','MARINO','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY'] });
+
+R({ id:'fluids-maintenance-pd', n:'Maintenance fluid — paediatric (Holliday–Segar / 4-2-1)', sys:'electrolyte', cls:'Maintenance intravenous fluid',
+  ind:'Daily maintenance requirement in children who are nil by mouth', pop:'paed', risk:3,
+  d:{t:'mlkgday', lo:0, hi:0, cap:2400, div:24,
+     text:'4-2-1 rule: 4 mL/kg/h for the first 10 kg + 2 mL/kg/h for the next 10 kg + 1 mL/kg/h for each kg above 20 kg (max 2400 mL/24 h)'},
+  fx:[{s:'Isotonic maintenance — 0.9% NaCl with 5% dextrose (DNS) ± KCl 20 mmol/L', c:1, u:'ml', p:'500 mL / 1000 mL bag', b:'DNS (Eurolife/Claris/Baxter), Paediatric maintenance solutions', r:'IV', hl:1},
+      {s:'0.45% NaCl in 5% dextrose (half-strength DNS)', c:1, u:'ml', p:'500 mL bag', b:'Half DNS, D5 0.45% NaCl', r:'IV'},
+      {s:'5% dextrose alone (neonates, hypernatraemia, hypoglycaemia)', c:1, u:'ml', p:'100 mL / 500 mL', b:'Dextrose 5% IP — Claris, Eurolife', r:'IV'}],
+  admin:'Hourly rate: 4 mL/kg/h for 0–10 kg, +2 mL/kg/h for 10–20 kg, +1 mL/kg/h above 20 kg. Example 25 kg = 40 + 20 + 5 = 65 mL/h (1560 mL/day).',
+  dil:'Add KCl only if the child is passing urine and K⁺ is known; maximum 40 mmol/L peripherally, 60 mmol/L centrally, infused at ≤0.3 mmol/kg/h.',
+  warn:['USE ISOTONIC FLUIDS FOR MAINTENANCE — hypotonic (0.18–0.45%) fluids cause hospital-acquired hyponatraemia and hyponatraemic encephalopathy with death and brain injury (multiple national safety alerts).','Reduce by 25–50% in SIADH, heart failure, renal failure, and post-operative states (non-osmotic ADH release).','Add dextrose in neonates and small infants to prevent hypoglycaemia and ketosis.','Always include ongoing losses (drains, diarrhoea, fever, NG aspirate) separately.'],
+  ref:['NICE-CG174','AAP-HYPONAT','IAP-FLUID','BNFC','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY','NELSON','GHAI10','IAP-STG'] });
+
+R({ id:'dextrose-bolus', n:'Dextrose (glucose) bolus', sys:'endocrine', cls:'Carbohydrate — osmotic and caloric',
+  ind:'Symptomatic hypoglycaemia; hyperkalaemia (with insulin); high-dose insulin therapy antidote', pop:'all', risk:4,
+  d:{t:'mgkg', lo:200, hi:500, cap:50000, rep:'adult 25 g IV (50 mL of 50% or 250 mL of 10%); child 0.2–0.5 g/kg; neonate 0.2 g/kg'},
+  fx:[{s:'50% (500 mg/mL)', c:500, u:'mg', p:'20 mL vial (10 g), 50 mL vial (25 g)', b:'Dextrose 50% IP — Neon, Samarth, Claris', r:'IV', hl:1},
+      {s:'25% (250 mg/mL)', c:250, u:'mg', p:'10 mL ampoule (2.5 g), 25 mL', b:'Dextrose 25% IP — Neon, Samarth; preferred in children and neonates', r:'IV'},
+      {s:'10% (100 mg/mL)', c:100, u:'mg', p:'500 mL bag (50 g)', b:'Dextrose 10% IP — Claris, Eurolife, Baxter', r:'IV'},
+      {s:'5% (50 mg/mL) in 0.9% NaCl (DNS)', c:50, u:'mg', p:'500 mL / 1000 mL', b:'DNS (Dextrose Normal Saline) — Eurolife, Claris', r:'IV'}],
+  admin:'Adult hypoglycaemia: 25 g IV (50 mL of 50%, or preferably 250 mL of 10% through a good vein). Child: 0.2–0.5 g/kg (2–5 mL/kg of 10%). Neonate: 0.2 g/kg (2 mL/kg of 10%).',
+  dil:'ALWAYS prefer 10% or 25% to 50% where possible — 50% is extremely hyperosmolar (2525 mOsm/L) and causes phlebitis and tissue necrosis on extravasation.',
+  warn:['Extravasation of 50% dextrose causes severe tissue necrosis — use a central line or a large well-sited peripheral vein, and dilute to 10–25% when possible.','Rebound hypoglycaemia — recheck glucose 15 min after treatment and start a 10% dextrose infusion; identify and remove the cause.','In neonates, glucose infusion rate should not exceed 8–12 mg/kg/min (hyperglycaemia → osmotic diuresis, IVH risk).'],
+  ref:['ESICM-GLUC','ADA-HYPO','BNFC','AAP-NEO','HARRIET-LANE','SINGH-DOSES','GUPTA-FORMULARY'] });

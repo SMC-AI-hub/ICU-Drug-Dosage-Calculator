@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#0b5394">
+<meta name="description" content="Offline paediatric and neonatal emergency drug calculator, 24 weeks of gestation to 18 years: age- or weight-driven dosing, Indian formulations with mg/mL concentrations for IV and oral routes, system-wise and class-wise grouping, guideline references, enforced dose caps and high-alert double-check blocks.">
+<title>Paediatric &amp; Neonatal Drug Calculator — 24 weeks to 18 years</title>
+<style>/*__CSS__*/</style>
+</head>
+<body>
+
+<!-- ============================ HEADER ============================ -->
+<header class="topbar">
+  <div class="logo">
+    <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+      <rect x="1" y="1" width="30" height="30" rx="8" fill="rgba(255,255,255,.16)" stroke="rgba(255,255,255,.5)" stroke-width="1.3"/>
+      <path d="M16 7v18M7 16h18" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>
+      <path d="M4 23h5l2-4 3 8 2.6-6 1.8 3H28" stroke="#9fd0ff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div style="min-width:0">
+      <h1>Paediatric &amp; Neonatal Drug Calculator</h1>
+      <div class="sub">24 weeks of gestation to 18 years · Indian formulations · guideline-referenced · dose- and volume-verified</div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <div class="meta">
+    <div id="metaCtx">No patient entered</div>
+    <div class="mono">build /*__BUILD__*/</div>
+  </div>
+  <button class="tbtn icon" id="btnWiz" type="button" title="Guided 3-step patient entry wizard" aria-label="Patient wizard"><span aria-hidden="true">👶</span><span class="tlab">Wizard</span></button>
+  <button class="tbtn icon" id="btnGuide" type="button" title="Junior staff quick start & safety guide" aria-label="Junior guide"><span aria-hidden="true">💡</span><span class="tlab">Guide</span></button>
+  <button class="tbtn icon" id="btnRail" type="button" title="Patient panel and emergency shortcuts" aria-label="Patient panel">☰</button>
+  <button class="tbtn icon" id="btnPal" type="button" title="Jump to any drug, protocol or tool (Ctrl+K)" aria-label="Find anything">🔍</button>
+  <button class="tbtn icon" id="btnType" type="button" title="Larger text on/off" aria-label="Text size">Aa</button>
+  <button class="tbtn icon" id="btnTheme" type="button" title="Dark / light theme" aria-label="Theme">◐</button>
+  <button class="tbtn icon" id="btnPrint" type="button" title="Print the calculated dose sheet" aria-label="Print"><span aria-hidden="true">🖨</span><span class="tlab">Print</span></button>
+  <button class="tbtn icon" id="btnCsv" type="button" title="Export every calculated row as CSV" aria-label="Export CSV"><span aria-hidden="true">⬇</span><span class="tlab">CSV</span></button>
+  <button class="tbtn icon" id="btnAbout" type="button" title="About, safety and clinical governance" aria-label="About"><span aria-hidden="true">ℹ</span><span class="tlab">About</span></button>
+</header>
+
+<div class="safety" id="safetyBanner">
+  <span><b>⚠ CLINICAL DECISION SUPPORT — NOT A PRESCRIPTION.</b>
+  Verify the drug, the concentration on the vial in your hand and the calculated volume against your institutional protocol before administration.
+  High-alert drugs require an <b>independent double check</b> by two practitioners.
+  Weigh the patient whenever possible — a weight estimated from age can be wrong by 20–30%.</span>
+  <button class="sx" id="safetyX" type="button" title="Hide this notice for this session" aria-label="Dismiss">✕</button>
+</div>
+
+<!-- patient strip: phone / tablet only. Always tells you which patient the
+     numbers below belong to, and opens the full panel on tap. -->
+<div class="pbar" id="pbar">
+  <div class="pmini" id="pmini">
+    <span class="pw" id="pminiW">—</span>
+    <span class="pa" id="pminiA">No patient set — tap to add a weight or age</span>
+  </div>
+  <button class="btn ghost sm" id="pEdit" type="button">Patient</button>
+</div>
+
+<div class="wrap">
+
+  <!-- ======================= PATIENT PANEL ======================= -->
+  <aside id="rail">
+    <div class="panel">
+      <div class="ph"><h2>Patient</h2><span class="rt">24 weeks – 18 years</span></div>
+      <div class="pb">
+
+        <div class="field">
+          <label for="p_wt">Weight (kg) — use this if you know it</label>
+          <input id="p_wt" type="number" step="0.01" min="0" max="200" inputmode="decimal" placeholder="e.g. 3.4" autocomplete="off">
+          <div class="row" style="margin-top:7px">
+            <button class="chip" type="button" id="btnDemo70">Example: 4 y, 16 kg</button>
+            <button class="chip" type="button" id="btnDemoPreterm">Example: 28+3 preterm</button>
+          </div>
+          <span class="hint">A measured weight beats every estimate — weigh every child you can.</span>
+        </div>
+
+        <div class="field" style="margin-top:12px">
+          <label for="p_ageY">Age — years / months / days</label>
+          <div class="row">
+            <input id="p_ageY" type="number" step="1" min="0" max="120" inputmode="numeric" placeholder="years" aria-label="Age in years" style="flex:1 1 70px">
+            <input id="p_ageM" type="number" step="1" min="0" max="11" inputmode="numeric" placeholder="months" aria-label="Age in months" style="flex:1 1 70px">
+            <input id="p_ageD" type="number" step="1" min="0" max="30" inputmode="numeric" placeholder="days" aria-label="Age in days" style="flex:1 1 70px">
+          </div>
+          <span class="hint">Age alone is enough: the calculator estimates the weight from the WHO median and flags it <b>ESTIMATED</b> everywhere it is used.</span>
+        </div>
+
+        <div class="field" style="margin-top:12px">
+          <label for="p_gaW">Born preterm? Gestation at birth (weeks + days)</label>
+          <div class="row">
+            <input id="p_gaW" type="number" step="1" min="24" max="42" inputmode="numeric" placeholder="weeks" aria-label="Gestational age at birth, weeks" style="flex:1 1 70px">
+            <input id="p_gaD" type="number" step="1" min="0" max="6" inputmode="numeric" placeholder="days" aria-label="Gestational age at birth, days" style="flex:1 1 70px">
+          </div>
+          <span class="hint">For every baby born before 37 weeks the calculator doses on <b>postmenstrual age</b>, estimates weight from the Fenton reference and shows the <b>corrected age</b>.</span>
+        </div>
+
+        <details class="cdet" style="margin:12px 0 0">
+          <summary>Sex, estimation method, height, creatinine, electrolytes</summary>
+          <div class="inner">
+            <div class="row" style="margin-top:8px">
+              <div class="field" style="flex:1 1 46%">
+                <label for="p_sex">Sex (affects the weight estimate)</label>
+                <select id="p_sex"><option value="male">Male</option><option value="female">Female</option></select>
+              </div>
+              <div class="field" style="flex:1 1 46%">
+                <label for="p_wm">Weight-estimation method</label>
+                <select id="p_wm">
+                  <option value="who">WHO median (most accurate)</option>
+                  <option value="apls">APLS formula</option>
+                  <option value="luscombe">Luscombe (3×age)+7</option>
+                </select>
+              </div>
+            </div>
+            <div class="row" style="margin-top:9px">
+              <div class="field" style="flex:1 1 46%"><label for="p_ht">Height (cm)</label>
+                <input id="p_ht" type="number" step="0.1" min="0" max="250" inputmode="decimal" placeholder="optional"></div>
+              <div class="field" style="flex:1 1 46%"><label for="p_scr">Creatinine (mg/dL)</label>
+                <input id="p_scr" type="number" step="0.01" min="0" max="30" inputmode="decimal" placeholder="optional"></div>
+            </div>
+            <div class="row" style="margin-top:9px">
+              <div class="field" style="flex:1 1 30%"><label for="p_k">K⁺ mmol/L</label>
+                <input id="p_k" type="number" step="0.01" min="0" max="12" inputmode="decimal" placeholder="—"></div>
+              <div class="field" style="flex:1 1 30%"><label for="p_na">Na⁺ mmol/L</label>
+                <input id="p_na" type="number" step="0.1" min="80" max="200" inputmode="decimal" placeholder="—"></div>
+              <div class="field" style="flex:1 1 30%"><label for="p_glu">Glucose mg/dL</label>
+                <input id="p_glu" type="number" step="1" min="0" max="2000" inputmode="decimal" placeholder="—"></div>
+            </div>
+            <label class="field" style="flex-direction:row;align-items:flex-start;gap:7px;margin-top:11px;cursor:pointer">
+              <input id="p_ao" type="checkbox" style="margin-top:2px">
+              <span style="font-size:var(--fs-2);color:var(--ink2);font-weight:500">Dose this 12–16-year-old as an <b>adult</b> (large adolescent)</span>
+            </label>
+          </div>
+        </details>
+
+        <div id="ctxOut" class="wbox"></div>
+
+        <div class="row" style="margin-top:10px">
+          <button class="btn ghost sm" id="btnReset" type="button">Clear patient</button>
+        </div>
+
+        <div class="quickfill-box no-print" style="margin:14px -14px -13px;padding:10px 14px 12px;border-top:1px solid var(--line2);background:var(--panel2);border-radius:0 0 var(--r-lg) var(--r-lg)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:var(--fs-1);font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--ink3)">⚡ Quick Fill Preset</span>
+            <span style="font-size:10px;font-weight:700;color:var(--brand);background:var(--brand-soft);padding:1px 6px;border-radius:var(--r-pill)">Dropdown</span>
+          </div>
+          <select id="selQuickFill" class="inp" aria-label="Select quick patient preset" style="width:100%;font-weight:600;font-size:var(--fs-2);cursor:pointer;background:var(--raised);border:1.5px solid var(--line3);padding:7px 10px;border-radius:var(--r-md);margin-bottom:8px">
+            <option value="">⚡ Select patient preset...</option>
+            <option value="3.4,,0,7">👶 Term newborn · 3.4 kg (40 wk)</option>
+            <option value="1.2,0,0,7">🍼 Preterm ELBW · 1.2 kg (28+3 wk)</option>
+            <option value="9.6,1,0,">🧒 1 year infant · 9.6 kg</option>
+            <option value="18.3,5,0,">🧒 5 years child · 18.3 kg</option>
+            <option value="31.9,10,0,">🧑 10 years child · 31.9 kg</option>
+            <option value="56.8,15,0,">🧑 15 years adolescent · 56.8 kg</option>
+            <option value=",,,">🧹 Clear patient fields</option>
+          </select>
+          <div class="quickfill-wrap">
+            <button class="chip quickfill" data-fill=",,," type="button" title="Clear the patient">—</button>
+            <button class="chip quickfill" data-fill="3.4,,0,7" type="button">Term 3.4 kg</button>
+            <button class="chip quickfill" data-fill="1.2,0,0,7" type="button">ELBW 1.2 kg</button>
+            <button class="chip quickfill" data-fill="9.6,1,0," type="button">1y · 9.6 kg</button>
+            <button class="chip quickfill" data-fill="18.3,5,0," type="button">5y · 18.3 kg</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="ph"><h2>Emergency shortcuts</h2><span class="rt">dropdown menu</span></div>
+      <div class="pb">
+        <select id="selEmergency" class="inp" aria-label="Jump to emergency protocol" style="width:100%;font-weight:650;font-size:var(--fs-2);cursor:pointer;background:var(--raised);border:1.5px solid var(--line3);padding:8px 10px;border-radius:var(--r-md);margin-bottom:8px">
+          <option value="">🚨 Jump to emergency protocol...</option>
+          <option value="p-arrest-paed">🧒 Paediatric cardiac arrest (AHA 2025)</option>
+          <option value="p-arrest-adult">🫀 Adult cardiac arrest</option>
+          <option value="p-anaphylaxis">💉 Anaphylaxis (Adrenaline IM)</option>
+          <option value="p-septic-shock">🩸 Septic shock (Hour-1 bundle)</option>
+          <option value="p-status-epilepticus">⚡ Status epilepticus</option>
+          <option value="p-hyperkalaemia">🧪 Hyperkalaemia emergency</option>
+          <option value="p-snakebite">🐍 Snakebite (India ASV)</option>
+          <option value="p-scorpion">🦂 Scorpion sting (Prazosin)</option>
+          <option value="p-op-poisoning">☠️ OP poisoning (Atropine)</option>
+          <option value="p-dka">🍬 DKA (Paediatric protocol)</option>
+          <option value="p-neonatal-resus">👶 Neonatal resuscitation</option>
+          <option value="p-eclampsia">🤰 Eclampsia (MgSO4)</option>
+          <option value="p-pph">🩸 Postpartum haemorrhage</option>
+          <option value="p-antidote-table">🧾 Antidote table</option>
+          <option value="p-never-events">🚫 Never events</option>
+        </select>
+        <div class="emergency-list">
+          <button class="chip goto" data-goto="p-arrest-paed" type="button">🧒 Paediatric arrest</button>
+          <button class="chip goto" data-goto="p-arrest-adult" type="button">🫀 Adult cardiac arrest</button>
+          <button class="chip goto" data-goto="p-anaphylaxis" type="button">💉 Anaphylaxis</button>
+          <button class="chip goto" data-goto="p-septic-shock" type="button">🩸 Septic shock</button>
+          <button class="chip goto" data-goto="p-status-epilepticus" type="button">⚡ Status epilepticus</button>
+          <button class="chip goto" data-goto="p-snakebite" type="button">🐍 Snakebite (India)</button>
+          <button class="chip goto" data-goto="p-scorpion" type="button">🦂 Scorpion sting</button>
+          <button class="chip goto" data-goto="p-op-poisoning" type="button">☠️ OP poisoning</button>
+          <button class="chip goto" data-goto="p-dka" type="button">🍬 DKA</button>
+          <button class="chip goto" data-goto="p-neonatal-resus" type="button">👶 Neonatal resus</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- =========================== CONTENT =========================== -->
+  <main>
+    <div class="panel">
+      <div id="tabs"></div>
+      <div class="printonly print-head">
+        <h1>Paediatric &amp; Neonatal Drug Calculator — calculated dose sheet</h1>
+        <div class="pack">Printed from the offline build. Verify every entry against the product label and your institutional protocol before administration.</div>
+      </div>
+      <div id="content"></div>
+    </div>
+  </main>
+</div>
+
+<footer class="foot">
+  <b>Paediatric &amp; Neonatal Drug Calculator</b> · self-contained offline page · no network calls, no data leaves this device.<br>
+  Doses are taken from the guideline cited on each entry (AHA/ERC 2025, WHO, NICE, KDIGO, IDSA, ESC, ACOG, ISCCM, IAP/NNF, NTEP, NVBDCP, MoHFW national protocols, BNF/BNFC, Sanford, Nelson, Marino, Tintinalli, Goldfrank, APLS).
+  Indian formulation strengths, pack sizes and brand names reflect the IP/NFDC market and change over time — <b>always read the label on the product in your hand</b>.<br>
+  Reported errors and discrepancies should be acted on immediately: an error you catch is an error the next clinician will not make.
+</footer>
+
+<div class="modal-bd" id="modal" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="mh"><h2 id="modalT">Reference</h2><button class="xbtn" id="modalX" type="button">Close ✕</button></div>
+    <div class="mb" id="modalB"></div>
+  </div>
+</div>
+
+<div class="wiz-modal-bd" id="wizModal" role="dialog" aria-modal="true" aria-labelledby="wizTitle">
+  <div class="wiz-card">
+    <div class="wiz-head">
+      <h2 id="wizTitle">👶 Guided Patient Entry Wizard</h2>
+      <button class="xbtn" id="wizClose" type="button" aria-label="Close wizard">✕</button>
+    </div>
+    <div class="wiz-body" id="wizBody"></div>
+  </div>
+</div>
+
+<div class="wiz-modal-bd" id="walkModal" role="dialog" aria-modal="true" aria-labelledby="walkTitle">
+  <div class="wiz-card">
+    <div class="wiz-head">
+      <h2 id="walkTitle">💡 Junior Doctor &amp; Nurse Quick-Start</h2>
+      <button class="xbtn" id="walkClose" type="button" aria-label="Close guide">✕</button>
+    </div>
+    <div class="wiz-body" id="walkBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>/*__JS__*/</script>
+<script>
+/* Bootstrap only. Every event handler lives in ui.js so that there is
+   exactly ONE definition of each behaviour (a duplicated handler here once
+   fought with the one in ui.js and cancelled its highlight). */
+(function(){
+  function boot(){ try{ App.init(); }catch(e){
+    var c=document.getElementById('content');
+    if(c) c.innerHTML='<div class="empty" style="padding:40px"><b>The interface failed to start.</b><div class="pack">'+
+      String(e && e.message ? e.message : e)+'</div></div>';
+  } }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
+</body>
+</html>
