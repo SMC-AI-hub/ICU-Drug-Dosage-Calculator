@@ -60,6 +60,8 @@ body.dark{
   --sh-2:0 2px 6px rgba(0,0,0,.45), 0 12px 30px rgba(0,0,0,.35);
   --sh-3:0 4px 12px rgba(0,0,0,.5), 0 24px 60px rgba(0,0,0,.45);
 }
+body.dark .proto .step-drug{background:#172554;color:#93c5fd;border-color:#1e40af}
+body.dark .proto .step-vol{background:#064e3b;color:#6ee7b7;border-color:#047857}
 body.big{ --fs-4:17px; --fs-3:15px; --fs-2:14px; --fs-5:19px; --fs-6:24px; --fs-7:32px; }
 
 /* ----------------------------------------------------------------- base */
@@ -209,8 +211,13 @@ input[type=checkbox]{width:auto;accent-color:var(--brand)}
 .chip.np-chip[aria-pressed="true"]{background:var(--neu, #6366f1);border-color:var(--neu, #6366f1);color:#fff}
 .chip.risk,.chip.warn{border-color:var(--warn-line);color:var(--warn);background:var(--warn-soft)}
 .chip.risk[aria-pressed="true"]{background:var(--crit);border-color:var(--crit);color:#fff}
-.chip.goto{background:var(--raised);border-color:var(--line3);color:var(--ink2);width:100%;justify-content:flex-start}
+.chip.goto{background:var(--raised);border-color:var(--line3);color:var(--ink2);width:100%;justify-content:flex-start;padding:6px 10px;font-size:var(--fs-2);border-radius:var(--r-sm)}
 .chip.goto:hover{background:var(--crit-soft);border-color:var(--crit-line);color:var(--crit)}
+.quickfill-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.quickfill-wrap .chip{flex:1 1 auto;font-size:var(--fs-1);padding:4px 8px;justify-content:center}
+.emergency-list{display:flex;flex-direction:column;gap:5px;max-height:260px;overflow-y:auto;padding-right:2px;scrollbar-width:thin}
+.emergency-list::-webkit-scrollbar{width:4px}
+.emergency-list::-webkit-scrollbar-thumb{background:var(--line3);border-radius:2px}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
   background:var(--brand);border:1px solid var(--brand);color:#fff;
@@ -260,6 +267,16 @@ input[type=checkbox]{width:auto;accent-color:var(--brand)}
 .count b{color:var(--ink);font-size:var(--fs-3)}
 
 /* ------------------------------------------------------------- shortcuts */
+.quick-welcome-bar{
+  padding:10px 14px; background:linear-gradient(180deg, var(--brand-soft) 0%, var(--panel2) 100%);
+  border-bottom:1px solid var(--brand-line); display:flex; align-items:center;
+}
+.qw-wrap{display:flex; align-items:center; gap:10px; flex-wrap:wrap; width:100%}
+.qw-title{font-size:var(--fs-2); font-weight:800; color:var(--brand); text-transform:uppercase; letter-spacing:0.4px; white-space:nowrap}
+.qw-chips{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+.qw-chips .chip{background:var(--raised); border-color:var(--brand-line); color:var(--brand); font-weight:700}
+.qw-chips .chip:hover{background:var(--brand); color:#fff}
+
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;padding:12px 14px;border-bottom:1px solid var(--line2);background:var(--panel2)}
 .tile{
   display:flex;flex-direction:column;gap:3px;text-align:left;
@@ -343,24 +360,34 @@ input[type=checkbox]{width:auto;accent-color:var(--brand)}
 .card-toggle .ctog-icon{font-size:12px;line-height:1;display:inline-block;transition:transform .15s ease}
 .card-toggle .ctog-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.3px}
 
-.card.is-expanded{border-color:var(--brand-line);box-shadow:var(--sh-2)}
+/* Card Collapsed & Expanded states */
+.card:not(.is-expanded) .card-extended{
+  display:none !important;
+}
+.card:not(.is-expanded) .ch{
+  padding:10px 13px 8px;
+}
+.card.is-expanded{border-color:var(--brand-line);box-shadow:var(--sh-2);margin-bottom:6px}
+.card.is-expanded .ch{border-bottom:1px solid var(--line2);background:var(--panel2)}
 .card.is-expanded .card-toggle{background:var(--brand-soft);color:var(--brand);border-color:var(--brand-line)}
 .card.is-expanded.risk5{border-color:var(--crit-line)}
 .card.is-expanded.risk5 .card-toggle{background:var(--crit-soft);color:var(--crit);border-color:var(--crit-line)}
+.card.is-expanded .card-extended{display:block;padding:0 13px 12px}
+.b-dose-pill{background:var(--ok-soft,#ecfdf5);color:var(--ok,#059669);border:1px solid var(--ok-line,#a7f3d0);font-weight:800;font-size:10px}
 
 
 /* the answer block: dose + the one-line volume, visually fused */
-.answer{margin:0 13px 10px;border:1px solid var(--brand-line);background:var(--brand-soft);border-radius:var(--r-sm)}
+.answer{margin:0 13px 12px;border:1.5px solid var(--brand-line);background:var(--brand-soft);border-radius:var(--r-md);box-shadow:0 1px 3px rgba(0,0,0,0.03)}
 .card.risk5 .answer{border-color:var(--crit-line);background:var(--crit-soft)}
-.dose{padding:10px 12px 9px}
-.dl{font-size:var(--fs-1);font-weight:800;text-transform:uppercase;letter-spacing:.45px;color:var(--ink3)}
-.dv{font-size:var(--fs-6);font-weight:800;letter-spacing:-.5px;line-height:1.2;margin-top:3px;color:var(--ink);overflow-wrap:anywhere}
-.dv small{font-size:var(--fs-2);font-weight:600;color:var(--ink2);letter-spacing:0}
+.dose{padding:12px 14px 10px}
+.dl{font-size:var(--fs-1);font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3)}
+.dv{font-size:24px;font-weight:850;letter-spacing:-.6px;line-height:1.2;margin-top:4px;color:var(--brand2);overflow-wrap:anywhere}
+.dv small{font-size:var(--fs-2);font-weight:650;color:var(--ink2);letter-spacing:0}
 .card.risk5 .dv{color:var(--crit)}
-.dr{font-size:var(--fs-2);color:var(--ink2);margin-top:4px}
+.dr{font-size:var(--fs-2);color:var(--ink2);margin-top:5px;line-height:1.35}
 .dr b{color:var(--ink)}
-.cap{font-size:var(--fs-2);color:var(--warn);margin-top:6px;font-weight:600}
-.cap.hit{color:var(--crit);font-weight:700}
+.cap{font-size:var(--fs-2);color:var(--warn);margin-top:6px;font-weight:700}
+.cap.hit{color:var(--crit);font-weight:800}
 
 /* ---- maintenance dose callout box inside dose card ---- */
 .maint-box{margin-top:10px;padding:9px 11px;background:var(--panel);border:1.5px solid var(--brand-line);border-radius:var(--r-sm);box-shadow:0 1px 3px rgba(0,0,0,0.03)}
@@ -492,13 +519,62 @@ body.dark .vol{color:var(--brand2)}
 .utilgrid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 .utile{background:var(--raised);border:1px solid var(--line);border-radius:var(--r-md);padding:13px;box-shadow:var(--sh-1)}
 .utile h4{font-size:var(--fs-4);margin-bottom:8px}
-.proto,.rc{border:1px solid var(--line);border-radius:var(--r-md);margin:12px 14px;overflow:hidden;background:var(--raised);box-shadow:var(--sh-1)}
-.proto .rh{display:flex;align-items:center;gap:9px;padding:12px 14px;background:var(--panel2);border-bottom:1px solid var(--line2)}
-.proto .rh h3{font-size:var(--fs-5)}
-.proto .rb{padding:13px 14px}
-.proto .rb ol,.proto .rb ul{margin:0}
-.proto .step-drug{font-weight:750;color:var(--ink)}
-.proto .step-vol{font-weight:800;color:var(--brand2);font-variant-numeric:tabular-nums}
+
+/* ======================== PROTOCOLS & RESUSCITATION ======================== */
+.proto{
+  border:1px solid var(--line);border-left:5px solid var(--brand);
+  border-radius:var(--r-md);margin:14px 0;overflow:hidden;
+  background:var(--panel);box-shadow:var(--sh-1);
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.proto:hover{box-shadow:var(--sh-2);border-color:var(--brand-line)}
+.proto.flash{outline:3px solid var(--crit);border-left-color:var(--crit);animation:protoFlash 1.5s ease}
+@keyframes protoFlash{0%{transform:scale(1.01);background:var(--crit-soft)}100%{transform:scale(1);background:var(--panel)}}
+
+.proto h3{
+  font-size:var(--fs-4);font-weight:800;color:var(--ink);
+  padding:14px 16px 6px;margin:0;letter-spacing:-.2px;
+}
+.proto .pp{
+  font-size:var(--fs-1);font-weight:750;color:var(--brand);
+  text-transform:uppercase;letter-spacing:.5px;
+  padding:0 16px 10px;border-bottom:1px solid var(--line2);background:transparent;
+}
+
+.proto ol{padding:14px 18px 16px 38px;margin:0}
+.proto ol li{
+  font-size:var(--fs-3);line-height:1.65;color:var(--ink);
+  margin-bottom:11px;
+}
+.proto ol li::marker{font-weight:800;color:var(--brand)}
+
+/* 1. Essential Drug Names (Clickable Link / Badge) */
+.proto .step-drug{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--brand-soft);color:var(--brand);
+  border:1px solid var(--brand-line);padding:2px 8px;border-radius:6px;
+  font-size:var(--fs-2);font-weight:750;cursor:pointer;text-decoration:none;
+  vertical-align:1px;line-height:1.25;transition:all .14s ease;
+}
+.proto .step-drug:hover{
+  background:var(--brand);border-color:var(--brand);color:#fff;
+  transform:translateY(-1px);box-shadow:0 2px 6px rgba(11,83,148,.25);
+}
+.proto .step-drug:active{transform:translateY(0)}
+
+/* 2. Doses, Quantities, Rates & Volumes (High-Contrast Amber/Green Pill) */
+.proto .step-vol{
+  display:inline-block;background:var(--ok-soft, #ecfdf5);color:var(--ok, #059669);
+  border:1px solid var(--ok-line, #a7f3d0);padding:1.5px 7px;border-radius:5px;
+  font-size:var(--fs-2);font-weight:800;font-variant-numeric:tabular-nums;
+  letter-spacing:-.1px;vertical-align:1px;line-height:1.25;
+}
+
+/* Specific emergency protocols (Resus, Shock, Arrest) get bold left accents */
+.proto[data-pid*="arrest"], .proto[data-pid*="resus"], .proto[data-pid*="anaphylaxis"]{border-left-color:var(--crit)}
+.proto[data-pid*="septic"], .proto[data-pid*="status"], .proto[data-pid*="snakebite"]{border-left-color:var(--warn)}
+
+.rc{border:1px solid var(--line);border-radius:var(--r-md);margin:12px 14px;overflow:hidden;background:var(--raised);box-shadow:var(--sh-1)}
 .tickok,.tickbad{font-weight:700}
 .tickok{color:var(--ok)} .tickbad{color:var(--crit)}
 .inl{display:inline-flex;gap:6px;align-items:baseline}

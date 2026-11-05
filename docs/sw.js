@@ -2,11 +2,13 @@
    Strategy: install-time precache of the whole app, then cache-first for
    every same-origin request. Foreign origins are never contacted, so the
    app keeps working with the radio off, in a lift, or in a bunker. */
-var CACHE = 'icu-calc-v9e00ec770761';
+var CACHE = 'icu-calc-v9ad677428709';
 var CORE = [
   './', './index.html', './manifest.webmanifest', './sw.js',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png', './icons/favicon-32.png', './icons/favicon.svg'
+  './icons/apple-touch-icon.png', './icons/favicon-32.png', './icons/favicon.svg',
+  './screenshots/desktop-main.png', './screenshots/desktop-pump.png',
+  './screenshots/mobile-main.png', './screenshots/mobile-emergency.png'
 ];
 
 self.addEventListener('install', function (e) {

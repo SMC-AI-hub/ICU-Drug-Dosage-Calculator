@@ -21,6 +21,17 @@
     "health",
     "utilities"
   ],
+  "launch_handler": {
+    "client_mode": [
+      "navigate-existing",
+      "auto"
+    ]
+  },
+  "edge_side_panel": {
+    "preferred_width": 420
+  },
+  "handle_links": "preferred",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -47,7 +58,48 @@
       "purpose": "any"
     }
   ],
+  "screenshots": [
+    {
+      "src": "screenshots/desktop-main.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Paediatric Drug Calculator — Clinical Dose Formulary & Patient Wizard"
+    },
+    {
+      "src": "screenshots/desktop-pump.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Continuous Infusion Syringe Pump Rate Calculator"
+    },
+    {
+      "src": "screenshots/mobile-main.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile Dose Formulary & Fast Emergency Calculation"
+    },
+    {
+      "src": "screenshots/mobile-emergency.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Emergency Resuscitation & CPR Protocol Guide"
+    }
+  ],
   "shortcuts": [
+    {
+      "name": "Emergency protocols",
+      "short_name": "Emergency",
+      "url": "./?tab=protocols",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
     {
       "name": "Infusion pump rates",
       "short_name": "Pump",
@@ -60,18 +112,7 @@
       ]
     },
     {
-      "name": "Emergency protocols",
-      "short_name": "Protocols",
-      "url": "./?tab=protocols",
-      "icons": [
-        {
-          "src": "icons/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Calculators (CrCl, fluids, sodium)",
+      "name": "Calculators (GIR, fluids, CrCl)",
       "short_name": "Calculators",
       "url": "./?tab=utils",
       "icons": [
@@ -80,6 +121,35 @@
           "sizes": "192x192"
         }
       ]
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "./",
+      "name": "Clinical Dose Sheets",
+      "accept": {
+        "text/csv": [
+          ".csv"
+        ],
+        "application/json": [
+          ".json"
+        ]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "./",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+pedcalc",
+      "url": "./?drug=%s"
     }
   ]
 }

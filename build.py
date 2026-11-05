@@ -83,8 +83,17 @@ PWA_BOOT = """
 (function(){
   if(!('serviceWorker' in navigator)) return;
   if(location.protocol!=='http:' && location.protocol!=='https:') return;
+  var refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    if(!refreshing){
+      refreshing = true;
+      window.location.reload();
+    }
+  });
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js').catch(function(e){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      if(reg) reg.update().catch(function(){});
+    }).catch(function(e){
       /* the app still runs and still works from cache; install is unaffected */
       if(window.console) console.warn('service worker not registered:', e && e.message);
     });
@@ -112,6 +121,14 @@ MANIFEST = {
     "lang": "en-IN",
     "dir": "ltr",
     "categories": ["medical", "health", "utilities"],
+    "launch_handler": {
+        "client_mode": ["navigate-existing", "auto"]
+    },
+    "edge_side_panel": {
+        "preferred_width": 420
+    },
+    "handle_links": "preferred",
+    "prefer_related_applications": False,
     "icons": [
         {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
         {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
@@ -120,14 +137,69 @@ MANIFEST = {
         {"src": "icons/apple-touch-icon.png", "sizes": "180x180", "type": "image/png",
          "purpose": "any"},
     ],
+    "screenshots": [
+        {
+            "src": "screenshots/desktop-main.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Paediatric Drug Calculator — Clinical Dose Formulary & Patient Wizard"
+        },
+        {
+            "src": "screenshots/desktop-pump.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Continuous Infusion Syringe Pump Rate Calculator"
+        },
+        {
+            "src": "screenshots/mobile-main.png",
+            "sizes": "750x1334",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Mobile Dose Formulary & Fast Emergency Calculation"
+        },
+        {
+            "src": "screenshots/mobile-emergency.png",
+            "sizes": "750x1334",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Emergency Resuscitation & CPR Protocol Guide"
+        }
+    ],
     "shortcuts": [
+        {"name": "Emergency protocols", "short_name": "Emergency", "url": "./?tab=protocols",
+         "icons": [{"src": "icons/icon-192.png", "sizes": "192x192"}]},
         {"name": "Infusion pump rates", "short_name": "Pump", "url": "./?tab=pump",
          "icons": [{"src": "icons/icon-192.png", "sizes": "192x192"}]},
-        {"name": "Emergency protocols", "short_name": "Protocols", "url": "./?tab=protocols",
-         "icons": [{"src": "icons/icon-192.png", "sizes": "192x192"}]},
-        {"name": "Calculators (CrCl, fluids, sodium)", "short_name": "Calculators",
+        {"name": "Calculators (GIR, fluids, CrCl)", "short_name": "Calculators",
          "url": "./?tab=utils", "icons": [{"src": "icons/icon-192.png", "sizes": "192x192"}]},
     ],
+    "file_handlers": [
+        {
+            "action": "./",
+            "name": "Clinical Dose Sheets",
+            "accept": {
+                "text/csv": [".csv"],
+                "application/json": [".json"]
+            }
+        }
+    ],
+    "share_target": {
+        "action": "./",
+        "method": "GET",
+        "params": {
+            "title": "title",
+            "text": "text",
+            "url": "url"
+        }
+    },
+    "protocol_handlers": [
+        {
+            "protocol": "web+pedcalc",
+            "url": "./?drug=%s"
+        }
+    ]
 }
 
 SW_JS = """/* ICU Drug Calculator — offline service worker.
@@ -138,7 +210,9 @@ var CACHE = 'icu-calc-v{ver}';
 var CORE = [
   './', './index.html', './manifest.webmanifest', './sw.js',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png', './icons/favicon-32.png', './icons/favicon.svg'
+  './icons/apple-touch-icon.png', './icons/favicon-32.png', './icons/favicon.svg',
+  './screenshots/desktop-main.png', './screenshots/desktop-pump.png',
+  './screenshots/mobile-main.png', './screenshots/mobile-emergency.png'
 ];
 
 self.addEventListener('install', function (e) {{
@@ -268,6 +342,10 @@ def build_zip():
                 z.write(fp, "pwa/" + name)
         for name in sorted(os.listdir(PWA_ICONS)):
             z.write(os.path.join(PWA_ICONS, name), "pwa/icons/" + name)
+        shots_dir = os.path.join(PWA_DIR, "screenshots")
+        if os.path.exists(shots_dir):
+            for name in sorted(os.listdir(shots_dir)):
+                z.write(os.path.join(shots_dir, name), "pwa/screenshots/" + name)
     kb = os.path.getsize(ZIP_OUT) / 1024.0
     print(f"zip  {ZIP_OUT}  ({kb:,.1f} KB)")
     return 0

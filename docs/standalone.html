@@ -69,6 +69,8 @@ body.dark{
   --sh-2:0 2px 6px rgba(0,0,0,.45), 0 12px 30px rgba(0,0,0,.35);
   --sh-3:0 4px 12px rgba(0,0,0,.5), 0 24px 60px rgba(0,0,0,.45);
 }
+body.dark .proto .step-drug{background:#172554;color:#93c5fd;border-color:#1e40af}
+body.dark .proto .step-vol{background:#064e3b;color:#6ee7b7;border-color:#047857}
 body.big{ --fs-4:17px; --fs-3:15px; --fs-2:14px; --fs-5:19px; --fs-6:24px; --fs-7:32px; }
 
 /* ----------------------------------------------------------------- base */
@@ -218,8 +220,13 @@ input[type=checkbox]{width:auto;accent-color:var(--brand)}
 .chip.np-chip[aria-pressed="true"]{background:var(--neu, #6366f1);border-color:var(--neu, #6366f1);color:#fff}
 .chip.risk,.chip.warn{border-color:var(--warn-line);color:var(--warn);background:var(--warn-soft)}
 .chip.risk[aria-pressed="true"]{background:var(--crit);border-color:var(--crit);color:#fff}
-.chip.goto{background:var(--raised);border-color:var(--line3);color:var(--ink2);width:100%;justify-content:flex-start}
+.chip.goto{background:var(--raised);border-color:var(--line3);color:var(--ink2);width:100%;justify-content:flex-start;padding:6px 10px;font-size:var(--fs-2);border-radius:var(--r-sm)}
 .chip.goto:hover{background:var(--crit-soft);border-color:var(--crit-line);color:var(--crit)}
+.quickfill-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.quickfill-wrap .chip{flex:1 1 auto;font-size:var(--fs-1);padding:4px 8px;justify-content:center}
+.emergency-list{display:flex;flex-direction:column;gap:5px;max-height:260px;overflow-y:auto;padding-right:2px;scrollbar-width:thin}
+.emergency-list::-webkit-scrollbar{width:4px}
+.emergency-list::-webkit-scrollbar-thumb{background:var(--line3);border-radius:2px}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
   background:var(--brand);border:1px solid var(--brand);color:#fff;
@@ -269,6 +276,16 @@ input[type=checkbox]{width:auto;accent-color:var(--brand)}
 .count b{color:var(--ink);font-size:var(--fs-3)}
 
 /* ------------------------------------------------------------- shortcuts */
+.quick-welcome-bar{
+  padding:10px 14px; background:linear-gradient(180deg, var(--brand-soft) 0%, var(--panel2) 100%);
+  border-bottom:1px solid var(--brand-line); display:flex; align-items:center;
+}
+.qw-wrap{display:flex; align-items:center; gap:10px; flex-wrap:wrap; width:100%}
+.qw-title{font-size:var(--fs-2); font-weight:800; color:var(--brand); text-transform:uppercase; letter-spacing:0.4px; white-space:nowrap}
+.qw-chips{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+.qw-chips .chip{background:var(--raised); border-color:var(--brand-line); color:var(--brand); font-weight:700}
+.qw-chips .chip:hover{background:var(--brand); color:#fff}
+
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;padding:12px 14px;border-bottom:1px solid var(--line2);background:var(--panel2)}
 .tile{
   display:flex;flex-direction:column;gap:3px;text-align:left;
@@ -352,24 +369,34 @@ input[type=checkbox]{width:auto;accent-color:var(--brand)}
 .card-toggle .ctog-icon{font-size:12px;line-height:1;display:inline-block;transition:transform .15s ease}
 .card-toggle .ctog-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.3px}
 
-.card.is-expanded{border-color:var(--brand-line);box-shadow:var(--sh-2)}
+/* Card Collapsed & Expanded states */
+.card:not(.is-expanded) .card-extended{
+  display:none !important;
+}
+.card:not(.is-expanded) .ch{
+  padding:10px 13px 8px;
+}
+.card.is-expanded{border-color:var(--brand-line);box-shadow:var(--sh-2);margin-bottom:6px}
+.card.is-expanded .ch{border-bottom:1px solid var(--line2);background:var(--panel2)}
 .card.is-expanded .card-toggle{background:var(--brand-soft);color:var(--brand);border-color:var(--brand-line)}
 .card.is-expanded.risk5{border-color:var(--crit-line)}
 .card.is-expanded.risk5 .card-toggle{background:var(--crit-soft);color:var(--crit);border-color:var(--crit-line)}
+.card.is-expanded .card-extended{display:block;padding:0 13px 12px}
+.b-dose-pill{background:var(--ok-soft,#ecfdf5);color:var(--ok,#059669);border:1px solid var(--ok-line,#a7f3d0);font-weight:800;font-size:10px}
 
 
 /* the answer block: dose + the one-line volume, visually fused */
-.answer{margin:0 13px 10px;border:1px solid var(--brand-line);background:var(--brand-soft);border-radius:var(--r-sm)}
+.answer{margin:0 13px 12px;border:1.5px solid var(--brand-line);background:var(--brand-soft);border-radius:var(--r-md);box-shadow:0 1px 3px rgba(0,0,0,0.03)}
 .card.risk5 .answer{border-color:var(--crit-line);background:var(--crit-soft)}
-.dose{padding:10px 12px 9px}
-.dl{font-size:var(--fs-1);font-weight:800;text-transform:uppercase;letter-spacing:.45px;color:var(--ink3)}
-.dv{font-size:var(--fs-6);font-weight:800;letter-spacing:-.5px;line-height:1.2;margin-top:3px;color:var(--ink);overflow-wrap:anywhere}
-.dv small{font-size:var(--fs-2);font-weight:600;color:var(--ink2);letter-spacing:0}
+.dose{padding:12px 14px 10px}
+.dl{font-size:var(--fs-1);font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3)}
+.dv{font-size:24px;font-weight:850;letter-spacing:-.6px;line-height:1.2;margin-top:4px;color:var(--brand2);overflow-wrap:anywhere}
+.dv small{font-size:var(--fs-2);font-weight:650;color:var(--ink2);letter-spacing:0}
 .card.risk5 .dv{color:var(--crit)}
-.dr{font-size:var(--fs-2);color:var(--ink2);margin-top:4px}
+.dr{font-size:var(--fs-2);color:var(--ink2);margin-top:5px;line-height:1.35}
 .dr b{color:var(--ink)}
-.cap{font-size:var(--fs-2);color:var(--warn);margin-top:6px;font-weight:600}
-.cap.hit{color:var(--crit);font-weight:700}
+.cap{font-size:var(--fs-2);color:var(--warn);margin-top:6px;font-weight:700}
+.cap.hit{color:var(--crit);font-weight:800}
 
 /* ---- maintenance dose callout box inside dose card ---- */
 .maint-box{margin-top:10px;padding:9px 11px;background:var(--panel);border:1.5px solid var(--brand-line);border-radius:var(--r-sm);box-shadow:0 1px 3px rgba(0,0,0,0.03)}
@@ -501,13 +528,62 @@ body.dark .vol{color:var(--brand2)}
 .utilgrid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
 .utile{background:var(--raised);border:1px solid var(--line);border-radius:var(--r-md);padding:13px;box-shadow:var(--sh-1)}
 .utile h4{font-size:var(--fs-4);margin-bottom:8px}
-.proto,.rc{border:1px solid var(--line);border-radius:var(--r-md);margin:12px 14px;overflow:hidden;background:var(--raised);box-shadow:var(--sh-1)}
-.proto .rh{display:flex;align-items:center;gap:9px;padding:12px 14px;background:var(--panel2);border-bottom:1px solid var(--line2)}
-.proto .rh h3{font-size:var(--fs-5)}
-.proto .rb{padding:13px 14px}
-.proto .rb ol,.proto .rb ul{margin:0}
-.proto .step-drug{font-weight:750;color:var(--ink)}
-.proto .step-vol{font-weight:800;color:var(--brand2);font-variant-numeric:tabular-nums}
+
+/* ======================== PROTOCOLS & RESUSCITATION ======================== */
+.proto{
+  border:1px solid var(--line);border-left:5px solid var(--brand);
+  border-radius:var(--r-md);margin:14px 0;overflow:hidden;
+  background:var(--panel);box-shadow:var(--sh-1);
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.proto:hover{box-shadow:var(--sh-2);border-color:var(--brand-line)}
+.proto.flash{outline:3px solid var(--crit);border-left-color:var(--crit);animation:protoFlash 1.5s ease}
+@keyframes protoFlash{0%{transform:scale(1.01);background:var(--crit-soft)}100%{transform:scale(1);background:var(--panel)}}
+
+.proto h3{
+  font-size:var(--fs-4);font-weight:800;color:var(--ink);
+  padding:14px 16px 6px;margin:0;letter-spacing:-.2px;
+}
+.proto .pp{
+  font-size:var(--fs-1);font-weight:750;color:var(--brand);
+  text-transform:uppercase;letter-spacing:.5px;
+  padding:0 16px 10px;border-bottom:1px solid var(--line2);background:transparent;
+}
+
+.proto ol{padding:14px 18px 16px 38px;margin:0}
+.proto ol li{
+  font-size:var(--fs-3);line-height:1.65;color:var(--ink);
+  margin-bottom:11px;
+}
+.proto ol li::marker{font-weight:800;color:var(--brand)}
+
+/* 1. Essential Drug Names (Clickable Link / Badge) */
+.proto .step-drug{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--brand-soft);color:var(--brand);
+  border:1px solid var(--brand-line);padding:2px 8px;border-radius:6px;
+  font-size:var(--fs-2);font-weight:750;cursor:pointer;text-decoration:none;
+  vertical-align:1px;line-height:1.25;transition:all .14s ease;
+}
+.proto .step-drug:hover{
+  background:var(--brand);border-color:var(--brand);color:#fff;
+  transform:translateY(-1px);box-shadow:0 2px 6px rgba(11,83,148,.25);
+}
+.proto .step-drug:active{transform:translateY(0)}
+
+/* 2. Doses, Quantities, Rates & Volumes (High-Contrast Amber/Green Pill) */
+.proto .step-vol{
+  display:inline-block;background:var(--ok-soft, #ecfdf5);color:var(--ok, #059669);
+  border:1px solid var(--ok-line, #a7f3d0);padding:1.5px 7px;border-radius:5px;
+  font-size:var(--fs-2);font-weight:800;font-variant-numeric:tabular-nums;
+  letter-spacing:-.1px;vertical-align:1px;line-height:1.25;
+}
+
+/* Specific emergency protocols (Resus, Shock, Arrest) get bold left accents */
+.proto[data-pid*="arrest"], .proto[data-pid*="resus"], .proto[data-pid*="anaphylaxis"]{border-left-color:var(--crit)}
+.proto[data-pid*="septic"], .proto[data-pid*="status"], .proto[data-pid*="snakebite"]{border-left-color:var(--warn)}
+
+.rc{border:1px solid var(--line);border-radius:var(--r-md);margin:12px 14px;overflow:hidden;background:var(--raised);box-shadow:var(--sh-1)}
 .tickok,.tickbad{font-weight:700}
 .tickok{color:var(--ok)} .tickbad{color:var(--crit)}
 .inl{display:inline-flex;gap:6px;align-items:baseline}
@@ -926,7 +1002,7 @@ body.dark .vol-callout{color:var(--brand2)}
   <div class="spacer"></div>
   <div class="meta">
     <div id="metaCtx">No patient entered</div>
-    <div class="mono">build 9e00ec770761</div>
+    <div class="mono">build 9ad677428709</div>
   </div>
   <button class="tbtn icon" id="btnWiz" type="button" title="Guided 3-step patient entry wizard" aria-label="Patient wizard"><span aria-hidden="true">👶</span><span class="tlab">Wizard</span></button>
   <button class="tbtn icon" id="btnGuide" type="button" title="Junior staff quick start & safety guide" aria-label="Junior guide"><span aria-hidden="true">💡</span><span class="tlab">Guide</span></button>
@@ -1038,38 +1114,64 @@ body.dark .vol-callout{color:var(--brand2)}
           <button class="btn ghost sm" id="btnReset" type="button">Clear patient</button>
         </div>
 
-        <div class="chips no-print" style="margin:12px -14px -13px;border-radius:0 0 var(--r-lg) var(--r-lg)">
-          <span style="font-size:var(--fs-1);font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--ink3);width:100%">Quick fill</span>
-          <button class="chip quickfill" data-fill=",,," type="button" title="Clear the patient">—</button>
-          <button class="chip quickfill" data-fill="3.4,,0,7" type="button">Term newborn</button>
-          <button class="chip quickfill" data-fill="1.2,0,0,7" type="button">ELBW 1.2 kg</button>
-          <button class="chip quickfill" data-fill="9.6,1,0," type="button">1 year · 9.6 kg</button>
-          <button class="chip quickfill" data-fill="18.3,5,0," type="button">5 years · 18.3 kg</button>
-          <button class="chip quickfill" data-fill="31.9,10,0," type="button">10 years · 31.9 kg</button>
-          <button class="chip quickfill" data-fill="56.8,15,0," type="button">15 years · 56.8 kg</button>
+        <div class="quickfill-box no-print" style="margin:14px -14px -13px;padding:10px 14px 12px;border-top:1px solid var(--line2);background:var(--panel2);border-radius:0 0 var(--r-lg) var(--r-lg)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:var(--fs-1);font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--ink3)">⚡ Quick Fill Preset</span>
+            <span style="font-size:10px;font-weight:700;color:var(--brand);background:var(--brand-soft);padding:1px 6px;border-radius:var(--r-pill)">Dropdown</span>
+          </div>
+          <select id="selQuickFill" class="inp" aria-label="Select quick patient preset" style="width:100%;font-weight:600;font-size:var(--fs-2);cursor:pointer;background:var(--raised);border:1.5px solid var(--line3);padding:7px 10px;border-radius:var(--r-md);margin-bottom:8px">
+            <option value="">⚡ Select patient preset...</option>
+            <option value="3.4,,0,7">👶 Term newborn · 3.4 kg (40 wk)</option>
+            <option value="1.2,0,0,7">🍼 Preterm ELBW · 1.2 kg (28+3 wk)</option>
+            <option value="9.6,1,0,">🧒 1 year infant · 9.6 kg</option>
+            <option value="18.3,5,0,">🧒 5 years child · 18.3 kg</option>
+            <option value="31.9,10,0,">🧑 10 years child · 31.9 kg</option>
+            <option value="56.8,15,0,">🧑 15 years adolescent · 56.8 kg</option>
+            <option value=",,,">🧹 Clear patient fields</option>
+          </select>
+          <div class="quickfill-wrap">
+            <button class="chip quickfill" data-fill=",,," type="button" title="Clear the patient">—</button>
+            <button class="chip quickfill" data-fill="3.4,,0,7" type="button">Term 3.4 kg</button>
+            <button class="chip quickfill" data-fill="1.2,0,0,7" type="button">ELBW 1.2 kg</button>
+            <button class="chip quickfill" data-fill="9.6,1,0," type="button">1y · 9.6 kg</button>
+            <button class="chip quickfill" data-fill="18.3,5,0," type="button">5y · 18.3 kg</button>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="panel">
-      <div class="ph"><h2>Emergency shortcuts</h2><span class="rt">one tap</span></div>
+      <div class="ph"><h2>Emergency shortcuts</h2><span class="rt">dropdown menu</span></div>
       <div class="pb">
-        <div class="chips" style="padding:0;border:0;background:transparent">
-          <button class="chip goto" data-goto="p-arrest-adult" type="button">🫀 Adult cardiac arrest</button>
+        <select id="selEmergency" class="inp" aria-label="Jump to emergency protocol" style="width:100%;font-weight:650;font-size:var(--fs-2);cursor:pointer;background:var(--raised);border:1.5px solid var(--line3);padding:8px 10px;border-radius:var(--r-md);margin-bottom:8px">
+          <option value="">🚨 Jump to emergency protocol...</option>
+          <option value="p-arrest-paed">🧒 Paediatric cardiac arrest (AHA 2025)</option>
+          <option value="p-arrest-adult">🫀 Adult cardiac arrest</option>
+          <option value="p-anaphylaxis">💉 Anaphylaxis (Adrenaline IM)</option>
+          <option value="p-septic-shock">🩸 Septic shock (Hour-1 bundle)</option>
+          <option value="p-status-epilepticus">⚡ Status epilepticus</option>
+          <option value="p-hyperkalaemia">🧪 Hyperkalaemia emergency</option>
+          <option value="p-snakebite">🐍 Snakebite (India ASV)</option>
+          <option value="p-scorpion">🦂 Scorpion sting (Prazosin)</option>
+          <option value="p-op-poisoning">☠️ OP poisoning (Atropine)</option>
+          <option value="p-dka">🍬 DKA (Paediatric protocol)</option>
+          <option value="p-neonatal-resus">👶 Neonatal resuscitation</option>
+          <option value="p-eclampsia">🤰 Eclampsia (MgSO4)</option>
+          <option value="p-pph">🩸 Postpartum haemorrhage</option>
+          <option value="p-antidote-table">🧾 Antidote table</option>
+          <option value="p-never-events">🚫 Never events</option>
+        </select>
+        <div class="emergency-list">
           <button class="chip goto" data-goto="p-arrest-paed" type="button">🧒 Paediatric arrest</button>
+          <button class="chip goto" data-goto="p-arrest-adult" type="button">🫀 Adult cardiac arrest</button>
           <button class="chip goto" data-goto="p-anaphylaxis" type="button">💉 Anaphylaxis</button>
           <button class="chip goto" data-goto="p-septic-shock" type="button">🩸 Septic shock</button>
           <button class="chip goto" data-goto="p-status-epilepticus" type="button">⚡ Status epilepticus</button>
-          <button class="chip goto" data-goto="p-hyperkalaemia" type="button">🧪 Hyperkalaemia</button>
           <button class="chip goto" data-goto="p-snakebite" type="button">🐍 Snakebite (India)</button>
           <button class="chip goto" data-goto="p-scorpion" type="button">🦂 Scorpion sting</button>
           <button class="chip goto" data-goto="p-op-poisoning" type="button">☠️ OP poisoning</button>
           <button class="chip goto" data-goto="p-dka" type="button">🍬 DKA</button>
-          <button class="chip goto" data-goto="p-eclampsia" type="button">🤰 Eclampsia</button>
-          <button class="chip goto" data-goto="p-pph" type="button">🩸 Postpartum haemorrhage</button>
-          <button class="chip goto" data-goto="p-neonatal-resus" type="button">👶 Neonatal resuscitation</button>
-          <button class="chip goto" data-goto="p-antidote-table" type="button">🧾 Antidote table</button>
-          <button class="chip goto" data-goto="p-never-events" type="button">🚫 Never events</button>
+          <button class="chip goto" data-goto="p-neonatal-resus" type="button">👶 Neonatal resus</button>
         </div>
       </div>
     </div>
@@ -7013,7 +7115,11 @@ function renderCard(reg, ctx){
   Object.keys(routes).slice(0,4).forEach(function(r){ badges+='<span class="bdg b-route '+routeClass(r)+'">'+esc(r)+'</span>'; });
   if(reg.inf) badges+='<span class="bdg b-same">INFUSION</span>';
   if(dw.label!=='actual body weight') badges+='<span class="bdg b-same">'+esc(dw.label)+'</span>';
-  h.push('<div class="ch" role="button" tabindex="0" aria-expanded="'+open+'" title="'+(open?'Click to collapse card':'Click to expand full details')+'">'+
+  if(dw.kg!=null && out.dose && out.dose.text){
+    badges+='<span class="bdg b-dose-pill" title="Calculated dose: '+esc(out.dose.text)+'">⚡ '+esc(out.dose.text)+'</span>';
+  }
+  /* ---- card toggle button ---- */
+  h.push('<div class="ch" role="button" tabindex="0" aria-expanded="'+open+'" title="'+(open?'Click to collapse details':'Click to expand full details')+'">'+
          '<div class="chead"><div class="nm">'+esc(reg.n)+'</div>'+
          '<div class="ind">'+esc(reg.ind||'')+'</div><div class="badges">'+badges+'</div></div>'+
          '<button class="star'+(ST.fav.has(reg.id)?' on':'')+'" data-fav="'+esc(reg.id)+'" '+
@@ -7023,11 +7129,15 @@ function renderCard(reg, ctx){
          '<span class="ctog-lbl">'+(open?'Collapse':'Details')+'</span></button>'+
          '</div>');
 
-  /* ---- the answer block: the dose and the volume to draw, fused ---- */
+  /* ---- the primary clinical dose & volume block (always visible in both collapsed and expanded states) ---- */
   h.push('<div class="answer'+(out.capApplied?' ans-warn':'')+'">');
   h.push('<div class="dose">');
   if(out.error && !out.ok && !out.dose && !out.doseText){
-    h.push('<div class="dl">Dose</div><div class="dv" style="color:var(--crit);font-size:14px">'+esc(out.error)+'</div>');
+    var stdDose = reg.d && reg.d.lo!=null ? fmtNum(reg.d.lo)+(reg.d.hi!=null&&reg.d.hi!==reg.d.lo?'–'+fmtNum(reg.d.hi):'')+' '+(reg.d.t||'mg/kg') : '';
+    h.push('<div class="dl">Standard Regimen</div><div class="dv" style="color:var(--crit);font-size:14px">'+esc(out.error)+'</div>');
+    if(stdDose){
+      h.push('<div class="dr" style="font-size:var(--fs-2);color:var(--ink2)">Standard dose: <b>'+esc(stdDose)+'</b></div>');
+    }
   } else if(out.kind==='text'){
     h.push('<div class="dl">Dose / regimen</div><div class="dv" style="font-size:13.5px;line-height:1.4">'+esc(out.doseText)+'</div>');
   } else {
@@ -7075,7 +7185,7 @@ function renderCard(reg, ctx){
   }
   h.push('</div>');
 
-  /* ---- ten-fold / look-alike alerts: visible even when collapsed ---- */
+  /* ---- ten-fold / look-alike alerts ---- */
   if(out.alerts && out.alerts.length){
     h.push('<div class="notebox warn" style="margin:9px 0 0"><ul>'+
       out.alerts.map(function(a){ return '<li>'+esc(a)+'</li>'; }).join('')+'</ul></div>');
@@ -7154,7 +7264,8 @@ function renderCard(reg, ctx){
   h.push('</div></details>');
   h.push('</div>');   /* /answer */
 
-  /* ---- warnings stay visible; the rest of the card is on demand ---- */
+  /* ---- extended clinical details (collapsed by default, shown when expanded) ---- */
+  h.push('<div class="card-extended">');
   if(reg.warn && reg.warn.length){
     h.push('<div class="warnbox"><ul>'+reg.warn.map(function(w){return '<li>'+esc(w)+'</li>';}).join('')+'</ul></div>');
   }
@@ -7228,6 +7339,7 @@ function renderCard(reg, ctx){
          '</div>');
 
   h.push('</div></details>');   /* /cdet */
+  h.push('</div>');             /* /card-extended */
   h.push('</article>');
   return h.join('');
 }
@@ -7366,49 +7478,16 @@ function renderRecentInto(){
 }
 /* ---- first-run prompt: Task-First Dashboard --- */
 function heroHtml(){
-  return '<div class="home-hero hero" id="heroPanel">'+
-    '<div style="max-width:860px;margin:0 auto">'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'+
-        '<div>'+
-          '<h2 style="margin:0 0 4px;font-size:20px;font-weight:850;color:var(--ink)">Paediatric &amp; Neonatal Clinical Hub</h2>'+
-          '<div style="font-size:13px;color:var(--ink2)">24 weeks gestation to 18 years · 279 verified regimens · 655 Indian formulations</div>'+
-        '</div>'+
-        '<button class="btn sm" id="btnHeroGuide" type="button" style="display:inline-flex;align-items:center;gap:5px">💡 Junior Quick-Start</button>'+
-      '</div>'+
-      '<div class="home-cards">'+
-        '<button class="home-card emerg" id="btnHeroEmerg" type="button">'+
-          '<div class="hc-icon">🚨</div>'+
-          '<div class="hc-title">EMERGENCY RESUSCITATION</div>'+
-          '<div class="hc-desc">Defibrillation energy calculator (J/kg), CPR cycle timer, resuscitation drugs &amp; NRP/PALS flows.</div>'+
-          '<div class="hc-badge">Time-Critical</div>'+
-        '</button>'+
-        '<button class="home-card" id="btnHeroWiz" type="button">'+
-          '<div class="hc-icon">👶</div>'+
-          '<div class="hc-title">Calculate for Patient</div>'+
-          '<div class="hc-desc">3-step guided entry: Neonate vs Child, exact weight or Fenton/WHO age estimation, preterm gestation, renal labs.</div>'+
-          '<div class="hc-badge">Step-by-Step Wizard</div>'+
-        '</button>'+
-        '<button class="home-card" id="btnHeroDrugs" type="button">'+
-          '<div class="hc-icon">💊</div>'+
-          '<div class="hc-title">Find a Drug / Protocol</div>'+
-          '<div class="hc-desc">Search generic names &amp; Indian brands, filter by 20 body systems or 4 clinical pathways.</div>'+
-          '<div class="hc-badge">279 Regimens</div>'+
-        '</button>'+
-      '</div>'+
-      '<div style="margin-top:14px;padding:12px;background:var(--panel);border:1px solid var(--line2);border-radius:var(--r-md)">'+
-        '<div style="font-size:12px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px">⚡ Quick Patient Presets:</div>'+
-        '<div class="hrow" style="margin:0">'+
-          '<button class="btn sm herofill" type="button" data-fill="18.3,5,0,">5 y · 18.3 kg</button>'+
-          '<button class="btn sm ghost herofill" type="button" data-fill="9.6,1,0,">1 y · 9.6 kg</button>'+
-          '<button class="btn sm ghost herofill" type="button" data-fill="3.4,,0,7">Term newborn · 3.4 kg</button>'+
-          '<button class="btn sm ghost herofill" type="button" data-fill="1.1,,0,14">28+3 Preterm · 1.1 kg</button>'+
-          '<button class="btn sm ghost railopen" type="button">Open panel</button>'+
-        '</div>'+
-      '</div>'+
-      '<div class="steps" style="margin-top:14px">'+
-        '<div class="st"><b><span class="sn">1</span>Weigh if you can</b><span>A measured weight beats every formula. Type it in the panel — that is the only number the whole app leans on.</span></div>'+
-        '<div class="st"><b><span class="sn">2</span>Preterm? add the gestation</b><span>Born before 37 weeks switches dosing to <b>postmenstrual age</b>, estimates weight from the Fenton reference and shows the corrected age.</span></div>'+
-        '<div class="st"><b><span class="sn">3</span>Read the answer strip</b><span>Each card leads with the dose and the volume to draw. Open <i>all strengths</i> for the other formulations, and the detail line for administration and references.</span></div>'+
+  return '<div class="quick-welcome-bar no-print">'+
+    '<div class="qw-wrap">'+
+      '<span class="qw-title">⚡ Quick Patient Presets:</span>'+
+      '<div class="qw-chips">'+
+        '<button class="chip herofill" type="button" data-fill="3.4,,0,7">👶 Term 3.4 kg</button>'+
+        '<button class="chip herofill" type="button" data-fill="1.2,0,0,7">🍼 Preterm 1.2 kg</button>'+
+        '<button class="chip herofill" type="button" data-fill="9.6,1,0,">🧒 1y · 9.6 kg</button>'+
+        '<button class="chip herofill" type="button" data-fill="18.3,5,0,">🧒 5y · 18.3 kg</button>'+
+        '<button class="chip herofill" type="button" data-fill="31.9,10,0,">🧑 10y · 31.9 kg</button>'+
+        '<button class="chip ghost railopen" type="button">⚙️ Custom Weight/Age</button>'+
       '</div>'+
     '</div>'+
   '</div>';
@@ -9417,6 +9496,15 @@ function wirePanel(){
   $$('.chip.goto').forEach(function(b){
     b.addEventListener('click',function(){ gotoProto(b.getAttribute('data-goto')); });
   });
+  var selEm = $('#selEmergency');
+  if(selEm){
+    selEm.addEventListener('change', function(){
+      if(this.value){
+        gotoProto(this.value);
+        this.value = '';
+      }
+    });
+  }
 
   /* demo quick-fill */
   $$('.quickfill').forEach(function(b){
@@ -9426,6 +9514,17 @@ function wirePanel(){
       syncPanel(); renderAll(); toast('Patient set: '+(v[0]?v[0]+' kg':'')+(v[1]?' · '+v[1]+' y':'')+(v[2]?' '+v[2]+' m':''));
     });
   });
+  var selQf = $('#selQuickFill');
+  if(selQf){
+    selQf.addEventListener('change', function(){
+      if(this.value !== ''){
+        var v = this.value.split(',');
+        ST.pt.wt = v[0]; ST.pt.ageY = v[1]; ST.pt.ageM = v[2]; ST.pt.ageD = v[3]||'';
+        syncPanel(); renderAll(); toast('Patient set: '+(v[0]?v[0]+' kg':'')+(v[1]?' · '+v[1]+' y':'')+(v[2]?' '+v[2]+' m':''));
+        this.value = '';
+      }
+    });
+  }
 }
 var _dh=null;
 function debounceRender(){ clearTimeout(_dh); _dh=setTimeout(renderAll,10); }

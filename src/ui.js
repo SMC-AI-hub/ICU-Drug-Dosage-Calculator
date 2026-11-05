@@ -561,7 +561,11 @@ function renderCard(reg, ctx){
   Object.keys(routes).slice(0,4).forEach(function(r){ badges+='<span class="bdg b-route '+routeClass(r)+'">'+esc(r)+'</span>'; });
   if(reg.inf) badges+='<span class="bdg b-same">INFUSION</span>';
   if(dw.label!=='actual body weight') badges+='<span class="bdg b-same">'+esc(dw.label)+'</span>';
-  h.push('<div class="ch" role="button" tabindex="0" aria-expanded="'+open+'" title="'+(open?'Click to collapse card':'Click to expand full details')+'">'+
+  if(dw.kg!=null && out.dose && out.dose.text){
+    badges+='<span class="bdg b-dose-pill" title="Calculated dose: '+esc(out.dose.text)+'">⚡ '+esc(out.dose.text)+'</span>';
+  }
+  /* ---- card toggle button ---- */
+  h.push('<div class="ch" role="button" tabindex="0" aria-expanded="'+open+'" title="'+(open?'Click to collapse details':'Click to expand full details')+'">'+
          '<div class="chead"><div class="nm">'+esc(reg.n)+'</div>'+
          '<div class="ind">'+esc(reg.ind||'')+'</div><div class="badges">'+badges+'</div></div>'+
          '<button class="star'+(ST.fav.has(reg.id)?' on':'')+'" data-fav="'+esc(reg.id)+'" '+
@@ -571,11 +575,15 @@ function renderCard(reg, ctx){
          '<span class="ctog-lbl">'+(open?'Collapse':'Details')+'</span></button>'+
          '</div>');
 
-  /* ---- the answer block: the dose and the volume to draw, fused ---- */
+  /* ---- the primary clinical dose & volume block (always visible in both collapsed and expanded states) ---- */
   h.push('<div class="answer'+(out.capApplied?' ans-warn':'')+'">');
   h.push('<div class="dose">');
   if(out.error && !out.ok && !out.dose && !out.doseText){
-    h.push('<div class="dl">Dose</div><div class="dv" style="color:var(--crit);font-size:14px">'+esc(out.error)+'</div>');
+    var stdDose = reg.d && reg.d.lo!=null ? fmtNum(reg.d.lo)+(reg.d.hi!=null&&reg.d.hi!==reg.d.lo?'–'+fmtNum(reg.d.hi):'')+' '+(reg.d.t||'mg/kg') : '';
+    h.push('<div class="dl">Standard Regimen</div><div class="dv" style="color:var(--crit);font-size:14px">'+esc(out.error)+'</div>');
+    if(stdDose){
+      h.push('<div class="dr" style="font-size:var(--fs-2);color:var(--ink2)">Standard dose: <b>'+esc(stdDose)+'</b></div>');
+    }
   } else if(out.kind==='text'){
     h.push('<div class="dl">Dose / regimen</div><div class="dv" style="font-size:13.5px;line-height:1.4">'+esc(out.doseText)+'</div>');
   } else {
@@ -623,7 +631,7 @@ function renderCard(reg, ctx){
   }
   h.push('</div>');
 
-  /* ---- ten-fold / look-alike alerts: visible even when collapsed ---- */
+  /* ---- ten-fold / look-alike alerts ---- */
   if(out.alerts && out.alerts.length){
     h.push('<div class="notebox warn" style="margin:9px 0 0"><ul>'+
       out.alerts.map(function(a){ return '<li>'+esc(a)+'</li>'; }).join('')+'</ul></div>');
@@ -702,7 +710,8 @@ function renderCard(reg, ctx){
   h.push('</div></details>');
   h.push('</div>');   /* /answer */
 
-  /* ---- warnings stay visible; the rest of the card is on demand ---- */
+  /* ---- extended clinical details (collapsed by default, shown when expanded) ---- */
+  h.push('<div class="card-extended">');
   if(reg.warn && reg.warn.length){
     h.push('<div class="warnbox"><ul>'+reg.warn.map(function(w){return '<li>'+esc(w)+'</li>';}).join('')+'</ul></div>');
   }
@@ -776,6 +785,7 @@ function renderCard(reg, ctx){
          '</div>');
 
   h.push('</div></details>');   /* /cdet */
+  h.push('</div>');             /* /card-extended */
   h.push('</article>');
   return h.join('');
 }
@@ -914,49 +924,16 @@ function renderRecentInto(){
 }
 /* ---- first-run prompt: Task-First Dashboard --- */
 function heroHtml(){
-  return '<div class="home-hero hero" id="heroPanel">'+
-    '<div style="max-width:860px;margin:0 auto">'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'+
-        '<div>'+
-          '<h2 style="margin:0 0 4px;font-size:20px;font-weight:850;color:var(--ink)">Paediatric &amp; Neonatal Clinical Hub</h2>'+
-          '<div style="font-size:13px;color:var(--ink2)">24 weeks gestation to 18 years · 279 verified regimens · 655 Indian formulations</div>'+
-        '</div>'+
-        '<button class="btn sm" id="btnHeroGuide" type="button" style="display:inline-flex;align-items:center;gap:5px">💡 Junior Quick-Start</button>'+
-      '</div>'+
-      '<div class="home-cards">'+
-        '<button class="home-card emerg" id="btnHeroEmerg" type="button">'+
-          '<div class="hc-icon">🚨</div>'+
-          '<div class="hc-title">EMERGENCY RESUSCITATION</div>'+
-          '<div class="hc-desc">Defibrillation energy calculator (J/kg), CPR cycle timer, resuscitation drugs &amp; NRP/PALS flows.</div>'+
-          '<div class="hc-badge">Time-Critical</div>'+
-        '</button>'+
-        '<button class="home-card" id="btnHeroWiz" type="button">'+
-          '<div class="hc-icon">👶</div>'+
-          '<div class="hc-title">Calculate for Patient</div>'+
-          '<div class="hc-desc">3-step guided entry: Neonate vs Child, exact weight or Fenton/WHO age estimation, preterm gestation, renal labs.</div>'+
-          '<div class="hc-badge">Step-by-Step Wizard</div>'+
-        '</button>'+
-        '<button class="home-card" id="btnHeroDrugs" type="button">'+
-          '<div class="hc-icon">💊</div>'+
-          '<div class="hc-title">Find a Drug / Protocol</div>'+
-          '<div class="hc-desc">Search generic names &amp; Indian brands, filter by 20 body systems or 4 clinical pathways.</div>'+
-          '<div class="hc-badge">279 Regimens</div>'+
-        '</button>'+
-      '</div>'+
-      '<div style="margin-top:14px;padding:12px;background:var(--panel);border:1px solid var(--line2);border-radius:var(--r-md)">'+
-        '<div style="font-size:12px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px">⚡ Quick Patient Presets:</div>'+
-        '<div class="hrow" style="margin:0">'+
-          '<button class="btn sm herofill" type="button" data-fill="18.3,5,0,">5 y · 18.3 kg</button>'+
-          '<button class="btn sm ghost herofill" type="button" data-fill="9.6,1,0,">1 y · 9.6 kg</button>'+
-          '<button class="btn sm ghost herofill" type="button" data-fill="3.4,,0,7">Term newborn · 3.4 kg</button>'+
-          '<button class="btn sm ghost herofill" type="button" data-fill="1.1,,0,14">28+3 Preterm · 1.1 kg</button>'+
-          '<button class="btn sm ghost railopen" type="button">Open panel</button>'+
-        '</div>'+
-      '</div>'+
-      '<div class="steps" style="margin-top:14px">'+
-        '<div class="st"><b><span class="sn">1</span>Weigh if you can</b><span>A measured weight beats every formula. Type it in the panel — that is the only number the whole app leans on.</span></div>'+
-        '<div class="st"><b><span class="sn">2</span>Preterm? add the gestation</b><span>Born before 37 weeks switches dosing to <b>postmenstrual age</b>, estimates weight from the Fenton reference and shows the corrected age.</span></div>'+
-        '<div class="st"><b><span class="sn">3</span>Read the answer strip</b><span>Each card leads with the dose and the volume to draw. Open <i>all strengths</i> for the other formulations, and the detail line for administration and references.</span></div>'+
+  return '<div class="quick-welcome-bar no-print">'+
+    '<div class="qw-wrap">'+
+      '<span class="qw-title">⚡ Quick Patient Presets:</span>'+
+      '<div class="qw-chips">'+
+        '<button class="chip herofill" type="button" data-fill="3.4,,0,7">👶 Term 3.4 kg</button>'+
+        '<button class="chip herofill" type="button" data-fill="1.2,0,0,7">🍼 Preterm 1.2 kg</button>'+
+        '<button class="chip herofill" type="button" data-fill="9.6,1,0,">🧒 1y · 9.6 kg</button>'+
+        '<button class="chip herofill" type="button" data-fill="18.3,5,0,">🧒 5y · 18.3 kg</button>'+
+        '<button class="chip herofill" type="button" data-fill="31.9,10,0,">🧑 10y · 31.9 kg</button>'+
+        '<button class="chip ghost railopen" type="button">⚙️ Custom Weight/Age</button>'+
       '</div>'+
     '</div>'+
   '</div>';
@@ -2965,6 +2942,15 @@ function wirePanel(){
   $$('.chip.goto').forEach(function(b){
     b.addEventListener('click',function(){ gotoProto(b.getAttribute('data-goto')); });
   });
+  var selEm = $('#selEmergency');
+  if(selEm){
+    selEm.addEventListener('change', function(){
+      if(this.value){
+        gotoProto(this.value);
+        this.value = '';
+      }
+    });
+  }
 
   /* demo quick-fill */
   $$('.quickfill').forEach(function(b){
@@ -2974,6 +2960,17 @@ function wirePanel(){
       syncPanel(); renderAll(); toast('Patient set: '+(v[0]?v[0]+' kg':'')+(v[1]?' · '+v[1]+' y':'')+(v[2]?' '+v[2]+' m':''));
     });
   });
+  var selQf = $('#selQuickFill');
+  if(selQf){
+    selQf.addEventListener('change', function(){
+      if(this.value !== ''){
+        var v = this.value.split(',');
+        ST.pt.wt = v[0]; ST.pt.ageY = v[1]; ST.pt.ageM = v[2]; ST.pt.ageD = v[3]||'';
+        syncPanel(); renderAll(); toast('Patient set: '+(v[0]?v[0]+' kg':'')+(v[1]?' · '+v[1]+' y':'')+(v[2]?' '+v[2]+' m':''));
+        this.value = '';
+      }
+    });
+  }
 }
 var _dh=null;
 function debounceRender(){ clearTimeout(_dh); _dh=setTimeout(renderAll,10); }

@@ -139,38 +139,64 @@
           <button class="btn ghost sm" id="btnReset" type="button">Clear patient</button>
         </div>
 
-        <div class="chips no-print" style="margin:12px -14px -13px;border-radius:0 0 var(--r-lg) var(--r-lg)">
-          <span style="font-size:var(--fs-1);font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--ink3);width:100%">Quick fill</span>
-          <button class="chip quickfill" data-fill=",,," type="button" title="Clear the patient">—</button>
-          <button class="chip quickfill" data-fill="3.4,,0,7" type="button">Term newborn</button>
-          <button class="chip quickfill" data-fill="1.2,0,0,7" type="button">ELBW 1.2 kg</button>
-          <button class="chip quickfill" data-fill="9.6,1,0," type="button">1 year · 9.6 kg</button>
-          <button class="chip quickfill" data-fill="18.3,5,0," type="button">5 years · 18.3 kg</button>
-          <button class="chip quickfill" data-fill="31.9,10,0," type="button">10 years · 31.9 kg</button>
-          <button class="chip quickfill" data-fill="56.8,15,0," type="button">15 years · 56.8 kg</button>
+        <div class="quickfill-box no-print" style="margin:14px -14px -13px;padding:10px 14px 12px;border-top:1px solid var(--line2);background:var(--panel2);border-radius:0 0 var(--r-lg) var(--r-lg)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:var(--fs-1);font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--ink3)">⚡ Quick Fill Preset</span>
+            <span style="font-size:10px;font-weight:700;color:var(--brand);background:var(--brand-soft);padding:1px 6px;border-radius:var(--r-pill)">Dropdown</span>
+          </div>
+          <select id="selQuickFill" class="inp" aria-label="Select quick patient preset" style="width:100%;font-weight:600;font-size:var(--fs-2);cursor:pointer;background:var(--raised);border:1.5px solid var(--line3);padding:7px 10px;border-radius:var(--r-md);margin-bottom:8px">
+            <option value="">⚡ Select patient preset...</option>
+            <option value="3.4,,0,7">👶 Term newborn · 3.4 kg (40 wk)</option>
+            <option value="1.2,0,0,7">🍼 Preterm ELBW · 1.2 kg (28+3 wk)</option>
+            <option value="9.6,1,0,">🧒 1 year infant · 9.6 kg</option>
+            <option value="18.3,5,0,">🧒 5 years child · 18.3 kg</option>
+            <option value="31.9,10,0,">🧑 10 years child · 31.9 kg</option>
+            <option value="56.8,15,0,">🧑 15 years adolescent · 56.8 kg</option>
+            <option value=",,,">🧹 Clear patient fields</option>
+          </select>
+          <div class="quickfill-wrap">
+            <button class="chip quickfill" data-fill=",,," type="button" title="Clear the patient">—</button>
+            <button class="chip quickfill" data-fill="3.4,,0,7" type="button">Term 3.4 kg</button>
+            <button class="chip quickfill" data-fill="1.2,0,0,7" type="button">ELBW 1.2 kg</button>
+            <button class="chip quickfill" data-fill="9.6,1,0," type="button">1y · 9.6 kg</button>
+            <button class="chip quickfill" data-fill="18.3,5,0," type="button">5y · 18.3 kg</button>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="panel">
-      <div class="ph"><h2>Emergency shortcuts</h2><span class="rt">one tap</span></div>
+      <div class="ph"><h2>Emergency shortcuts</h2><span class="rt">dropdown menu</span></div>
       <div class="pb">
-        <div class="chips" style="padding:0;border:0;background:transparent">
-          <button class="chip goto" data-goto="p-arrest-adult" type="button">🫀 Adult cardiac arrest</button>
+        <select id="selEmergency" class="inp" aria-label="Jump to emergency protocol" style="width:100%;font-weight:650;font-size:var(--fs-2);cursor:pointer;background:var(--raised);border:1.5px solid var(--line3);padding:8px 10px;border-radius:var(--r-md);margin-bottom:8px">
+          <option value="">🚨 Jump to emergency protocol...</option>
+          <option value="p-arrest-paed">🧒 Paediatric cardiac arrest (AHA 2025)</option>
+          <option value="p-arrest-adult">🫀 Adult cardiac arrest</option>
+          <option value="p-anaphylaxis">💉 Anaphylaxis (Adrenaline IM)</option>
+          <option value="p-septic-shock">🩸 Septic shock (Hour-1 bundle)</option>
+          <option value="p-status-epilepticus">⚡ Status epilepticus</option>
+          <option value="p-hyperkalaemia">🧪 Hyperkalaemia emergency</option>
+          <option value="p-snakebite">🐍 Snakebite (India ASV)</option>
+          <option value="p-scorpion">🦂 Scorpion sting (Prazosin)</option>
+          <option value="p-op-poisoning">☠️ OP poisoning (Atropine)</option>
+          <option value="p-dka">🍬 DKA (Paediatric protocol)</option>
+          <option value="p-neonatal-resus">👶 Neonatal resuscitation</option>
+          <option value="p-eclampsia">🤰 Eclampsia (MgSO4)</option>
+          <option value="p-pph">🩸 Postpartum haemorrhage</option>
+          <option value="p-antidote-table">🧾 Antidote table</option>
+          <option value="p-never-events">🚫 Never events</option>
+        </select>
+        <div class="emergency-list">
           <button class="chip goto" data-goto="p-arrest-paed" type="button">🧒 Paediatric arrest</button>
+          <button class="chip goto" data-goto="p-arrest-adult" type="button">🫀 Adult cardiac arrest</button>
           <button class="chip goto" data-goto="p-anaphylaxis" type="button">💉 Anaphylaxis</button>
           <button class="chip goto" data-goto="p-septic-shock" type="button">🩸 Septic shock</button>
           <button class="chip goto" data-goto="p-status-epilepticus" type="button">⚡ Status epilepticus</button>
-          <button class="chip goto" data-goto="p-hyperkalaemia" type="button">🧪 Hyperkalaemia</button>
           <button class="chip goto" data-goto="p-snakebite" type="button">🐍 Snakebite (India)</button>
           <button class="chip goto" data-goto="p-scorpion" type="button">🦂 Scorpion sting</button>
           <button class="chip goto" data-goto="p-op-poisoning" type="button">☠️ OP poisoning</button>
           <button class="chip goto" data-goto="p-dka" type="button">🍬 DKA</button>
-          <button class="chip goto" data-goto="p-eclampsia" type="button">🤰 Eclampsia</button>
-          <button class="chip goto" data-goto="p-pph" type="button">🩸 Postpartum haemorrhage</button>
-          <button class="chip goto" data-goto="p-neonatal-resus" type="button">👶 Neonatal resuscitation</button>
-          <button class="chip goto" data-goto="p-antidote-table" type="button">🧾 Antidote table</button>
-          <button class="chip goto" data-goto="p-never-events" type="button">🚫 Never events</button>
+          <button class="chip goto" data-goto="p-neonatal-resus" type="button">👶 Neonatal resus</button>
         </div>
       </div>
     </div>
