@@ -1,0 +1,16 @@
+[Unit]
+Description=ICU Emergency Drug Calculator - offline preview server
+After=network.target
+
+[Service]
+Type=simple
+User=user
+WorkingDirectory=/home/user/icu-calc
+ExecStart=/usr/bin/python3 /home/user/icu-calc/serve.py 8000
+Restart=always
+RestartSec=2
+StandardOutput=append:/tmp/icu-preview.log
+StandardError=append:/tmp/icu-preview.log
+
+[Install]
+WantedBy=multi-user.target

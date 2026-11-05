@@ -1,0 +1,155 @@
+{
+  "name": "Paediatric & Neonatal Drug Calculator — 24 weeks to 18 years",
+  "short_name": "Paeds Doses",
+  "description": "Offline paediatric and neonatal drug calculator, 24 weeks of gestation to 18 years: postmenstrual-age dosing for preterm infants, Fenton/WHO weight estimation, Indian formulations with mg/mL concentrations for IV and oral routes, enforced dose caps, pump-rate and infusion-board checks, and guideline references.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "any",
+  "background_color": "#0b5394",
+  "theme_color": "#0b5394",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": [
+    "medical",
+    "health",
+    "utilities"
+  ],
+  "launch_handler": {
+    "client_mode": [
+      "navigate-existing",
+      "auto"
+    ]
+  },
+  "edge_side_panel": {
+    "preferred_width": 420
+  },
+  "handle_links": "preferred",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/desktop-main.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Paediatric Drug Calculator — Clinical Dose Formulary & Patient Wizard"
+    },
+    {
+      "src": "screenshots/desktop-pump.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Continuous Infusion Syringe Pump Rate Calculator"
+    },
+    {
+      "src": "screenshots/mobile-main.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile Dose Formulary & Fast Emergency Calculation"
+    },
+    {
+      "src": "screenshots/mobile-emergency.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Emergency Resuscitation & CPR Protocol Guide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Emergency protocols",
+      "short_name": "Emergency",
+      "url": "./?tab=protocols",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Infusion pump rates",
+      "short_name": "Pump",
+      "url": "./?tab=pump",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Calculators (GIR, fluids, CrCl)",
+      "short_name": "Calculators",
+      "url": "./?tab=utils",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "./",
+      "name": "Clinical Dose Sheets",
+      "accept": {
+        "text/csv": [
+          ".csv"
+        ],
+        "application/json": [
+          ".json"
+        ]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "./",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+pedcalc",
+      "url": "./?drug=%s"
+    }
+  ]
+}
