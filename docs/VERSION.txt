@@ -1,24 +1,24 @@
 Paediatric & Neonatal Drug Calculator — deployed build
 =======================================================
 
-build          cd90dab80373
-built          2026-11-05 12:30 UTC
+build          9ad677428709
+built          2026-11-05 13:57 UTC
 regimens       279   (655 formulations, 20 systems)
 dose checks    4185  independently re-derived and agreed
 gate           validate PASS · build PASS · smoke 52/52 · browser 8/8
 
-What is new in this build (Ultra-Clean Simplified UI)
-------------------------------------------------------
-1. Streamlined Direct Interface:
-   - Removed overwhelming multi-card hero dashboard and stacked filter boxes.
-   - Clean, direct access to search bar and calculated drug formulary.
-   - Clean, compact 1-tap quick patient presets (Term 3.4kg, Preterm 1.2kg, 1y 9.6kg, 5y 18.3kg, 10y 31.9kg).
+What is new in this build (High-Visibility Protocols & Clean UI)
+---------------------------------------------------------------
+1. High-Visibility Protocol Highlighting:
+   - Replaced dull grey backgrounds on protocol elements.
+   - Clinical interactive pill buttons for drug names (soft blue #e0f2fe, dark blue #0369a1).
+   - High-contrast green dosage badges (#ecfdf5, bold #059669) for all doses, rates, and volumes.
+   - Clean, distinct cards with emergency color-coded accent stripes.
 
-2. Visible Calculated Doses on Compact Cards:
-   - Primary clinical dose (e.g. ⚡ 183 mcg) and volume-to-draw line (0.18 mL of 1 mg/mL) are always visible on collapsed cards.
-   - 1-tap "▸ Details" expansion cleanly reveals Indian brand formulations, syringe pump rate grids, dilution steps, double-check math, and guideline citations.
+2. Streamlined Ultra-Clean Interface:
+   - Removed hero clutter; direct prominent top search bar.
+   - Compact 1-tap quick patient presets (3.4kg, 1.2kg, 9.6kg, 18.3kg, 31.9kg).
+   - Visible calculated doses and volume-to-draw on compact collapsed cards.
 
-3. PWABuilder & Play Store Capability:
-   - Full responsive screenshots (1280x720 desktop wide & 750x1334 mobile narrow).
-   - Window controls overlay, launch handler, edge side panel, file handlers, share target, web+pedcalc protocol.
-   - 100% offline service worker caching.
+3. Auto-Updating Service Worker:
+   - Live controllerchange reload listener automatically refreshes client on new build deploy.
